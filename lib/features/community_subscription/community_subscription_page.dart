@@ -52,7 +52,7 @@ class CommunitySubscriptionPage extends StatelessWidget {
           );
         }
         return Scaffold(
-          appBar: AppBar(title: const Text('Inscrição')),
+          appBar: AppBar(leading: const AppBackButton(), title: const Text('Inscrição')),
           body: AsyncBody(
             status: state.status,
             builder: (context) => ListView(

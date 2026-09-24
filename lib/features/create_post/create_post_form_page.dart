@@ -90,7 +90,10 @@ class _CreatePostFormPageState extends State<CreatePostFormPage> {
         final cubit = context.read<CreatePostCubit>();
         final type = state.type;
         return Scaffold(
-          appBar: AppBar(title: Text(type == PostType.ad ? 'Criar propaganda' : type.label)),
+          appBar: AppBar(
+            leading: const AppBackButton(fallback: AppRoutes.create),
+            title: Text(type == PostType.ad ? 'Criar propaganda' : type.label),
+          ),
           body: ListView(
             padding: const EdgeInsets.fromLTRB(24, 8, 24, 32),
             children: [

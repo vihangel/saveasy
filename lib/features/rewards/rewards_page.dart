@@ -40,7 +40,7 @@ class RewardsPage extends StatelessWidget {
     final user = context.select((SessionCubit c) => c.state.userOrNull);
     return RewardsListener(
       child: Scaffold(
-        appBar: AppBar(title: const Text('Recompensas')),
+        appBar: AppBar(leading: const AppBackButton(), title: const Text('Recompensas')),
         body: BlocBuilder<RewardsCubit, RewardsState>(
           builder: (context, state) => AsyncBody(
             status: state.status,
@@ -182,7 +182,10 @@ class RewardDetailPage extends StatelessWidget {
         builder: (context, state) {
           final reward = state.rewards.where((r) => r.id == rewardId).firstOrNull;
           return Scaffold(
-            appBar: AppBar(title: Text(reward?.kind.label ?? '')),
+            appBar: AppBar(
+              leading: const AppBackButton(fallback: AppRoutes.rewards),
+              title: Text(reward?.kind.label ?? ''),
+            ),
             body: reward == null
                 ? const Center(child: CircularProgressIndicator())
                 : ListView(

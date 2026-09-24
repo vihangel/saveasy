@@ -57,7 +57,10 @@ class _EditProfilePageState extends State<EditProfilePage> {
       builder: (context, state) {
         final cubit = context.read<EditProfileCubit>();
         return Scaffold(
-          appBar: AppBar(title: const Text('Editar Perfil')),
+          appBar: AppBar(
+            leading: const AppBackButton(fallback: AppRoutes.profile),
+            title: const Text('Editar Perfil'),
+          ),
           body: ListView(
             padding: const EdgeInsets.fromLTRB(24, 8, 24, 32),
             children: [

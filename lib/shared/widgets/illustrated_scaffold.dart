@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 
+import '../../app/routes.dart';
 import '../../app/theme.dart';
+import 'app_back_button.dart';
 
 /// Layout das telas de autenticação: faixa laranja com ilustração no topo
 /// e o conteúdo num cartão branco arredondado.
@@ -46,7 +47,7 @@ class IllustratedScaffold extends StatelessWidget {
                               alignment: Alignment.centerLeft,
                               child: IconButton(
                                 icon: const Icon(Icons.arrow_back_rounded, color: Colors.white),
-                                onPressed: onBack ?? () => context.pop(),
+                                onPressed: onBack ?? () => AppBackButton.goBack(context, fallback: AppRoutes.login),
                               ),
                             )
                           : null,

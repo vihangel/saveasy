@@ -29,7 +29,7 @@ class AchievementsPage extends StatelessWidget {
         final daily = state.items.where((a) => a.daily).toList();
         final general = state.items.where((a) => !a.daily).toList();
         return Scaffold(
-          appBar: AppBar(title: const Text('Conquistas')),
+          appBar: AppBar(leading: const AppBackButton(), title: const Text('Conquistas')),
           body: AsyncBody(
             status: state.status,
             builder: (context) => ListView(

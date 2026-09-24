@@ -39,7 +39,7 @@ class StorePage extends StatelessWidget {
     final balance = context.select((SessionCubit c) => c.state.userOrNull?.balance ?? 0);
     return StoreListener(
       child: Scaffold(
-        appBar: AppBar(title: const Text('Lojas da Comunidade')),
+        appBar: AppBar(leading: const AppBackButton(), title: const Text('Lojas da Comunidade')),
         body: BlocBuilder<StoreCubit, StoreState>(
           builder: (context, state) {
             final cubit = context.read<StoreCubit>();
@@ -171,7 +171,7 @@ class ProductPage extends StatelessWidget {
         builder: (context, state) {
           final product = state.products.where((p) => p.id == productId).firstOrNull;
           return Scaffold(
-            appBar: AppBar(),
+            appBar: AppBar(leading: const AppBackButton(fallback: AppRoutes.store)),
             body: product == null
                 ? const Center(child: CircularProgressIndicator())
                 : ListView(

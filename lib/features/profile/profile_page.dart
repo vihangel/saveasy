@@ -16,9 +16,12 @@ import 'profile_cubit.dart';
 /// Perfil / Perfil Pessoal / Influencer / Comunidade / Empresa, com as abas
 /// Publicações, Currículo de Ações e Álbum de boas ações.
 class ProfilePage extends StatelessWidget {
-  const ProfilePage({super.key});
+  const ProfilePage({super.key, this.isTab = false});
 
-  static Widget route(BuildContext context, String userId) => BlocProvider(
+  /// Aba "Perfil" da barra inferior: não mostra o voltar.
+  final bool isTab;
+
+  static Widget route(BuildContext context, String userId, {bool isTab = false}) => BlocProvider(
     key: ValueKey(userId),
     create: (context) => ProfileCubit(
       userId: userId,
@@ -28,7 +31,7 @@ class ProfilePage extends StatelessWidget {
       wallet: context.read<WalletRepository>(),
       session: context.read<SessionCubit>(),
     )..load(),
-    child: const ProfilePage(),
+    child: ProfilePage(isTab: isTab),
   );
 
   @override
@@ -41,7 +44,7 @@ class ProfilePage extends StatelessWidget {
           body: AsyncBody(
             status: state.status,
             error: state.error,
-            builder: (context) => _Body(state: state),
+            builder: (context) => _Body(state: state, showBack: !isTab),
           ),
         ),
       ),
@@ -50,9 +53,10 @@ class ProfilePage extends StatelessWidget {
 }
 
 class _Body extends StatelessWidget {
-  const _Body({required this.state});
+  const _Body({required this.state, required this.showBack});
 
   final ProfileState state;
+  final bool showBack;
 
   @override
   Widget build(BuildContext context) {
@@ -61,7 +65,9 @@ class _Body extends StatelessWidget {
       length: 3,
       child: NestedScrollView(
         headerSliverBuilder: (context, _) => [
-          SliverToBoxAdapter(child: _Header(state: state)),
+          SliverToBoxAdapter(
+            child: _Header(state: state, showBack: showBack),
+          ),
           const SliverToBoxAdapter(
             child: TabBar(
               tabs: [
@@ -91,14 +97,14 @@ class _Body extends StatelessWidget {
 }
 
 class _Header extends StatelessWidget {
-  const _Header({required this.state});
+  const _Header({required this.state, required this.showBack});
 
   final ProfileState state;
+  final bool showBack;
 
   @override
   Widget build(BuildContext context) {
     final user = state.user!;
-    final canPop = context.canPop();
     return Column(
       children: [
         SizedBox(
@@ -115,11 +121,7 @@ class _Header extends StatelessWidget {
               SafeArea(
                 child: Row(
                   children: [
-                    if (canPop)
-                      IconButton(
-                        icon: const Icon(Icons.arrow_back_rounded, color: Colors.white),
-                        onPressed: () => context.pop(),
-                      ),
+                    if (showBack) const AppBackButton(color: Colors.white),
                     const Spacer(),
                     if (state.isMe)
                       IconButton(

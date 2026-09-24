@@ -34,7 +34,7 @@ class WalletPage extends StatelessWidget {
         final cubit = context.read<WalletCubit>();
         if (user == null) return const SizedBox.shrink();
         return Scaffold(
-          appBar: AppBar(title: const Text('Carteira')),
+          appBar: AppBar(leading: const AppBackButton(), title: const Text('Carteira')),
           body: RefreshIndicator(
             onRefresh: cubit.load,
             child: ListView(

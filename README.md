@@ -18,6 +18,11 @@ flutter run
 
 Para zerar os dados mockados, desinstale o app (ou limpe o `localStorage` na web).
 
+Na web, em telas largas (≥ 600px) o app aparece numa coluna com largura de
+celular. A partir de 1000px aparece também um painel lateral com a apresentação e
+a conta de teste. Listas e carrosséis podem ser arrastados com o mouse. Toda tela
+tem voltar: sem histórico (link direto ou página recarregada), ele leva ao início.
+
 Na web as URLs não usam `#` (`usePathUrlStrategy`). Por isso o servidor precisa
 devolver o `index.html` para qualquer rota. Para testar localmente:
 

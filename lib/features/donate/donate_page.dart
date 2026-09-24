@@ -50,7 +50,7 @@ class DonatePage extends StatelessWidget {
           );
         }
         return Scaffold(
-          appBar: AppBar(title: const Text('Doar')),
+          appBar: AppBar(leading: const AppBackButton(), title: const Text('Doar')),
           body: AsyncBody(
             status: state.status,
             builder: (context) => _AmountForm(state: state),

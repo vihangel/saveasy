@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../app/routes.dart';
 import '../../app/theme.dart';
 import '../../shared/data/models/models.dart';
 import '../../shared/data/repositories/repositories.dart';
@@ -47,6 +48,7 @@ class _ChatPageState extends State<ChatPage> {
         final thread = state.thread;
         return Scaffold(
           appBar: AppBar(
+            leading: const AppBackButton(fallback: AppRoutes.messages),
             centerTitle: false,
             titleSpacing: 0,
             title: thread == null

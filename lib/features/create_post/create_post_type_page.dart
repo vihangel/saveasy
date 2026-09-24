@@ -40,7 +40,7 @@ class _CreatePostTypePageState extends State<CreatePostTypePage> {
   Widget build(BuildContext context) {
     final types = _order.where((t) => t.label.toLowerCase().contains(_query.toLowerCase())).toList();
     return Scaffold(
-      appBar: AppBar(title: const Text('Criar uma publicação'), centerTitle: false),
+      appBar: AppBar(leading: const AppBackButton(), title: const Text('Criar uma publicação'), centerTitle: false),
       body: Column(
         children: [
           const Padding(

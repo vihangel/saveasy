@@ -71,7 +71,11 @@ void main() {
     '/signup/success',
   ];
 
-  const sizes = {'iPhone SE (320x568)': Size(320, 568), 'Android pequeno (360x640)': Size(360, 640)};
+  const sizes = {
+    'iPhone SE (320x568)': Size(320, 568),
+    'Android pequeno (360x640)': Size(360, 640),
+    'Desktop (1280x800)': Size(1280, 800),
+  };
   const textScales = [1.0, 1.3];
 
   for (final MapEntry(key: sizeName, value: size) in sizes.entries) {

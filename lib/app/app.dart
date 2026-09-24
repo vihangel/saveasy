@@ -9,6 +9,7 @@ import '../shared/data/datasources/mock_database.dart';
 import '../shared/data/repositories/repositories.dart';
 import '../shared/notifiers/session_cubit.dart';
 import '../shared/services/media_picker_service.dart';
+import 'responsive_frame.dart';
 import 'router.dart';
 import 'theme.dart';
 
@@ -62,6 +63,8 @@ class _SaveEasyAppState extends State<SaveEasyApp> {
           debugShowCheckedModeBanner: false,
           theme: AppTheme.light,
           routerConfig: _router,
+          scrollBehavior: const AppScrollBehavior(),
+          builder: (context, child) => ResponsiveFrame(child: child!),
           locale: const Locale('pt', 'BR'),
           supportedLocales: const [Locale('pt', 'BR')],
           localizationsDelegates: GlobalMaterialLocalizations.delegates,

@@ -47,7 +47,7 @@ class SendCoinsPage extends StatelessWidget {
           );
         }
         return Scaffold(
-          appBar: AppBar(title: const Text('Enviar moedas')),
+          appBar: AppBar(leading: const AppBackButton(), title: const Text('Enviar moedas')),
           body: AsyncBody(
             status: state.status,
             builder: (context) => _Form(state: state),

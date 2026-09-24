@@ -22,7 +22,10 @@ class AdInfoPage extends StatelessWidget {
       (Icons.volunteer_activism_rounded, 'Para boas causas', 'Divulgue uma campanha ou o seu currículo de boas ações.'),
     ];
     return Scaffold(
-      appBar: AppBar(title: const Text('Propaganda')),
+      appBar: AppBar(
+        leading: const AppBackButton(fallback: AppRoutes.create),
+        title: const Text('Propaganda'),
+      ),
       body: ListView(
         padding: const EdgeInsets.all(24),
         children: [

@@ -68,6 +68,7 @@ class _Content extends StatelessWidget {
             slivers: [
               SliverAppBar(
                 pinned: true,
+                leading: const AppBackButton(color: Colors.white),
                 expandedHeight: 240,
                 backgroundColor: PostCover.colorsFor(post.type).last,
                 foregroundColor: Colors.white,

@@ -103,7 +103,7 @@ GoRouter createRouter(SessionCubit session) {
             routes: [
               GoRoute(
                 path: AppRoutes.profile,
-                builder: (context, _) => ProfilePage.route(context, context.read<SessionCubit>().user.id),
+                builder: (context, _) => ProfilePage.route(context, context.read<SessionCubit>().user.id, isTab: true),
               ),
             ],
           ),

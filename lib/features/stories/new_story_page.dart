@@ -65,6 +65,7 @@ class _NewStoryPageState extends State<NewStoryPage> {
     return Scaffold(
       backgroundColor: colors.last,
       appBar: AppBar(
+        leading: const AppBackButton(color: Colors.white),
         backgroundColor: Colors.transparent,
         foregroundColor: Colors.white,
         title: const Text('Novo story', style: TextStyle(color: Colors.white)),
