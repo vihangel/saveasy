@@ -8,6 +8,8 @@ set -euo pipefail
 REPO_URL="$(git remote get-url origin)"
 REPO_NAME="$(basename -s .git "$REPO_URL")"
 COMMIT="$(git rev-parse --short HEAD)"
+GIT_NAME="$(git config user.name)"
+GIT_EMAIL="$(git config user.email)"
 
 dart run build_runner build --delete-conflicting-outputs
 flutter build web --release --base-href "/$REPO_NAME/"
@@ -17,6 +19,8 @@ cp index.html 404.html   # fallback para URLs sem '#'
 touch .nojekyll
 rm -rf .git
 git init -q -b gh-pages
+git config user.name "$GIT_NAME"
+git config user.email "$GIT_EMAIL"
 git add -A
 git commit -q -m "Deploy do build web ($COMMIT)"
 git push -f "$REPO_URL" gh-pages
