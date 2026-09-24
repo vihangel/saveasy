@@ -1,5 +1,7 @@
 # Save Easy
 
+**Demo online:** https://vihangel.github.io/saveasy/
+
 Protótipo front-end do app Save Easy (Flutter), baseado no Figma "Telas - Protótipo".
 Não há back-end: os dados são mockados e as alterações ficam salvas localmente
 (`shared_preferences`), então cadastro, doações, publicações etc. persistem entre execuções.
@@ -22,6 +24,17 @@ devolver o `index.html` para qualquer rota. Para testar localmente:
 ```bash
 flutter build web && python3 tool/serve_web.py 8765
 ```
+
+## Deploy (GitHub Pages)
+
+```bash
+tool/deploy_pages.sh
+```
+
+O script gera o build com `--base-href /saveasy/`, cria o `404.html` (fallback
+das URLs sem `#`) e publica na branch `gh-pages`. O workflow
+`.github/workflows/deploy-pages.yml` faz o mesmo automaticamente a cada push na
+`main`, mas só roda com o GitHub Actions ativado no repositório.
 
 ## Stack
 

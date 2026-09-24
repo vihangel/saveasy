@@ -1,11 +1,11 @@
 {
-    "name": "saveeasy2026",
-    "short_name": "saveeasy2026",
+    "name": "Save Easy",
+    "short_name": "Save Easy",
     "start_url": ".",
     "display": "standalone",
-    "background_color": "#0175C2",
-    "theme_color": "#0175C2",
-    "description": "A new Flutter project.",
+    "background_color": "#FA7E2A",
+    "theme_color": "#6176ED",
+    "description": "Save Easy - app de boas ações",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [
