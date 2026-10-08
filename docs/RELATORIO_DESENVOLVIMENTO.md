@@ -99,7 +99,10 @@ direto no banco.
    iOS (URL Types) e no Android (intent-filter).
 4. **Proteção contra senhas vazadas**: *Authentication → Policies* → ativar
    "Leaked password protection" (advisor de segurança).
-5. **SMTP próprio** antes de abrir para o público (o SMTP padrão do Supabase
+5. **Conta de teste**: o repositório é público e a senha dela está no
+   `seed.sql`. Excluir essa conta (e as contas demo, `is_demo = true`) antes do
+   lançamento ou ao criar o projeto de produção.
+6. **SMTP próprio** antes de abrir para o público (o SMTP padrão do Supabase
    tem limite baixo de envios por hora).
 
 ### Decisões tomadas nesta entrega (validar)
