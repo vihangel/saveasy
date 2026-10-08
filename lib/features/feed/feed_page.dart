@@ -158,7 +158,7 @@ class FeedPage extends StatelessWidget {
           final post = state.posts[i];
           return PostCard(
             post: post,
-            commentsCount: state.commentCounts[post.id] ?? 0,
+            commentsCount: post.commentsCount,
             onLike: () => cubit.toggleLike(post.id),
             onShare: () {
               cubit.share(post.id);

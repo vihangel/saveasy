@@ -32,7 +32,7 @@ class CommunitySubscriptionCubit extends Cubit<CommunitySubscriptionState> {
     try {
       final user = await _wallet.subscribe(
         userId: _session.user.id,
-        communityId: communityId,
+        community: state.community!,
         price: plans[state.plan]!,
       );
       _session.updateUser(user);

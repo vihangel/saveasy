@@ -1,70 +1,58 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 
-import '../../../shared/data/models/models.dart';
 import '../../../shared/data/repositories/repositories.dart';
+import '../../../shared/notifiers/session_cubit.dart';
 import '../../../shared/utils/view_status.dart';
 
 part 'sign_up_cubit.freezed.dart';
 part 'sign_up_state.dart';
 
-/// Guarda os dados dos passos do cadastro até a criação da conta.
+/// Cadastro (Sign Up Page do protótipo): e-mail e senha → código do e-mail.
+/// Depois disso a pessoa já está logada e completa o perfil no onboarding.
 class SignUpCubit extends Cubit<SignUpState> {
-  SignUpCubit(this._auth) : super(const SignUpState());
+  SignUpCubit(this._auth, this._session) : super(const SignUpState());
 
   final AuthRepository _auth;
-
-  void selectAccountType(AccountType type) => emit(state.copyWith(accountType: type));
-
-  void confirmAccountType() => emit(state.copyWith(step: SignUpStep.credentials, status: ViewStatus.success));
+  final SessionCubit _session;
 
   void toggleTerms(bool value) => emit(state.copyWith(acceptedTerms: value));
 
-  void toggleEmailNews(bool value) => emit(state.copyWith(emailNews: value));
-
-  void selectPronouns(String value) => emit(state.copyWith(pronouns: value));
-
-  void selectBirthDate(DateTime value) => emit(state.copyWith(birthDate: value));
-
-  void setAvatar(String? reference) => emit(state.copyWith(avatarUrl: reference));
-
-  Future<void> submitCredentials({required String email, required String password}) async {
+  Future<void> submit({required String email, required String password}) async {
     if (!state.acceptedTerms) {
       return emit(state.copyWith(status: ViewStatus.failure, error: 'Você precisa aceitar os termos.'));
     }
-    emit(state.copyWith(status: ViewStatus.loading, error: null));
-    if (await _auth.emailExists(email)) {
-      return emit(state.copyWith(status: ViewStatus.failure, error: 'Já existe uma conta com esse e-mail.'));
+    emit(state.copyWith(status: ViewStatus.loading, error: null, email: email.trim()));
+    try {
+      final result = await _auth.signUp(email: email, password: password);
+      if (result.user != null) {
+        _session.signedIn(result.user!);
+        return emit(state.copyWith(status: ViewStatus.success));
+      }
+      emit(state.copyWith(status: ViewStatus.success, awaitingCode: true));
+    } on AppException catch (e) {
+      emit(state.copyWith(status: ViewStatus.failure, error: e.message));
     }
-    emit(state.copyWith(email: email.trim(), password: password, step: SignUpStep.profile, status: ViewStatus.success));
   }
 
-  Future<void> submitProfile({required String name, required String username}) async {
-    emit(state.copyWith(status: ViewStatus.loading, error: null));
-    if (await _auth.usernameExists(username.replaceAll('@', ''))) {
-      return emit(state.copyWith(status: ViewStatus.failure, error: 'Esse nome de usuário já está em uso.'));
+  Future<void> verify(String code) async {
+    if (code.trim().length != 6) {
+      return emit(state.copyWith(status: ViewStatus.failure, error: 'Digite os 6 números do código.'));
     }
-    emit(state.copyWith(name: name, username: username, step: SignUpStep.address, status: ViewStatus.success));
-  }
-
-  Future<void> submitAddress(Address address) async {
     emit(state.copyWith(status: ViewStatus.loading, error: null));
     try {
-      await _auth.register(
-        SignUpData(
-          accountType: state.accountType,
-          email: state.email,
-          password: state.password,
-          name: state.name,
-          username: state.username,
-          pronouns: state.pronouns,
-          birthDate: state.birthDate,
-          address: address,
-          emailNews: state.emailNews,
-          avatarUrl: state.avatarUrl,
-        ),
-      );
-      emit(state.copyWith(step: SignUpStep.done, status: ViewStatus.success));
+      final user = await _auth.verifySignUpCode(state.email, code);
+      emit(state.copyWith(status: ViewStatus.success));
+      _session.signedIn(user);
+    } on AppException catch (e) {
+      emit(state.copyWith(status: ViewStatus.failure, error: e.message));
+    }
+  }
+
+  Future<void> resend() async {
+    try {
+      await _auth.resendSignUpCode(state.email);
+      emit(state.copyWith(message: 'Enviamos um novo código para ${state.email}.', error: null));
     } on AppException catch (e) {
       emit(state.copyWith(status: ViewStatus.failure, error: e.message));
     }

@@ -9,6 +9,8 @@ import '../features/auth/forgot_password/forgot_password_cubit.dart';
 import '../features/auth/forgot_password/forgot_password_pages.dart';
 import '../features/auth/login/login_cubit.dart';
 import '../features/auth/login/login_page.dart';
+import '../features/auth/onboarding/onboarding_cubit.dart';
+import '../features/auth/onboarding/onboarding_pages.dart';
 import '../features/auth/sign_up/sign_up_cubit.dart';
 import '../features/auth/sign_up/sign_up_pages.dart';
 import '../features/chat/chat_page.dart';
@@ -20,6 +22,7 @@ import '../features/donate/donate_page.dart';
 import '../features/edit_profile/edit_profile_page.dart';
 import '../features/event_confirmed/event_confirmed_page.dart';
 import '../features/feed/feed_page.dart';
+import '../features/follows/follow_list_page.dart';
 import '../features/home/home_shell.dart';
 import '../features/messages/messages_page.dart';
 import '../features/notifications/notifications_page.dart';
@@ -27,6 +30,8 @@ import '../features/onboarding/welcome_page.dart';
 import '../features/post_detail/post_detail_page.dart';
 import '../features/profile/profile_page.dart';
 import '../features/rewards/rewards_cubit.dart';
+import '../features/saved/saved_page.dart';
+import '../features/settings/settings_page.dart';
 import '../features/rewards/rewards_page.dart';
 import '../features/send_coins/send_coins_page.dart';
 import '../features/splash/splash_page.dart';
@@ -68,16 +73,28 @@ GoRouter createRouter(SessionCubit session) {
         ],
       ),
 
-      // Cadastro: um cubit acumula os dados dos passos.
+      // Cadastro: e-mail e senha → código do e-mail (um cubit para os dois passos).
       ShellRoute(
-        builder: (context, _, child) =>
-            BlocProvider(create: (context) => SignUpCubit(context.read<AuthRepository>()), child: child),
+        builder: (context, _, child) => BlocProvider(
+          create: (context) => SignUpCubit(context.read<AuthRepository>(), context.read<SessionCubit>()),
+          child: child,
+        ),
         routes: [
-          GoRoute(path: AppRoutes.signUp, builder: (_, _) => const AccountTypePage()),
-          GoRoute(path: AppRoutes.signUpCredentials, builder: (_, _) => const SignUpCredentialsPage()),
-          GoRoute(path: AppRoutes.signUpProfile, builder: (_, _) => const SignUpProfilePage()),
-          GoRoute(path: AppRoutes.signUpAddress, builder: (_, _) => const SignUpAddressPage()),
-          GoRoute(path: AppRoutes.signUpSuccess, builder: (_, _) => const SignUpSuccessPage()),
+          GoRoute(path: AppRoutes.signUp, builder: (_, _) => const SignUpPage()),
+          GoRoute(path: AppRoutes.signUpVerify, builder: (_, _) => const VerifyEmailPage()),
+        ],
+      ),
+
+      // Completar perfil (logado, antes de entrar no app).
+      ShellRoute(
+        builder: (context, _, child) => BlocProvider(
+          create: (context) => OnboardingCubit(context.read<AuthRepository>(), context.read<SessionCubit>()),
+          child: child,
+        ),
+        routes: [
+          GoRoute(path: AppRoutes.onboarding, builder: (_, _) => const AccountTypePage()),
+          GoRoute(path: AppRoutes.onboardingProfile, builder: (_, _) => const OnboardingProfilePage()),
+          GoRoute(path: AppRoutes.onboardingAddress, builder: (_, _) => const OnboardingAddressPage()),
         ],
       ),
 
@@ -124,6 +141,10 @@ GoRouter createRouter(SessionCubit session) {
         routes: [
           GoRoute(path: 'donate', builder: (context, state) => DonatePage.route(context, state.pathParameters['id']!)),
           GoRoute(
+            path: 'edit',
+            builder: (context, state) => CreatePostFormPage.editRoute(context, state.pathParameters['id']!),
+          ),
+          GoRoute(
             path: 'confirmed',
             builder: (_, state) => EventConfirmedPage(postId: state.pathParameters['id']!),
           ),
@@ -138,10 +159,21 @@ GoRouter createRouter(SessionCubit session) {
         ),
       ),
       GoRoute(path: AppRoutes.editProfile, builder: (context, _) => EditProfilePage.route(context)),
+      GoRoute(path: AppRoutes.settings, builder: (_, _) => const SettingsPage()),
+      GoRoute(path: AppRoutes.saved, builder: (_, _) => const SavedPage()),
       GoRoute(
         path: '/users/:id',
         builder: (context, state) => ProfilePage.route(context, state.pathParameters['id']!),
         routes: [
+          GoRoute(
+            path: 'follows',
+            builder: (context, state) => FollowListPage(
+              profileId: state.pathParameters['id']!,
+              kind: state.uri.queryParameters['kind'] == 'following'
+                  ? FollowListKind.following
+                  : FollowListKind.followers,
+            ),
+          ),
           GoRoute(
             path: 'subscribe',
             builder: (context, state) => CommunitySubscriptionPage.route(context, state.pathParameters['id']!),
@@ -228,6 +260,10 @@ String? _redirect(SessionState session, GoRouterState state) {
       onboardingSeen ? (pending != null && _isPublicPath(pending) ? pending : AppRoutes.login) : AppRoutes.welcome,
     SessionUnauthenticated(:final onboardingSeen) when location == AppRoutes.welcome && onboardingSeen =>
       AppRoutes.login,
+    // Conta criada mas sem perfil completo: só pode ficar no onboarding.
+    SessionAuthenticated(:final user) when !user.onboardingCompleted =>
+      location.startsWith(AppRoutes.onboarding) ? null : AppRoutes.onboarding,
+    SessionAuthenticated() when location.startsWith(AppRoutes.onboarding) => AppRoutes.home,
     SessionAuthenticated() when location == AppRoutes.splash =>
       pending != null && !_isPublicPath(pending) ? pending : AppRoutes.home,
     SessionAuthenticated() when isPublic => AppRoutes.home,

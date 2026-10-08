@@ -6,15 +6,20 @@ Protótipo front-end do app Save Easy (Flutter), baseado no Figma "Telas - Prot�
 Não há back-end: os dados são mockados e as alterações ficam salvas localmente
 (`shared_preferences`), então cadastro, doações, publicações etc. persistem entre execuções.
 
-**Conta de teste:** `demo@saveeasy.com` / `123456` · código de verificação: `12345`
+**Modo mock:** conta `demo@saveeasy.com` / `123456` · código `123456`. **Supabase:** conta de teste no `supabase/seed.sql`.
 
 ## Rodando
 
 ```bash
 flutter pub get
 dart run build_runner build --delete-conflicting-outputs
-flutter run
+flutter run                              # back-end Supabase (padrão)
+flutter run --dart-define=BACKEND=mock   # tudo local, sem internet
 ```
+
+O back-end está em `supabase/` (migrations versionadas e `seed.sql` de
+demonstração de Cuiabá). O andamento de cada entrega, com o checklist de
+validação, fica em [docs/RELATORIO_DESENVOLVIMENTO.md](docs/RELATORIO_DESENVOLVIMENTO.md).
 
 Para zerar os dados mockados, desinstale o app (ou limpe o `localStorage` na web).
 

@@ -18,7 +18,7 @@ class ForgotPasswordCubit extends Cubit<ForgotPasswordState> {
       _run(() => _auth.sendRecoveryCode(email), next: ForgotPasswordStep.code, email: email.trim());
 
   Future<void> verifyCode(String code) =>
-      _run(() => _auth.verifyCode(state.email, code), next: ForgotPasswordStep.newPassword);
+      _run(() => _auth.verifyRecoveryCode(state.email, code), next: ForgotPasswordStep.newPassword);
 
   Future<void> resetPassword(String password) =>
       _run(() => _auth.resetPassword(state.email, password), next: ForgotPasswordStep.done);

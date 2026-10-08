@@ -25,14 +25,7 @@ class FeedCubit extends Cubit<FeedState> {
         _posts.feed(tab: state.tab, userId: _userId, category: state.category, query: state.query),
         _stories.stories(),
       ).wait;
-      emit(
-        state.copyWith(
-          status: ViewStatus.success,
-          posts: posts,
-          stories: stories,
-          commentCounts: {for (final p in posts) p.id: _posts.commentCount(p.id)},
-        ),
-      );
+      emit(state.copyWith(status: ViewStatus.success, posts: posts, stories: stories));
     } catch (_) {
       emit(state.copyWith(status: ViewStatus.failure, error: 'Não foi possível carregar o feed.'));
     }

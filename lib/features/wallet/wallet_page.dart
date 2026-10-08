@@ -189,6 +189,9 @@ class _TransactionTile extends StatelessWidget {
       TransactionKind.coinsSent => Icons.send_rounded,
       TransactionKind.reward => Icons.emoji_events_rounded,
       TransactionKind.store => Icons.storefront_rounded,
+      TransactionKind.coinsReceived => Icons.call_received_rounded,
+      TransactionKind.bonus => Icons.card_giftcard_rounded,
+      TransactionKind.participation => Icons.diversity_3_rounded,
     };
     return ListTile(
       contentPadding: const EdgeInsets.symmetric(horizontal: 20),

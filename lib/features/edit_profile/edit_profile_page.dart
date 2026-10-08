@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../app/routes.dart';
 import '../../app/theme.dart';
+import '../../shared/data/datasources/image_storage.dart';
 import '../../shared/data/repositories/repositories.dart';
 import '../../shared/notifiers/session_cubit.dart';
 import '../../shared/utils/app_icons.dart';
@@ -64,6 +65,8 @@ class _EditProfilePageState extends State<EditProfilePage> {
           body: ListView(
             padding: const EdgeInsets.fromLTRB(24, 8, 24, 32),
             children: [
+              _CoverPicker(coverUrl: state.user.coverUrl, onChanged: cubit.setCover),
+              const SizedBox(height: 16),
               Center(
                 child: AvatarPicker(
                   name: _name.text,
@@ -197,6 +200,63 @@ class _BadgeOption extends StatelessWidget {
             ),
             const SizedBox(height: 4),
             Text(label, textAlign: TextAlign.center, maxLines: 2, style: const TextStyle(fontSize: 11)),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Capa do perfil (foto própria). As capas resgatadas em Recompensas entram
+/// quando o catálogo for para o back-end.
+class _CoverPicker extends StatelessWidget {
+  const _CoverPicker({required this.coverUrl, required this.onChanged});
+
+  final String? coverUrl;
+  final ValueChanged<String?> onChanged;
+
+  Future<void> _pick(BuildContext context) async {
+    final result = await showImagePickerSheet(
+      context,
+      title: 'Capa do perfil',
+      canRemove: coverUrl != null,
+      bucket: ImageBucket.avatars,
+    );
+    switch (result) {
+      case ImagePicked(:final reference):
+        onChanged(reference);
+      case ImageRemoved():
+        onChanged(null);
+      case null:
+        break;
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: () => _pick(context),
+      borderRadius: BorderRadius.circular(16),
+      child: Container(
+        height: 110,
+        clipBehavior: Clip.antiAlias,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(16),
+          gradient: const LinearGradient(colors: [AppColors.orange, Color(0xFFFFA16C)]),
+        ),
+        child: Stack(
+          fit: StackFit.expand,
+          children: [
+            if (coverUrl != null) AppImage(reference: coverUrl!),
+            const Positioned(
+              right: 8,
+              bottom: 8,
+              child: Chip(
+                avatar: Icon(Icons.photo_camera_outlined, size: 16),
+                label: Text('Trocar capa'),
+                visualDensity: VisualDensity.compact,
+              ),
+            ),
           ],
         ),
       ),

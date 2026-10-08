@@ -6,6 +6,17 @@ import 'package:image_picker/image_picker.dart';
 
 import 'image_storage_io.dart' if (dart.library.js_interop) 'image_storage_web.dart' as platform;
 
+/// Onde a imagem é usada. No Supabase, cada uso tem um bucket.
+enum ImageBucket {
+  avatars('avatars'),
+  postCovers('post-covers'),
+  stories('stories');
+
+  const ImageBucket(this.id);
+
+  final String id;
+}
+
 /// Guarda as imagens escolhidas pelo usuário e devolve uma referência em
 /// texto para salvar nos modelos (`AppUser.avatarUrl`, `Post.imageUrl`...).
 ///
@@ -14,9 +25,14 @@ import 'image_storage_io.dart' if (dart.library.js_interop) 'image_storage_web.d
 ///   absoluto do container muda a cada atualização do app).
 /// - Web: devolve um data URI (`data:image/jpeg;base64,...`).
 ///
-/// Quando existir back-end, basta trocar por um upload que devolva a URL.
+/// Com o Supabase ligado, [SupabaseImageStorage] envia para o Storage e
+/// devolve a URL pública.
 class ImageStorage {
   ImageStorage._(this._documentsPath);
+
+  /// Para subclasses que guardam em outro lugar (ex.: Supabase Storage).
+  @protected
+  ImageStorage.remote() : _documentsPath = null;
 
   final String? _documentsPath;
   final _memoryCache = <String, Uint8List>{};
@@ -29,7 +45,10 @@ class ImageStorage {
   @visibleForTesting
   factory ImageStorage.forTesting([String? documentsPath]) => ImageStorage._(documentsPath);
 
-  Future<String> save(XFile file) => platform.saveImage(file, _documentsPath);
+  /// Salva a imagem e devolve a referência. [bucket] indica o uso (no
+  /// armazenamento local é ignorado).
+  Future<String> save(XFile file, {ImageBucket bucket = ImageBucket.postCovers}) =>
+      platform.saveImage(file, _documentsPath);
 
   Future<void> delete(String reference) async {
     if (reference.startsWith(localPrefix)) await platform.deleteImage(reference, _documentsPath);

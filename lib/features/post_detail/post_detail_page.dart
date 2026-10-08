@@ -79,6 +79,7 @@ class _Content extends StatelessWidget {
                     onPressed: cubit.toggleSave,
                   ),
                   IconButton(icon: const Icon(Icons.share_outlined), onPressed: cubit.share),
+                  if (cubit.isAuthor) _AuthorMenu(post: post),
                 ],
                 flexibleSpace: FlexibleSpaceBar(
                   background: PostCover(type: post.type, imageUrl: post.imageUrl, height: 280, radius: 0, iconSize: 72),
@@ -126,7 +127,13 @@ class _Content extends StatelessWidget {
                         child: Text('Seja o primeiro a comentar!', style: TextStyle(color: AppColors.textMuted)),
                       ),
                     for (final comment in state.comments)
-                      CommentTile(comment: comment, onLike: () => cubit.toggleCommentLike(comment.id)),
+                      CommentTile(
+                        comment: comment,
+                        onLike: () => cubit.toggleCommentLike(comment.id),
+                        onDelete: comment.authorId != null && comment.authorId == context.currentUser.id
+                            ? () => cubit.deleteComment(comment.id)
+                            : null,
+                      ),
                   ],
                 ),
               ),
@@ -195,10 +202,19 @@ class _Content extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 16),
+          // "Tenho interesse / Evento salvo" (salvar = seguir o evento) e "Participar".
+          if (!post.isFinished && !post.confirmed) ...[
+            OutlinedButton.icon(
+              onPressed: cubit.toggleSave,
+              icon: Icon(post.saved ? Icons.check_circle_outline_rounded : Icons.star_border_rounded),
+              label: Text(post.saved ? 'Evento salvo' : 'Tenho interesse'),
+            ),
+            const SizedBox(height: 8),
+          ],
           _ParticipateButton(
             post: post,
             loading: state.participating,
-            label: 'Confirmar presença',
+            label: 'Participar',
             confirmedLabel: 'Presença confirmada · Cancelar',
             onPressed: participate,
           ),
@@ -549,6 +565,65 @@ class _CommentInputState extends State<_CommentInput> {
           ),
         ),
       ),
+    );
+  }
+}
+
+/// Menu do autor: editar e excluir a publicação.
+class _AuthorMenu extends StatelessWidget {
+  const _AuthorMenu({required this.post});
+
+  final Post post;
+
+  Future<void> _confirmDelete(BuildContext context) async {
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Excluir publicação?'),
+        content: const Text('Ela some do feed e do seu perfil. Doações e participações já feitas ficam registradas.'),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('Cancelar')),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            style: TextButton.styleFrom(foregroundColor: AppColors.danger),
+            child: const Text('Excluir'),
+          ),
+        ],
+      ),
+    );
+    if (!(ok ?? false) || !context.mounted) return;
+    if (await context.read<PostDetailCubit>().deletePost() && context.mounted) {
+      context.showMessage('Publicação excluída.');
+      AppBackButton.goBack(context);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return PopupMenuButton<String>(
+      tooltip: 'Opções',
+      icon: const Icon(Icons.more_vert_rounded),
+      onSelected: (value) async {
+        if (value == 'edit') {
+          await context.push(AppRoutes.editPost(post.id));
+          if (context.mounted) context.read<PostDetailCubit>().load();
+        } else {
+          _confirmDelete(context);
+        }
+      },
+      itemBuilder: (context) => const [
+        PopupMenuItem(
+          value: 'edit',
+          child: ListTile(leading: Icon(Icons.edit_outlined), title: Text('Editar')),
+        ),
+        PopupMenuItem(
+          value: 'delete',
+          child: ListTile(
+            leading: Icon(Icons.delete_outline_rounded, color: AppColors.danger),
+            title: Text('Excluir', style: TextStyle(color: AppColors.danger)),
+          ),
+        ),
+      ],
     );
   }
 }

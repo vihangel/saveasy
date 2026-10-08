@@ -1,0 +1,173 @@
+-- Conteúdo de demonstração (foco: Cuiabá - MT). Nomes e organizações são
+-- fictícios; os lugares são públicos da cidade. As contas não têm senha, então
+-- ninguém entra com elas: servem só para o feed não começar vazio.
+-- Rodar só em desenvolvimento/homologação.
+
+do $$
+declare
+  v_ids uuid[] := array[
+    'a1000000-0000-4000-8000-000000000001', -- Banco de Sangue Vida MT
+    'a1000000-0000-4000-8000-000000000002', -- Instituto Pantanal Vivo
+    'a1000000-0000-4000-8000-000000000003', -- Abrigo Patas do Coxipó
+    'a1000000-0000-4000-8000-000000000004', -- EcoCuiabá Reciclagem
+    'a1000000-0000-4000-8000-000000000005', -- Coletivo Mãos do Porto
+    'a1000000-0000-4000-8000-000000000006', -- Lu do Bem (influencer)
+    'a1000000-0000-4000-8000-000000000007', -- Ana Ribeiro
+    'a1000000-0000-4000-8000-000000000008'  -- Pedro Campos
+  ]::uuid[];
+  v_names text[] := array['Banco de Sangue Vida MT', 'Instituto Pantanal Vivo', 'Abrigo Patas do Coxipó',
+                          'EcoCuiabá Reciclagem', 'Coletivo Mãos do Porto', 'Lu do Bem', 'Ana Ribeiro', 'Pedro Campos'];
+  v_users text[] := array['vidamt', 'pantanalvivo', 'patasdocoxipo', 'ecocuiaba', 'maosdoporto', 'ludobem',
+                          'anaribeiro', 'pedrocampos'];
+  v_types public.account_type[] := array['community', 'community', 'community', 'business', 'community',
+                                         'influencer', 'personal', 'personal']::public.account_type[];
+  v_bios text[] := array[
+    'Doe sangue, doe vida. Campanhas mensais em Cuiabá e Várzea Grande.',
+    'Proteção do Pantanal e brigadas voluntárias contra incêndios.',
+    'Resgate e adoção de cães e gatos no Coxipó.',
+    'Coleta seletiva e reciclagem para empresas e condomínios de Cuiabá.',
+    'Sopão solidário e apoio a pessoas em situação de rua no Porto.',
+    'Criadora de conteúdo do bem direto de Cuiabá 🌞',
+    'Voluntária nos fins de semana. Amo bicho e plantas.',
+    'Professor e ciclista. Bora fazer Cuiabá mais verde!'];
+  i int;
+  p_blood bigint; p_fire bigint; p_dog bigint; p_clean bigint; p_soup bigint; p_recycle bigint;
+  p_tutorial bigint; p_disc bigint; p_items bigint;
+begin
+  if exists (select 1 from public.profiles where is_demo) then
+    raise notice 'Seed já aplicado.';
+    return;
+  end if;
+
+  for i in 1 .. array_length(v_ids, 1) loop
+    -- Campos de token vazios ('' e não null) evitam erro do GoTrue ao listar usuários.
+    insert into auth.users (id, instance_id, aud, role, email, encrypted_password,
+                            raw_app_meta_data, raw_user_meta_data, created_at, updated_at, email_confirmed_at,
+                            confirmation_token, recovery_token, email_change_token_new, email_change)
+    values (v_ids[i], '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated',
+            v_users[i] || '@demo.saveeasy.app', '',
+            '{"provider":"email","providers":["email"]}', jsonb_build_object('name', v_names[i]),
+            now() - interval '60 days', now(), now() - interval '60 days', '', '', '', '');
+
+    update public.profiles
+       set username = v_users[i], name = v_names[i], account_type = v_types[i], bio = v_bios[i],
+           city = 'Cuiabá', state = 'MT', onboarding_completed = true, is_demo = true,
+           verification_status = case when v_types[i] in ('community', 'business') then 'verified'::public.verification_status
+                                      else 'unverified'::public.verification_status end
+     where id = v_ids[i];
+  end loop;
+
+  -- Seguidores entre as contas demo.
+  insert into public.follows (follower_id, followed_id)
+  select a, b from unnest(v_ids) a cross join unnest(v_ids) b
+   where a <> b and (get_byte(decode(md5(a::text || b::text), 'hex'), 0) % 3) <> 0;
+
+  insert into public.posts (author_id, type, subtype, title, description, categories, tags, reward_coins, reward_xp,
+                            starts_at, ends_at, location_text, city, state, capacity, created_at)
+  values (v_ids[1], 'event', 'Presencial', 'Mutirão de doação de sangue',
+          'Os estoques de O- e A- estão baixos. Venha doar! Leve documento com foto, esteja alimentado e descansado. Doadores ganham lanche e o selo da campanha.',
+          '{health}', '{sangue,saude}', 25, 60, now() + interval '2 days 9 hours', now() + interval '2 days 17 hours',
+          'Centro de Cuiabá - Av. Getúlio Vargas', 'Cuiabá', 'MT', 300, now() - interval '1 day')
+  returning id into p_blood;
+
+  insert into public.posts (author_id, type, subtype, title, description, categories, tags, reward_coins, reward_xp,
+                            target_amount, raised_amount, ends_at, created_at)
+  values (v_ids[2], 'donation', 'Vaquinha', 'Equipamentos para brigadistas do Pantanal',
+          'Abafadores, bombas costais e EPIs para 40 brigadistas voluntários que atuam na temporada de seca. Cada doação vira equipamento de verdade.',
+          '{environment}', '{pantanal,queimadas}', 50, 100, 30000, 18450, now() + interval '25 days', now() - interval '6 days')
+  returning id into p_fire;
+
+  insert into public.posts (author_id, type, subtype, title, description, categories, tags, reward_coins, reward_xp,
+                            target_amount, raised_amount, ends_at, created_at)
+  values (v_ids[3], 'donation', 'Vaquinha', 'Cirurgia da Mel, resgatada no Coxipó',
+          'A Mel foi resgatada com a pata fraturada perto da Av. Fernando Corrêa. Precisamos cobrir a cirurgia e 30 dias de recuperação.',
+          '{animal,health}', '{caes,resgate}', 50, 100, 3500, 2210, now() + interval '9 days', now() - interval '2 days')
+  returning id into p_dog;
+
+  insert into public.posts (author_id, type, subtype, title, description, categories, tags, reward_coins, reward_xp,
+                            starts_at, ends_at, location_text, city, state, capacity, created_at)
+  values (v_ids[4], 'event', 'Presencial', 'Limpeza do Parque Mãe Bonifácia',
+          'Mutirão de limpeza das trilhas e separação dos recicláveis. Levamos luvas, sacos e água. Ponto de encontro na entrada principal às 7h.',
+          '{environment}', '{reciclagem,parque}', 25, 60, now() + interval '5 days 7 hours', now() + interval '5 days 11 hours',
+          'Parque Mãe Bonifácia - entrada principal', 'Cuiabá', 'MT', 80, now() - interval '3 days')
+  returning id into p_clean;
+
+  insert into public.posts (author_id, type, subtype, title, description, categories, tags, reward_coins, reward_xp,
+                            starts_at, location_text, city, state, created_at)
+  values (v_ids[5], 'social_action', 'Voluntariado', 'Sopão solidário de quinta no Porto',
+          'Toda quinta servimos sopa e pão para cerca de 150 pessoas. Precisamos de mãos para cozinhar (16h) e servir (18h30).',
+          '{health}', '{alimentacao,voluntariado}', 40, 80, now() + interval '1 day 16 hours',
+          'Praça Luís de Albuquerque - Porto', 'Cuiabá', 'MT', now() - interval '12 hours')
+  returning id into p_soup;
+
+  insert into public.posts (author_id, type, subtype, activity_kind, title, description, categories, tags,
+                            reward_coins, reward_xp, location_text, city, state, created_at)
+  values (v_ids[6], 'activity', 'Reciclagem', 'good_deed', 'Recolhemos 40 kg de lixo no Parque das Águas',
+          'Juntei uns amigos no domingo e enchemos 12 sacos. Bora repetir no próximo mês? Comenta aqui quem topa!',
+          '{environment}', '{reciclagem}', 20, 50, 'Parque das Águas', 'Cuiabá', 'MT', now() - interval '20 hours')
+  returning id into p_recycle;
+
+  insert into public.posts (author_id, type, subtype, title, description, categories, tags, reward_coins, reward_xp,
+                            duration_minutes, steps, created_at)
+  values (v_ids[4], 'tutorial', 'Sustentabilidade', 'Composteira caseira que aguenta o calor de Cuiabá',
+          'Reduza o lixo orgânico e produza adubo mesmo com 40 °C.', '{environment,education}', '{compostagem}', 15, 40, 90,
+          array['Use dois baldes com tampa e faça furos no fundo de um deles.',
+                'Coloque terra e folhas secas no balde furado.',
+                'Adicione restos de frutas, verduras e borra de café.',
+                'Cubra sempre com folhas secas e mantenha à sombra.',
+                'No calor, umedeça levemente 2x por semana. Em ~45 dias o adubo está pronto.'],
+          now() - interval '4 days')
+  returning id into p_tutorial;
+
+  insert into public.posts (author_id, type, subtype, title, description, categories, tags, reward_coins, reward_xp, created_at)
+  values (v_ids[8], 'discussion', 'Ideias', 'Como deixar Cuiabá mais arborizada?',
+          'Com o calor batendo recorde, quais ruas e bairros mais precisam de sombra? Bora mapear e propor um mutirão de plantio para a prefeitura.',
+          '{environment}', '{arborizacao,calor}', 5, 20, now() - interval '8 hours')
+  returning id into p_disc;
+
+  insert into public.posts (author_id, type, subtype, activity_kind, title, description, categories, tags,
+                            reward_coins, reward_xp, location_text, city, state, created_at)
+  values (v_ids[7], 'activity', 'Doação de itens', 'item_giveaway', 'Estou doando um fogão e 5 móveis',
+          'Mudança de apartamento: fogão 4 bocas, sofá, mesa com 4 cadeiras e estante. Prioridade para famílias e projetos sociais. Retirada no CPA.',
+          '{children}', '{doacao,moveis}', 20, 50, 'CPA I', 'Cuiabá', 'MT', now() - interval '5 hours')
+  returning id into p_items;
+
+  -- Comentários e curtidas.
+  insert into public.comments (post_id, author_id, body, created_at) values
+    (p_blood, v_ids[7], 'Vou com minha irmã! Precisa agendar?', now() - interval '20 hours'),
+    (p_blood, v_ids[1], 'Não precisa, Ana. É só chegar com documento 💙', now() - interval '19 hours'),
+    (p_fire, v_ids[6], 'Já doei e compartilhei nos stories! 🔥🚒', now() - interval '3 days'),
+    (p_dog, v_ids[7], 'Que dó da Mel 😢 doei um pouquinho.', now() - interval '1 day'),
+    (p_clean, v_ids[8], 'Vou de bike com a turma do pedal!', now() - interval '2 days'),
+    (p_soup, v_ids[6], 'Quinta estou aí para servir.', now() - interval '6 hours'),
+    (p_recycle, v_ids[4], 'Que demais! Os recicláveis podem vir para a nossa central.', now() - interval '10 hours'),
+    (p_disc, v_ids[2], 'Av. CPA e região do Coxipó são as mais quentes nos nossos registros.', now() - interval '6 hours'),
+    (p_tutorial, v_ids[7], 'Fiz a minha e funcionou! Dica: tampa sempre fechada por causa das moscas.', now() - interval '2 days');
+
+  insert into public.post_likes (post_id, profile_id)
+  select p, u from unnest(array[p_blood, p_fire, p_dog, p_clean, p_soup, p_recycle, p_tutorial, p_disc, p_items]) p
+  cross join unnest(v_ids) u
+  where (get_byte(decode(md5(p::text || u::text), 'hex'), 0) % 2) = 0;
+
+  insert into public.participations (post_id, profile_id, status, reward_granted_at)
+  select p, u, 'going', now() from unnest(array[p_blood, p_clean, p_soup]) p cross join unnest(v_ids[6:8]) u;
+end $$;
+
+-- Conta de teste para validar o app (login com senha, sem precisar do e-mail).
+-- E-mail: teste@saveeasy.dev · senha: SaveEasy#2026 · começa sem perfil completo.
+do $$
+declare
+  v_id uuid := 'b2000000-0000-4000-8000-000000000001';
+begin
+  if exists (select 1 from auth.users where id = v_id) then return; end if;
+  insert into auth.users (id, instance_id, aud, role, email, encrypted_password, raw_app_meta_data,
+                          raw_user_meta_data, created_at, updated_at, email_confirmed_at,
+                          confirmation_token, recovery_token, email_change_token_new, email_change)
+  values (v_id, '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated', 'teste@saveeasy.dev',
+          extensions.crypt('SaveEasy#2026', extensions.gen_salt('bf')),
+          '{"provider":"email","providers":["email"]}', '{}', now(), now(), now(), '', '', '', '');
+  insert into auth.identities (id, user_id, provider_id, provider, identity_data, last_sign_in_at, created_at, updated_at)
+  values (gen_random_uuid(), v_id, v_id::text, 'email',
+          jsonb_build_object('sub', v_id::text, 'email', 'teste@saveeasy.dev', 'email_verified', true),
+          now(), now(), now());
+end $$;

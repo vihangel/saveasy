@@ -23,9 +23,11 @@ class PostDetailCubit extends Cubit<PostDetailState> {
   Future<void> load() async {
     emit(state.copyWith(status: ViewStatus.loading));
     try {
-      final post = await _posts.getById(postId);
-      final (author, comments) = await (_users.getById(post.authorId), _posts.comments(postId)).wait;
-      emit(state.copyWith(status: ViewStatus.success, post: post, author: author, comments: comments));
+      // Uma chamada só: post + autor + comentários (RPC post_detail).
+      final detail = await _posts.detail(postId);
+      emit(
+        state.copyWith(status: ViewStatus.success, post: detail.post, author: detail.author, comments: detail.comments),
+      );
     } catch (_) {
       emit(state.copyWith(status: ViewStatus.failure, error: 'Publicação não encontrada.'));
     }
@@ -40,8 +42,18 @@ class PostDetailCubit extends Cubit<PostDetailState> {
   Future<void> addComment(String text) async {
     if (text.trim().isEmpty) return;
     emit(state.copyWith(sendingComment: true));
-    final comment = await _posts.addComment(postId: postId, authorName: _session.user.name, text: text);
-    emit(state.copyWith(sendingComment: false, comments: [comment, ...state.comments]));
+    try {
+      final comment = await _posts.addComment(postId: postId, authorName: _session.user.name, text: text);
+      emit(
+        state.copyWith(
+          sendingComment: false,
+          comments: [comment, ...state.comments],
+          post: _post.copyWith(commentsCount: _post.commentsCount + 1),
+        ),
+      );
+    } on AppException catch (e) {
+      emit(state.copyWith(sendingComment: false, message: e.message));
+    }
   }
 
   Future<void> toggleCommentLike(String commentId) async {
@@ -52,6 +64,15 @@ class PostDetailCubit extends Cubit<PostDetailState> {
   /// Confirma presença (evento) ou participação (ação social / atividade).
   /// Retorna true quando a confirmação foi feita agora.
   Future<bool> toggleParticipation() async {
+    try {
+      return await _toggleParticipation();
+    } on AppException catch (e) {
+      emit(state.copyWith(participating: false, message: e.message));
+      return false;
+    }
+  }
+
+  Future<bool> _toggleParticipation() async {
     emit(state.copyWith(participating: true));
     if (_post.confirmed) {
       final (post, _) = await _posts.cancelParticipation(postId: postId, userId: _session.user.id);
@@ -76,6 +97,34 @@ class PostDetailCubit extends Cubit<PostDetailState> {
     final me = await _users.toggleFollow(meId: _session.user.id, targetId: _post.authorId);
     _session.updateUser(me);
     emit(state.copyWith(author: await _users.getById(_post.authorId)));
+  }
+
+  bool get isAuthor => state.post?.authorId == _session.state.userOrNull?.id;
+
+  /// Exclui a publicação (só o autor). Retorna true se deu certo.
+  Future<bool> deletePost() async {
+    try {
+      await _posts.delete(postId);
+      return true;
+    } on AppException catch (e) {
+      emit(state.copyWith(message: e.message));
+      return false;
+    }
+  }
+
+  Future<void> deleteComment(String commentId) async {
+    try {
+      await _posts.deleteComment(commentId);
+      emit(
+        state.copyWith(
+          comments: state.comments.where((c) => c.id != commentId).toList(),
+          post: _post.copyWith(commentsCount: (_post.commentsCount - 1).clamp(0, 1 << 30)),
+          message: 'Comentário excluído.',
+        ),
+      );
+    } on AppException catch (e) {
+      emit(state.copyWith(message: e.message));
+    }
   }
 
   /// Recarrega o post depois de voltar de um fluxo (doação, envio de moedas).

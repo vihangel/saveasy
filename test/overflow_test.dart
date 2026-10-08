@@ -3,8 +3,10 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:saveeasy2026/app/app.dart';
+import 'package:saveeasy2026/app/dependencies.dart';
 import 'package:saveeasy2026/shared/data/datasources/image_storage.dart';
 import 'package:saveeasy2026/shared/data/datasources/mock_seed.dart';
+import 'package:saveeasy2026/shared/data/models/models.dart';
 
 import 'helpers/test_database.dart';
 
@@ -19,6 +21,11 @@ void main() {
     '/notifications',
     '/profile',
     '/profile/edit',
+    '/settings',
+    '/saved',
+    '/users/u_elefantes/follows',
+    '/users/u_me/follows?kind=following',
+    '/post/p_escola/edit',
     '/create',
     '/create/ad-info',
     '/create/donation',
@@ -60,16 +67,7 @@ void main() {
     '/store/pr_portacopo',
   ];
 
-  const publicRoutes = [
-    '/welcome',
-    '/login',
-    '/forgot-password',
-    '/signup',
-    '/signup/credentials',
-    '/signup/profile',
-    '/signup/address',
-    '/signup/success',
-  ];
+  const publicRoutes = ['/welcome', '/login', '/forgot-password', '/signup', '/signup/verify'];
 
   const sizes = {
     'iPhone SE (320x568)': Size(320, 568),
@@ -99,7 +97,9 @@ void main() {
         addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
 
         final (db, storage) = await createTestDatabase();
-        await tester.pumpWidget(SaveEasyApp(storage: storage, database: db, images: ImageStorage.forTesting()));
+        await tester.pumpWidget(
+          SaveEasyApp(deps: AppDependencies.mock(db, storage, images: ImageStorage.forTesting())),
+        );
         await _settle(tester);
 
         Future<void> visit(String route) async {
@@ -116,10 +116,34 @@ void main() {
           await visit(route);
         }
 
+        // Logado, mas com o perfil ainda incompleto (onboarding).
+        db.users = [
+          ...db.users,
+          const AppUser(
+            id: 'u_novo',
+            name: 'Pessoa Nova',
+            username: 'user_novo',
+            email: 'novo@teste.com',
+            accountType: AccountType.personal,
+            onboardingCompleted: false,
+          ),
+        ];
+        await storage.writeString('session_user_id', 'u_novo');
+        await tester.pumpWidget(const SizedBox());
+        await tester.pumpWidget(
+          SaveEasyApp(deps: AppDependencies.mock(db, storage, images: ImageStorage.forTesting())),
+        );
+        await _settle(tester);
+        for (final route in ['/onboarding', '/onboarding/profile', '/onboarding/address']) {
+          await visit(route);
+        }
+
         // Logado com a conta demo.
         await storage.writeString('session_user_id', MockSeed.demoUserId);
         await tester.pumpWidget(const SizedBox());
-        await tester.pumpWidget(SaveEasyApp(storage: storage, database: db, images: ImageStorage.forTesting()));
+        await tester.pumpWidget(
+          SaveEasyApp(deps: AppDependencies.mock(db, storage, images: ImageStorage.forTesting())),
+        );
         await _settle(tester);
         for (final route in loggedRoutes) {
           await visit(route);

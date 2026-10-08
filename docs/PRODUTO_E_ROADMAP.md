@@ -310,6 +310,54 @@ jurídico e contabilidade (o percentual vem do **lucro** ou da **receita**?).
 
 ---
 
+## 6.4 Taxas das lojas (Apple e Google): o que é permitido
+
+**Declarar moedas ou itens digitais como "produto físico" para fugir da compra
+dentro do app não é uma opção.** A Apple revisa o fluxo: as diretrizes 3.1.1 e
+2.3 exigem que bens digitais usados no app (moedas, capas, selos, títulos,
+impulsionamento) sejam vendidos pela compra dentro do app. A consequência é
+rejeição ou remoção do app e risco para a conta de desenvolvedor, e o Google
+Play tem a mesma regra. Formas legítimas de pagar menos ou nada:
+
+| Caso | Como fica | Taxa da loja |
+| --- | --- | --- |
+| **Doação para ONG** (comunidade verificada) | Fora da compra dentro do app (Pix/cartão no gateway). Permitido para organizações sem fins lucrativos aprovadas (3.2.1 vi) | 0% |
+| **Doação/presente de pessoa para pessoa** (vaquinha pessoal) | Fora da compra dentro do app, **desde que 100% vá para quem recebe** e não libere nada digital (3.2.1 vii). Taxa da plataforma ou recompensa em moedas atrelada à doação pode quebrar a exceção | 0% |
+| **Produto físico da loja** (caneca, camiseta) | Pix/cartão normal, é bem físico de verdade (3.1.3 e) | 0% |
+| **Anúncios e Plano Empresa** (B2B) | Vender pelo **painel web** para empresas (serviço corporativo, 3.1.3 c), sem botão de compra no app | 0% |
+| **Moedas e itens cosméticos** | Compra dentro do app | 15% com o Small Business Program da Apple e a taxa reduzida do Google (até US$ 1 mi/ano); 30% acima disso |
+| Venda das mesmas moedas **na web** | Permitido vender no site; no app só não pode ter botão nem link para comprar mais barato fora (exceto onde a lei local obriga, como os EUA e decisões de concorrência; acompanhar o caso do CADE no Brasil) | 0% na web |
+
+**Recomendações:**
+1. Moedas são **ganhas** principalmente por ações; pacotes pagos são um extra
+   cosmético e entram na compra dentro do app (15%).
+2. Doações sem recompensa em moedas compradas. O XP e o selo de doador podem
+   continuar, mas validar com um especialista o quanto "ganhar moedas por
+   doar" afeta a exceção.
+3. Empresas pagam anúncios e o plano pelo **painel web** (Stripe ou Asaas),
+   fora do app.
+4. Ativar o **Small Business Program** (Apple) e a taxa de 15% do Google no
+   primeiro dia.
+
+---
+
+## 6.5 Lançamento em Cuiabá - MT
+
+- Feed "Região" usa Cuiabá-MT como padrão; o cadastro já vem com Cuiabá/MT
+  preenchido e o CEP completa o endereço.
+- O seed de demonstração tem organizações e ações em lugares conhecidos da
+  cidade (Parque Mãe Bonifácia, Parque das Águas, Porto, CPA, Coxipó).
+- Antes de abrir: cadastrar 10 a 20 **comunidades reais verificadas** de Cuiabá
+  e Várzea Grande (hemocentro, abrigos de animais, ONGs ambientais e do
+  Pantanal, coletivos de bairro) e 3 a 5 empresas locais como primeiros
+  anunciantes.
+- Anúncios segmentados por **bairro/região de Cuiabá** no começo (CPA, Coxipó,
+  Centro, Porto), não por estado.
+- Eventos-âncora: mutirões em parques, campanhas de doação de sangue e a
+  temporada de queimadas no Pantanal (julho a outubro).
+
+---
+
 ## 7. Roadmap
 
 Estimativas em semanas para 1 dev full-stack Flutter + Supabase (ajustar ao time).

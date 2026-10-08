@@ -20,6 +20,13 @@ abstract class AppUser with _$AppUser {
 
     /// Referência do [ImageStorage] (arquivo local ou data URI).
     String? avatarUrl,
+    String? coverUrl,
+    String? city,
+    String? state,
+    String? verificationStatus,
+
+    /// false logo após criar a conta: falta escolher tipo, @ e dados.
+    @Default(true) bool onboardingCompleted,
     DateTime? birthDate,
     Address? address,
     @Default('') String bio,

@@ -18,7 +18,7 @@ void main() {
     final before = db.userById(MockSeed.demoUserId);
     final post = db.posts.firstWhere((p) => p.id == 'p_escola');
 
-    final (user, updatedPost) = await wallet.donate(userId: before.id, postId: post.id, amount: 50);
+    final (user, updatedPost) = await wallet.donate(userId: before.id, post: post, amount: 50);
 
     expect(user.balance, before.balance - 50);
     expect(user.coins, before.coins + post.rewardCoins);
@@ -27,7 +27,7 @@ void main() {
   });
 
   test('não permite doar mais que o saldo', () {
-    expect(wallet.donate(userId: MockSeed.demoUserId, postId: 'p_escola', amount: 1e6), throwsA(isA<AppException>()));
+    expect(wallet.donate(userId: MockSeed.demoUserId, post: db.posts.first, amount: 1e6), throwsA(isA<AppException>()));
   });
 
   test('enviar moedas transfere entre usuários', () async {

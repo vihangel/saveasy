@@ -16,8 +16,12 @@ class LoginCubit extends Cubit<LoginState> {
 
   Future<void> login(String email, String password) => _run(() => _auth.login(email, password).then(_session.signedIn));
 
-  Future<void> loginWithProvider(String provider) =>
-      _run(() => _auth.loginWithProvider(provider).then(_session.signedIn));
+  /// Na web o navegador sai para o Google/Facebook; a sessão volta pelo
+  /// [SessionCubit] (sessionChanges) quando o app recarrega.
+  Future<void> loginWithProvider(SocialProvider provider) => _run(() async {
+    final user = await _auth.loginWithProvider(provider);
+    if (user != null) _session.signedIn(user);
+  });
 
   Future<void> _run(Future<void> Function() action) async {
     emit(state.copyWith(status: ViewStatus.loading, error: null));

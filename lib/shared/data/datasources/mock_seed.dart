@@ -9,7 +9,7 @@ abstract final class MockSeed {
   static const demoUserId = 'u_me';
 
   /// Código fixo usado nas telas de validação (recuperar senha).
-  static const verificationCode = '12345';
+  static const verificationCode = '123456';
 
   static String _at(Duration offset) => DateTime.now().add(offset).toIso8601String();
 

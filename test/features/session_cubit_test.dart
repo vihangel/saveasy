@@ -11,7 +11,7 @@ void main() {
 
   setUp(() async {
     final (db, storage) = await createTestDatabase();
-    auth = AuthRepository(db, storage);
+    auth = MockAuthRepository(db, storage);
   });
 
   blocTest<SessionCubit, SessionState>(

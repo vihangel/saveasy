@@ -32,11 +32,29 @@ class CreatePostInput {
   final String steps;
 }
 
+/// Criar ou editar publicação (o mesmo formulário: "22. Edit post detail").
 class CreatePostCubit extends Cubit<CreatePostState> {
-  CreatePostCubit(PostType type, this._posts, this._session) : super(CreatePostState(type: type));
+  CreatePostCubit(PostType type, this._posts, this._session, {this.editing})
+    : super(
+        CreatePostState(
+          type: editing?.type ?? type,
+          subtype: (editing?.subtype.isEmpty ?? true) ? null : editing!.subtype,
+          tags: editing?.tags ?? const [],
+          categories: editing?.categories ?? const [],
+          startsAt: editing?.startsAt,
+          endsAt: editing?.endsAt,
+          imageUrl: editing?.imageUrl,
+          adPlan: editing?.adPlan,
+        ),
+      );
 
   final PostRepository _posts;
   final SessionCubit _session;
+
+  /// Publicação sendo editada (null = criando).
+  final Post? editing;
+
+  bool get isEditing => editing != null;
 
   /// Opções do campo "Tipo de ..." de cada formulário.
   static List<String> subtypesFor(PostType type) => switch (type) {
@@ -76,44 +94,54 @@ class CreatePostCubit extends Cubit<CreatePostState> {
     if (error != null) return emit(state.copyWith(status: ViewStatus.failure, error: error));
 
     emit(state.copyWith(status: ViewStatus.loading, error: null));
-    final user = _session.user;
-    final type = state.type;
-    final (post, author) = await _posts.create(
-      Post(
-        id: '',
-        type: type,
-        title: input.title.trim(),
-        description: input.description.trim(),
-        authorId: user.id,
-        authorName: user.name,
-        authorAvatarUrl: user.avatarUrl,
-        imageUrl: state.imageUrl,
-        authorType: user.accountType,
-        createdAt: DateTime.now(),
-        subtype: state.subtype ?? '',
-        tags: state.tags,
-        categories: state.categories,
-        startsAt: state.startsAt,
-        endsAt: state.endsAt,
-        location: input.location.trim().isEmpty ? null : input.location.trim(),
-        link: input.link.trim().isEmpty ? null : input.link.trim(),
-        targetAmount: double.tryParse(input.target.replaceAll(',', '.')),
-        recurring: state.subtype == 'Doação recorrente',
-        capacity: int.tryParse(input.capacity),
-        durationMinutes: int.tryParse(input.duration),
-        steps: input.steps.split('\n').map((s) => s.trim()).where((s) => s.isNotEmpty).toList(),
-        adPlan: state.adPlan,
-        rewardCoins: switch (type) {
-          PostType.event => 25,
-          PostType.donation => 50,
-          PostType.ad => 20,
-          _ => 15,
-        },
-      ),
-    );
-    _session.updateUser(author);
-    emit(state.copyWith(status: ViewStatus.success, createdPostId: post.id));
+    try {
+      if (isEditing) {
+        final updated = await _posts.update(_fill(editing!, input));
+        return emit(state.copyWith(status: ViewStatus.success, createdPostId: updated.id));
+      }
+      final user = _session.user;
+      final (post, author) = await _posts.create(
+        _fill(
+          Post(
+            id: '',
+            type: state.type,
+            title: '',
+            description: '',
+            authorId: user.id,
+            authorName: user.name,
+            authorAvatarUrl: user.avatarUrl,
+            authorType: user.accountType,
+            createdAt: DateTime.now(),
+          ),
+          input,
+        ),
+      );
+      _session.updateUser(author);
+      emit(state.copyWith(status: ViewStatus.success, createdPostId: post.id));
+    } on AppException catch (e) {
+      emit(state.copyWith(status: ViewStatus.failure, error: e.message));
+    }
   }
+
+  /// Aplica o que foi digitado no formulário sobre a publicação base.
+  Post _fill(Post base, CreatePostInput input) => base.copyWith(
+    title: input.title.trim(),
+    description: input.description.trim(),
+    imageUrl: state.imageUrl,
+    subtype: state.subtype ?? '',
+    tags: state.tags,
+    categories: state.categories,
+    startsAt: state.startsAt,
+    endsAt: state.endsAt,
+    location: input.location.trim().isEmpty ? null : input.location.trim(),
+    link: input.link.trim().isEmpty ? null : input.link.trim(),
+    targetAmount: double.tryParse(input.target.replaceAll(',', '.')),
+    recurring: state.subtype == 'Doação recorrente',
+    capacity: int.tryParse(input.capacity),
+    durationMinutes: int.tryParse(input.duration),
+    steps: input.steps.split('\n').map((s) => s.trim()).where((s) => s.isNotEmpty).toList(),
+    adPlan: state.adPlan,
+  );
 
   String? _validate(CreatePostInput input) {
     if (input.title.trim().isEmpty) return 'Informe o título.';

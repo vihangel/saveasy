@@ -72,7 +72,9 @@ class _Item extends StatelessWidget {
       borderRadius: BorderRadius.circular(20),
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+        // min: dentro do Wrap, cada item ocupa só o próprio tamanho.
         child: Row(
+          mainAxisSize: MainAxisSize.min,
           children: [
             Icon(icon, size: 20, color: color),
             const SizedBox(width: 4),

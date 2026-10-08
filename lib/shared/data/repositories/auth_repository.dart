@@ -1,127 +1,83 @@
-import '../datasources/local_storage.dart';
-import '../datasources/mock_database.dart';
-import '../datasources/mock_seed.dart';
 import '../models/models.dart';
-import 'app_exception.dart';
 
-/// Dados coletados nos passos do cadastro.
-class SignUpData {
-  const SignUpData({
+/// Login social disponível.
+enum SocialProvider { google, facebook, apple }
+
+/// Resultado do cadastro (passo 1: e-mail e senha).
+class SignUpResult {
+  const SignUpResult({required this.needsConfirmation, this.user});
+
+  /// true quando o e-mail precisa ser confirmado com o código enviado.
+  final bool needsConfirmation;
+
+  /// Já logado (quando o projeto não exige confirmação de e-mail).
+  final AppUser? user;
+}
+
+/// Dados do "completar perfil" (depois do login).
+class ProfileCompletion {
+  const ProfileCompletion({
     required this.accountType,
-    required this.email,
-    required this.password,
     required this.name,
     required this.username,
     required this.pronouns,
-    required this.birthDate,
-    required this.address,
-    required this.emailNews,
+    this.birthDate,
+    this.address,
+    this.emailNews = false,
     this.avatarUrl,
   });
 
   final AccountType accountType;
-  final String email;
-  final String password;
   final String name;
   final String username;
   final String pronouns;
   final DateTime? birthDate;
-  final Address address;
+  final Address? address;
   final bool emailNews;
   final String? avatarUrl;
 }
 
-class AuthRepository {
-  AuthRepository(this._db, this._storage);
+/// Autenticação e conta. Implementações: [MockAuthRepository] (local) e
+/// [SupabaseAuthRepository].
+abstract interface class AuthRepository {
+  bool get hasSeenOnboarding;
 
-  final MockDatabase _db;
-  final LocalStorage _storage;
+  Future<void> markOnboardingSeen();
 
-  static const _sessionKey = 'session_user_id';
-  static const _onboardingKey = 'onboarding_seen';
+  Future<AppUser?> restoreSession();
 
-  final _pendingCodes = <String, String>{};
+  /// Sessões que chegam "de fora" do fluxo de tela: login social e links de
+  /// e-mail. Emite null quando a sessão termina.
+  Stream<AppUser?> get sessionChanges;
 
-  bool get hasSeenOnboarding => _storage.readBool(_onboardingKey);
+  Future<AppUser> login(String email, String password);
 
-  Future<void> markOnboardingSeen() => _storage.writeBool(_onboardingKey, true);
+  /// Login social. Na web o navegador sai do app e a sessão volta por
+  /// [sessionChanges]; por isso pode retornar null.
+  Future<AppUser?> loginWithProvider(SocialProvider provider);
 
-  Future<AppUser?> restoreSession() async {
-    final id = _storage.readString(_sessionKey);
-    if (id == null) return null;
-    return _db.users.where((u) => u.id == id).firstOrNull;
-  }
+  Future<void> logout();
 
-  Future<AppUser> login(String email, String password) async {
-    await _db.delay();
-    final credential = _db.credentials.where((c) => c.email.toLowerCase() == email.trim().toLowerCase()).firstOrNull;
-    if (credential == null || credential.password != password) {
-      throw const AppException('E-mail ou senha inválidos.');
-    }
-    await _storage.writeString(_sessionKey, credential.userId);
-    return _db.userById(credential.userId);
-  }
+  Future<SignUpResult> signUp({required String email, required String password});
 
-  /// Login social mockado: entra com a conta demo.
-  Future<AppUser> loginWithProvider(String provider) => login(MockSeed.demoEmail, MockSeed.demoPassword);
+  Future<AppUser> verifySignUpCode(String email, String code);
 
-  Future<void> logout() => _storage.writeString(_sessionKey, null);
+  Future<void> resendSignUpCode(String email);
 
-  Future<bool> emailExists(String email) async {
-    await _db.delay();
-    return _db.credentials.any((c) => c.email.toLowerCase() == email.trim().toLowerCase());
-  }
+  Future<bool> isUsernameAvailable(String username);
 
-  Future<bool> usernameExists(String username) async =>
-      _db.users.any((u) => u.username.toLowerCase() == username.trim().toLowerCase());
+  Future<AppUser> completeProfile(ProfileCompletion data);
 
-  Future<AppUser> register(SignUpData data) async {
-    await _db.delay();
-    if (await emailExists(data.email)) {
-      throw const AppException('Já existe uma conta com esse e-mail.');
-    }
-    final user = AppUser(
-      id: _db.newId('u'),
-      name: data.name.trim(),
-      username: data.username.trim().replaceAll('@', ''),
-      email: data.email.trim(),
-      accountType: data.accountType,
-      pronouns: data.pronouns,
-      birthDate: data.birthDate,
-      address: data.address,
-      emailNews: data.emailNews,
-      avatarUrl: data.avatarUrl,
-      coins: 100,
-    );
-    _db.users = [..._db.users, user];
-    _db.credentials = [..._db.credentials, Credential(email: user.email, password: data.password, userId: user.id)];
-    await Future.wait([_db.saveUsers(), _db.saveCredentials()]);
-    return user;
-  }
+  Future<void> sendRecoveryCode(String email);
 
-  /// Em produção o código iria por e-mail; aqui ele é fixo ([MockSeed.verificationCode]).
-  Future<void> sendRecoveryCode(String email) async {
-    if (!await emailExists(email)) {
-      throw const AppException('Não encontramos uma conta com esse e-mail.');
-    }
-    _pendingCodes[email.trim().toLowerCase()] = MockSeed.verificationCode;
-  }
+  Future<void> verifyRecoveryCode(String email, String code);
 
-  Future<void> verifyCode(String email, String code) async {
-    await _db.delay();
-    if (_pendingCodes[email.trim().toLowerCase()] != code) {
-      throw const AppException('Código inválido. Confira o e-mail enviado.');
-    }
-  }
+  /// Troca a senha depois de validar o código de recuperação.
+  Future<void> resetPassword(String email, String newPassword);
 
-  Future<void> resetPassword(String email, String newPassword) async {
-    await _db.delay();
-    final key = email.trim().toLowerCase();
-    _db.credentials = [
-      for (final c in _db.credentials)
-        c.email.toLowerCase() == key ? Credential(email: c.email, password: newPassword, userId: c.userId) : c,
-    ];
-    _pendingCodes.remove(key);
-    await _db.saveCredentials();
-  }
+  /// Troca a senha estando logado (Configurações).
+  Future<void> changePassword(String newPassword);
+
+  /// Exclui a conta e todos os dados (LGPD).
+  Future<void> deleteAccount();
 }

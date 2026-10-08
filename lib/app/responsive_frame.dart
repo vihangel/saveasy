@@ -4,6 +4,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
 import '../shared/data/datasources/mock_seed.dart';
+import 'env.dart';
 import 'theme.dart';
 
 /// Adapta o app (desenhado para celular) a telas largas, como o navegador no
@@ -122,33 +123,37 @@ class _SidePanel extends StatelessWidget {
             style: TextStyle(fontSize: 15, height: 1.6),
           ),
           const SizedBox(height: 28),
-          Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: AppColors.border),
+          if (!Env.useSupabase) ...[
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: AppColors.border),
+              ),
+              child: const Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Conta de teste',
+                    style: TextStyle(fontWeight: FontWeight.w700, color: AppColors.textDark),
+                  ),
+                  SizedBox(height: 6),
+                  Text('${MockSeed.demoEmail}  ·  senha ${MockSeed.demoPassword}'),
+                  SizedBox(height: 4),
+                  Text(
+                    'Código de verificação: ${MockSeed.verificationCode}',
+                    style: TextStyle(fontSize: 12, color: AppColors.textMuted),
+                  ),
+                ],
+              ),
             ),
-            child: const Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Conta de teste',
-                  style: TextStyle(fontWeight: FontWeight.w700, color: AppColors.textDark),
-                ),
-                SizedBox(height: 6),
-                Text('${MockSeed.demoEmail}  ·  senha ${MockSeed.demoPassword}'),
-                SizedBox(height: 4),
-                Text(
-                  'Código de verificação: ${MockSeed.verificationCode}',
-                  style: TextStyle(fontSize: 12, color: AppColors.textMuted),
-                ),
-              ],
-            ),
-          ),
+          ],
           const SizedBox(height: 16),
-          const Text(
-            'Protótipo com dados simulados. O que você fizer fica salvo só neste navegador.',
+          Text(
+            Env.useSupabase
+                ? 'Versão de testes, com foco em Cuiabá - MT. Crie sua conta para participar.'
+                : 'Protótipo com dados simulados. O que você fizer fica salvo só neste navegador.',
             style: TextStyle(fontSize: 12, color: AppColors.textMuted),
           ),
         ],

@@ -8,11 +8,14 @@ abstract final class AppRoutes {
   static const forgotCode = '/forgot-password/code';
   static const resetPassword = '/forgot-password/reset';
 
+  /// Cadastro: e-mail e senha → código de confirmação.
   static const signUp = '/signup';
-  static const signUpCredentials = '/signup/credentials';
-  static const signUpProfile = '/signup/profile';
-  static const signUpAddress = '/signup/address';
-  static const signUpSuccess = '/signup/success';
+  static const signUpVerify = '/signup/verify';
+
+  /// Completar perfil (já logado): tipo de conta → perfil → endereço.
+  static const onboarding = '/onboarding';
+  static const onboardingProfile = '/onboarding/profile';
+  static const onboardingAddress = '/onboarding/address';
 
   static const home = '/home';
   static const messages = '/messages';
@@ -24,6 +27,7 @@ abstract final class AppRoutes {
   static const adInfo = '/create/ad-info';
 
   static String post(String id) => '/post/$id';
+  static String editPost(String id) => '/post/$id/edit';
   static String donate(String postId) => '/post/$postId/donate';
   static String eventConfirmed(String postId) => '/post/$postId/confirmed';
 
@@ -35,6 +39,10 @@ abstract final class AppRoutes {
   static String sendCoins(String userId, {String? postId}) =>
       '/users/$userId/send-coins${postId == null ? '' : '?post=$postId'}';
   static const editProfile = '/profile/edit';
+  static const settings = '/settings';
+  static const saved = '/saved';
+  static String follows(String userId, {bool following = false}) =>
+      '/users/$userId/follows${following ? '?kind=following' : ''}';
 
   static String chat(String threadId) => '/messages/$threadId';
 

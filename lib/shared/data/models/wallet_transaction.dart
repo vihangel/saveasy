@@ -15,7 +15,13 @@ enum TransactionKind {
   @JsonValue('reward')
   reward('Recompensa'),
   @JsonValue('store')
-  store('Loja');
+  store('Loja'),
+  @JsonValue('coins_received')
+  coinsReceived('Moedas recebidas'),
+  @JsonValue('bonus')
+  bonus('Bônus'),
+  @JsonValue('participation')
+  participation('Participação');
 
   const TransactionKind(this.label);
 

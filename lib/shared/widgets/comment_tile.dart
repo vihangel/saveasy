@@ -6,10 +6,13 @@ import '../utils/formatters.dart';
 import 'user_avatar.dart';
 
 class CommentTile extends StatelessWidget {
-  const CommentTile({super.key, required this.comment, this.onLike});
+  const CommentTile({super.key, required this.comment, this.onLike, this.onDelete});
 
   final Comment comment;
   final VoidCallback? onLike;
+
+  /// Só para o autor do comentário.
+  final VoidCallback? onDelete;
 
   @override
   Widget build(BuildContext context) {
@@ -18,7 +21,7 @@ class CommentTile extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          UserAvatar(name: comment.authorName, size: 36),
+          UserAvatar(name: comment.authorName, imageUrl: comment.authorAvatarUrl, size: 36),
           const SizedBox(width: 10),
           Expanded(
             child: Column(
@@ -65,6 +68,16 @@ class CommentTile extends StatelessWidget {
                       'Responder',
                       style: TextStyle(fontSize: 12, color: AppColors.primary, fontWeight: FontWeight.w600),
                     ),
+                    if (onDelete != null) ...[
+                      const SizedBox(width: 16),
+                      InkWell(
+                        onTap: onDelete,
+                        child: const Text(
+                          'Excluir',
+                          style: TextStyle(fontSize: 12, color: AppColors.danger, fontWeight: FontWeight.w600),
+                        ),
+                      ),
+                    ],
                   ],
                 ),
                 if (comment.replies > 0 && comment.lastReplyAuthor != null)

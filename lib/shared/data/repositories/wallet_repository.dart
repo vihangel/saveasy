@@ -1,3 +1,5 @@
+import 'package:flutter/foundation.dart';
+
 import '../datasources/mock_database.dart';
 import '../models/models.dart';
 import 'app_exception.dart';
@@ -8,6 +10,9 @@ class WalletRepository {
   WalletRepository(this._db);
 
   final MockDatabase _db;
+
+  @protected
+  MockDatabase get db => _db;
 
   static const packages = [
     CoinPackage(coins: 1000, price: 4.99),
@@ -40,14 +45,15 @@ class WalletRepository {
   }
 
   /// Doa dinheiro para uma campanha e aplica as recompensas do post.
-  Future<(AppUser, Post)> donate({required String userId, required String postId, required double amount}) async {
+  /// Recebe o [post] inteiro porque, com o Supabase ligado, a publicação não
+  /// existe no banco mock (pagamentos reais entram na fase 5 do roadmap).
+  Future<(AppUser, Post)> donate({required String userId, required Post post, required double amount}) async {
     await _db.delay();
     if (amount <= 0) throw const AppException('Informe um valor maior que zero.');
     final user = _db.userById(userId);
     _ensureBalance(user, amount);
-    final post = _db.posts.firstWhere((p) => p.id == postId);
     final updatedPost = post.copyWith(raisedAmount: post.raisedAmount + amount);
-    await _db.replacePost(updatedPost);
+    if (_db.posts.any((p) => p.id == post.id)) await _db.replacePost(updatedPost);
     final updatedUser = user
         .copyWith(balance: user.balance - amount)
         .reward(xp: post.rewardXp, coins: post.rewardCoins);
@@ -111,13 +117,12 @@ class WalletRepository {
   }
 
   /// Inscrição (assinatura mensal) em uma comunidade.
-  Future<AppUser> subscribe({required String userId, required String communityId, required double price}) async {
+  Future<AppUser> subscribe({required String userId, required AppUser community, required double price}) async {
     await _db.delay();
     final user = _db.userById(userId);
     _ensureBalance(user, price);
-    final community = _db.userById(communityId);
     final updated = user
-        .copyWith(balance: user.balance - price, subscribedCommunityIds: [...user.subscribedCommunityIds, communityId])
+        .copyWith(balance: user.balance - price, subscribedCommunityIds: [...user.subscribedCommunityIds, community.id])
         .reward(xp: 80, coins: 50);
     await _commit(
       updated,

@@ -4,6 +4,7 @@ import 'package:image_picker/image_picker.dart';
 
 import '../../app/theme.dart';
 import '../data/datasources/image_storage.dart';
+import '../data/repositories/app_exception.dart';
 import '../services/media_picker_service.dart';
 import '../utils/context_x.dart';
 
@@ -29,6 +30,7 @@ Future<ImagePickResult?> showImagePickerSheet(
   BuildContext context, {
   String title = 'Escolher imagem',
   bool canRemove = false,
+  ImageBucket bucket = ImageBucket.postCovers,
 }) async {
   final choice = await showModalBottomSheet<_Choice>(
     context: context,
@@ -73,9 +75,11 @@ Future<ImagePickResult?> showImagePickerSheet(
   try {
     final file = await picker.pick(source);
     if (file == null) return null;
-    return ImagePicked(await storage.save(file));
+    return ImagePicked(await storage.save(file, bucket: bucket));
   } on MediaPermissionException catch (e) {
     if (context.mounted) await _explainPermission(context, e, picker);
+  } on AppException catch (e) {
+    if (context.mounted) context.showMessage(e.message, error: true);
   } on CameraUnavailableException {
     if (context.mounted) context.showMessage('Câmera indisponível neste dispositivo. Use a galeria.', error: true);
   } catch (_) {

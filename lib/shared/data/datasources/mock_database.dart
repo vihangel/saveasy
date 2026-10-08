@@ -82,6 +82,16 @@ class MockDatabase {
 
   AppUser userById(String id) => users.firstWhere((u) => u.id == id);
 
+  /// Espelha um usuário vindo do Supabase para as telas que ainda usam o
+  /// mock (carteira em R$, loja, recompensas, stories, chat). Mantém o saldo
+  /// em R$ local, que não existe no back-end.
+  Future<void> mirrorUser(AppUser user) async {
+    final existing = users.where((u) => u.id == user.id).firstOrNull;
+    final mirrored = user.copyWith(balance: existing?.balance ?? user.balance);
+    users = existing == null ? [...users, mirrored] : [for (final u in users) u.id == user.id ? mirrored : u];
+    await saveUsers();
+  }
+
   Future<void> replaceUser(AppUser user) async {
     users = [for (final u in users) u.id == user.id ? user : u];
     await saveUsers();

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 
@@ -13,9 +15,19 @@ part 'session_state.dart';
 /// chamam [updateUser] para que saldo, moedas e nível fiquem sincronizados
 /// em todas as telas.
 class SessionCubit extends Cubit<SessionState> {
-  SessionCubit(this._auth) : super(const SessionState.unknown());
+  SessionCubit(this._auth) : super(const SessionState.unknown()) {
+    // Login social e links de e-mail chegam fora do fluxo das telas.
+    _changes = _auth.sessionChanges.listen((user) {
+      if (user != null) {
+        signedIn(user);
+      } else if (state is SessionAuthenticated) {
+        emit(SessionState.unauthenticated(onboardingSeen: _auth.hasSeenOnboarding));
+      }
+    });
+  }
 
   final AuthRepository _auth;
+  late final StreamSubscription<AppUser?> _changes;
 
   AppUser get user => (state as SessionAuthenticated).user;
 
@@ -42,5 +54,17 @@ class SessionCubit extends Cubit<SessionState> {
   Future<void> logout() async {
     await _auth.logout();
     emit(const SessionState.unauthenticated(onboardingSeen: true));
+  }
+
+  /// Exclui a conta e volta para o login.
+  Future<void> deleteAccount() async {
+    await _auth.deleteAccount();
+    emit(const SessionState.unauthenticated(onboardingSeen: true));
+  }
+
+  @override
+  Future<void> close() {
+    _changes.cancel();
+    return super.close();
   }
 }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../app/theme.dart';
+import '../data/datasources/image_storage.dart';
 import 'image_picker_sheet.dart';
 import 'user_avatar.dart';
 
@@ -16,7 +17,12 @@ class AvatarPicker extends StatelessWidget {
   final double size;
 
   Future<void> _pick(BuildContext context) async {
-    final result = await showImagePickerSheet(context, title: 'Foto de perfil', canRemove: imageUrl != null);
+    final result = await showImagePickerSheet(
+      context,
+      title: 'Foto de perfil',
+      canRemove: imageUrl != null,
+      bucket: ImageBucket.avatars,
+    );
     switch (result) {
       case ImagePicked(:final reference):
         onChanged(reference);

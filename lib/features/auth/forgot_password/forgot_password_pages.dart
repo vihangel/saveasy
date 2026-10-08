@@ -1,14 +1,15 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../app/env.dart';
 import '../../../app/routes.dart';
 import '../../../app/theme.dart';
 import '../../../shared/data/datasources/mock_seed.dart';
 import '../../../shared/utils/context_x.dart';
 import '../../../shared/utils/validators.dart';
 import '../../../shared/widgets/widgets.dart';
+import '../sign_up/sign_up_pages.dart' show CodeField;
 import 'forgot_password_cubit.dart';
 
 /// Escuta o cubit do fluxo e navega quando um passo é concluído.
@@ -123,24 +124,12 @@ class _VerifyCodePageState extends State<VerifyCodePage> {
           children: [
             const SizedBox(height: 16),
             Text(
-              'Enviamos um código de 5 dígitos para\n${state.email}',
+              'Enviamos um código de 6 números para\n${state.email}',
               textAlign: TextAlign.center,
               style: const TextStyle(fontSize: 13, color: AppColors.textMuted),
             ),
             const SizedBox(height: 16),
-            TextField(
-              controller: _code,
-              textAlign: TextAlign.center,
-              keyboardType: TextInputType.number,
-              maxLength: 5,
-              inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-              style: const TextStyle(fontSize: 36, letterSpacing: 16, fontWeight: FontWeight.w700),
-              decoration: const InputDecoration(
-                hintText: '#####',
-                counterText: '',
-                contentPadding: EdgeInsets.symmetric(vertical: 24),
-              ),
-            ),
+            CodeField(controller: _code, onCompleted: context.read<ForgotPasswordCubit>().verifyCode),
             const SizedBox(height: 32),
             PrimaryButton(
               label: 'Inserir código',
@@ -148,11 +137,12 @@ class _VerifyCodePageState extends State<VerifyCodePage> {
               onPressed: () => context.read<ForgotPasswordCubit>().verifyCode(_code.text),
             ),
             const SizedBox(height: 12),
-            const Text(
-              'Protótipo: use o código ${MockSeed.verificationCode}',
-              textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 11, color: AppColors.textMuted),
-            ),
+            if (!Env.useSupabase)
+              const Text(
+                'Modo demonstração: use o código ${MockSeed.verificationCode}',
+                textAlign: TextAlign.center,
+                style: TextStyle(fontSize: 11, color: AppColors.textMuted),
+              ),
           ],
         ),
       ),

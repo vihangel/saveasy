@@ -69,6 +69,14 @@ abstract class Post with _$Post {
     @Default('') String subtype,
     @Default(0) int likes,
     @Default(0) int shares,
+    @Default(0) int commentsCount,
+    @Default(0) int interests,
+    String? status,
+    String? city,
+    String? state,
+
+    /// Atividade: 'good_deed' (registro de boa ação) ou 'item_giveaway' (doação de itens).
+    String? activityKind,
     @Default(false) bool liked,
     @Default(false) bool saved,
     @Default(10) int rewardCoins,

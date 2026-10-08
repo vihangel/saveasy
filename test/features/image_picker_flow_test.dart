@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:saveeasy2026/app/app.dart';
+import 'package:saveeasy2026/app/dependencies.dart';
 import 'package:saveeasy2026/shared/data/datasources/image_storage.dart';
 import 'package:saveeasy2026/shared/data/datasources/mock_seed.dart';
 import 'package:saveeasy2026/shared/services/media_picker_service.dart';
@@ -42,7 +43,9 @@ void main() {
     final (db, storage) = await createTestDatabase();
     await storage.writeString('session_user_id', MockSeed.demoUserId);
     await tester.pumpWidget(
-      SaveEasyApp(storage: storage, database: db, images: ImageStorage.forTesting(tempDir.path), mediaPicker: picker),
+      SaveEasyApp(
+        deps: AppDependencies.mock(db, storage, images: ImageStorage.forTesting(tempDir.path), mediaPicker: picker),
+      ),
     );
     for (var i = 0; i < 12; i++) {
       await tester.pump(const Duration(milliseconds: 250));
@@ -57,7 +60,7 @@ void main() {
     final source = File('${tempDir.path}/foto.jpg')..writeAsBytesSync(List.filled(16, 0));
     await openEditProfile(tester, _FakePicker(file: XFile(source.path)));
 
-    await tester.tap(find.byIcon(Icons.photo_camera_outlined));
+    await tester.tap(find.byIcon(Icons.photo_camera_outlined).last);
     await tester.pumpAndSettle(const Duration(milliseconds: 100));
     expect(find.text('Escolher da galeria'), findsOneWidget);
 
@@ -77,7 +80,7 @@ void main() {
     final picker = _FakePicker(denied: true);
     await openEditProfile(tester, picker);
 
-    await tester.tap(find.byIcon(Icons.photo_camera_outlined));
+    await tester.tap(find.byIcon(Icons.photo_camera_outlined).last);
     await tester.pumpAndSettle(const Duration(milliseconds: 100));
     await tester.tap(find.text('Tirar foto'));
     await tester.pumpAndSettle(const Duration(milliseconds: 100));

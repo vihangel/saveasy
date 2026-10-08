@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../app/theme.dart';
+import '../../shared/data/datasources/image_storage.dart';
 import '../../shared/data/models/models.dart';
 import '../../shared/data/repositories/repositories.dart';
 import '../../shared/notifiers/session_cubit.dart';
@@ -31,7 +32,12 @@ class _NewStoryPageState extends State<NewStoryPage> {
   }
 
   Future<void> _pickImage() async {
-    final result = await showImagePickerSheet(context, title: 'Imagem do story', canRemove: _image != null);
+    final result = await showImagePickerSheet(
+      context,
+      title: 'Imagem do story',
+      canRemove: _image != null,
+      bucket: ImageBucket.stories,
+    );
     switch (result) {
       case ImagePicked(:final reference):
         setState(() => _image = reference);

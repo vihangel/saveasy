@@ -18,9 +18,26 @@ import 'create_post_cubit.dart';
 class CreatePostFormPage extends StatefulWidget {
   const CreatePostFormPage({super.key});
 
-  static Widget route(BuildContext context, PostType type) => BlocProvider(
-    create: (context) => CreatePostCubit(type, context.read<PostRepository>(), context.read<SessionCubit>()),
+  static Widget route(BuildContext context, PostType type, {Post? editing}) => BlocProvider(
+    create: (context) =>
+        CreatePostCubit(type, context.read<PostRepository>(), context.read<SessionCubit>(), editing: editing),
     child: const CreatePostFormPage(),
+  );
+
+  /// Abre o formulário de edição carregando a publicação pelo id da URL.
+  static Widget editRoute(BuildContext context, String postId) => FutureBuilder<Post>(
+    future: context.read<PostRepository>().getById(postId),
+    builder: (context, snapshot) {
+      if (snapshot.hasError) {
+        return Scaffold(
+          appBar: AppBar(leading: const AppBackButton()),
+          body: const EmptyState(message: 'Publicação não encontrada.', icon: Icons.search_off_rounded),
+        );
+      }
+      final post = snapshot.data;
+      if (post == null) return const Scaffold(body: Center(child: CircularProgressIndicator()));
+      return route(context, post.type, editing: post);
+    },
   );
 
   @override
@@ -28,14 +45,15 @@ class CreatePostFormPage extends StatefulWidget {
 }
 
 class _CreatePostFormPageState extends State<CreatePostFormPage> {
-  final _title = TextEditingController();
-  final _description = TextEditingController();
-  final _location = TextEditingController();
-  final _link = TextEditingController();
-  final _target = TextEditingController();
-  final _capacity = TextEditingController();
-  final _duration = TextEditingController();
-  final _steps = TextEditingController();
+  late final Post? _editing = context.read<CreatePostCubit>().editing;
+  late final _title = TextEditingController(text: _editing?.title);
+  late final _description = TextEditingController(text: _editing?.description);
+  late final _location = TextEditingController(text: _editing?.location);
+  late final _link = TextEditingController(text: _editing?.link);
+  late final _target = TextEditingController(text: _editing?.targetAmount?.toStringAsFixed(0));
+  late final _capacity = TextEditingController(text: _editing?.capacity?.toString());
+  late final _duration = TextEditingController(text: _editing?.durationMinutes?.toString());
+  late final _steps = TextEditingController(text: _editing?.steps.join('\n'));
 
   @override
   void dispose() {
@@ -80,11 +98,15 @@ class _CreatePostFormPageState extends State<CreatePostFormPage> {
       listenWhen: (a, b) => a.status != b.status,
       listener: (context, state) {
         if (state.status.isFailure) context.showMessage(state.error!, error: true);
-        if (state.status.isSuccess) {
-          context.showMessage('Publicação criada! +30 XP');
-          context.go(AppRoutes.home);
-          context.push(AppRoutes.post(state.createdPostId!));
+        if (!state.status.isSuccess) return;
+        if (context.read<CreatePostCubit>().isEditing) {
+          context.showMessage('Publicação atualizada.');
+          AppBackButton.goBack(context);
+          return;
         }
+        context.showMessage('Publicação criada! +30 XP');
+        context.go(AppRoutes.home);
+        context.push(AppRoutes.post(state.createdPostId!));
       },
       builder: (context, state) {
         final cubit = context.read<CreatePostCubit>();
@@ -92,7 +114,11 @@ class _CreatePostFormPageState extends State<CreatePostFormPage> {
         return Scaffold(
           appBar: AppBar(
             leading: const AppBackButton(fallback: AppRoutes.create),
-            title: Text(type == PostType.ad ? 'Criar propaganda' : type.label),
+            title: Text(
+              cubit.isEditing
+                  ? 'Editar ${type.label.toLowerCase()}'
+                  : (type == PostType.ad ? 'Criar propaganda' : type.label),
+            ),
           ),
           body: ListView(
             padding: const EdgeInsets.fromLTRB(24, 8, 24, 32),
@@ -131,7 +157,11 @@ class _CreatePostFormPageState extends State<CreatePostFormPage> {
               const SizedBox(height: 16),
               TagInput(tags: state.tags, onChanged: cubit.setTags),
               const SizedBox(height: 32),
-              PrimaryButton(label: 'Criar', loading: state.status.isLoading, onPressed: _submit),
+              PrimaryButton(
+                label: cubit.isEditing ? 'Salvar alterações' : 'Criar',
+                loading: state.status.isLoading,
+                onPressed: _submit,
+              ),
             ],
           ),
         );

@@ -31,7 +31,7 @@ class DonateCubit extends Cubit<DonateState> {
   Future<void> confirm() async {
     emit(state.copyWith(submitting: true, error: null));
     try {
-      final (user, post) = await _wallet.donate(userId: _session.user.id, postId: postId, amount: state.amount);
+      final (user, post) = await _wallet.donate(userId: _session.user.id, post: state.post!, amount: state.amount);
       _session.updateUser(user);
       emit(state.copyWith(submitting: false, done: true, post: post));
     } on AppException catch (e) {

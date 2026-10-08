@@ -31,6 +31,8 @@ class EditProfileCubit extends Cubit<EditProfileState> {
 
   void setAvatar(String? reference) => emit(state.copyWith(user: state.user.copyWith(avatarUrl: reference)));
 
+  void setCover(String? reference) => emit(state.copyWith(user: state.user.copyWith(coverUrl: reference)));
+
   void selectTitle(String? id) => emit(state.copyWith(user: state.user.copyWith(titleId: id)));
 
   void toggleBadge(String id) {

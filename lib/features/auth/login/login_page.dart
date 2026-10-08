@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../app/env.dart';
 import '../../../app/routes.dart';
 import '../../../app/theme.dart';
 import '../../../shared/data/datasources/mock_seed.dart';
+import '../../../shared/data/repositories/repositories.dart';
 import '../../../shared/utils/context_x.dart';
 import '../../../shared/utils/validators.dart';
 import '../../../shared/widgets/widgets.dart';
@@ -100,7 +102,7 @@ class _LoginPageState extends State<LoginPage> {
                         'f',
                         style: TextStyle(color: Colors.white, fontSize: 26, fontWeight: FontWeight.w900),
                       ),
-                      onTap: () => context.read<LoginCubit>().loginWithProvider('facebook'),
+                      onTap: () => context.read<LoginCubit>().loginWithProvider(SocialProvider.facebook),
                     ),
                     const SizedBox(width: 20),
                     _SocialButton(
@@ -109,18 +111,19 @@ class _LoginPageState extends State<LoginPage> {
                         'G',
                         style: TextStyle(color: Color(0xFFEA4335), fontSize: 24, fontWeight: FontWeight.w900),
                       ),
-                      onTap: () => context.read<LoginCubit>().loginWithProvider('google'),
+                      onTap: () => context.read<LoginCubit>().loginWithProvider(SocialProvider.google),
                     ),
                   ],
                 ),
                 const SizedBox(height: 16),
                 TextButton(onPressed: () => context.push(AppRoutes.signUp), child: const Text('Criar conta')),
                 const SizedBox(height: 8),
-                const Text(
-                  'Conta de teste: ${MockSeed.demoEmail} / ${MockSeed.demoPassword}',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(fontSize: 11, color: AppColors.textMuted),
-                ),
+                if (!Env.useSupabase)
+                  const Text(
+                    'Conta de teste: ${MockSeed.demoEmail} / ${MockSeed.demoPassword}',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(fontSize: 11, color: AppColors.textMuted),
+                  ),
               ],
             ),
           ),

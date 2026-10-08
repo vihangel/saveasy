@@ -9,7 +9,6 @@ abstract class FeedState with _$FeedState {
     @Default('') String query,
     @Default(<Post>[]) List<Post> posts,
     @Default(<Story>[]) List<Story> stories,
-    @Default(<String, int>{}) Map<String, int> commentCounts,
     String? error,
   }) = _FeedState;
 }

@@ -114,9 +114,14 @@ class _Header extends StatelessWidget {
             children: [
               Container(
                 height: 150,
+                width: double.infinity,
                 decoration: const BoxDecoration(
                   gradient: LinearGradient(colors: [AppColors.orange, Color(0xFFFFA16C)]),
                 ),
+                // Capa do perfil (foto própria); sem ela fica o gradiente da marca.
+                child: user.coverUrl == null
+                    ? null
+                    : AppImage(reference: user.coverUrl!, height: 150, width: double.infinity),
               ),
               SafeArea(
                 child: Row(
@@ -125,8 +130,9 @@ class _Header extends StatelessWidget {
                     const Spacer(),
                     if (state.isMe)
                       IconButton(
-                        icon: const Icon(Icons.edit_outlined, color: Colors.white),
-                        onPressed: () => context.push(AppRoutes.editProfile),
+                        tooltip: 'Configurações',
+                        icon: const Icon(Icons.settings_outlined, color: Colors.white),
+                        onPressed: () => context.push(AppRoutes.settings),
                       ),
                   ],
                 ),
@@ -231,8 +237,16 @@ class _Header extends StatelessWidget {
           child: Row(
             children: [
               _Stat(value: Formatters.compact(user.postsCount), label: 'Publicações'),
-              _Stat(value: Formatters.compact(user.followers), label: 'Seguidores'),
-              _Stat(value: Formatters.compact(user.following), label: 'Seguindo'),
+              _Stat(
+                value: Formatters.compact(user.followers),
+                label: 'Seguidores',
+                onTap: () => context.push(AppRoutes.follows(user.id)),
+              ),
+              _Stat(
+                value: Formatters.compact(user.following),
+                label: 'Seguindo',
+                onTap: () => context.push(AppRoutes.follows(user.id, following: true)),
+              ),
               if (user.rating > 0)
                 _Stat(value: user.rating.toStringAsFixed(1), label: 'Avaliação', icon: Icons.star_rounded),
             ],
@@ -250,29 +264,34 @@ class _Header extends StatelessWidget {
 }
 
 class _Stat extends StatelessWidget {
-  const _Stat({required this.value, required this.label, this.icon});
+  const _Stat({required this.value, required this.label, this.icon, this.onTap});
 
   final String value;
   final String label;
   final IconData? icon;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
     return Expanded(
-      child: Column(
-        children: [
-          FittedBox(
-            child: Row(
-              children: [
-                if (icon != null) Icon(icon, size: 16, color: AppColors.gold),
-                Text(value, style: context.text.titleMedium),
-              ],
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(8),
+        child: Column(
+          children: [
+            FittedBox(
+              child: Row(
+                children: [
+                  if (icon != null) Icon(icon, size: 16, color: AppColors.gold),
+                  Text(value, style: context.text.titleMedium),
+                ],
+              ),
             ),
-          ),
-          FittedBox(
-            child: Text(label, style: const TextStyle(fontSize: 12, color: AppColors.textMuted)),
-          ),
-        ],
+            FittedBox(
+              child: Text(label, style: const TextStyle(fontSize: 12, color: AppColors.textMuted)),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -298,8 +317,8 @@ class _MyActions extends StatelessWidget {
         Expanded(
           child: FilledButton.icon(
             onPressed: () => context.push(AppRoutes.wallet),
-            icon: const Icon(Icons.account_balance_wallet_outlined, size: 18),
-            label: Text(Formatters.currency(user.balance)),
+            icon: const Icon(Icons.monetization_on_outlined, size: 18),
+            label: Text('${Formatters.number(user.coins)} moedas'),
           ),
         ),
       ],

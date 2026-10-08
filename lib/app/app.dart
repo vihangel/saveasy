@@ -1,39 +1,44 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:go_router/go_router.dart';
 
-import '../shared/data/datasources/image_storage.dart';
-import '../shared/data/datasources/local_storage.dart';
-import '../shared/data/datasources/mock_database.dart';
-import '../shared/data/repositories/repositories.dart';
 import '../shared/notifiers/session_cubit.dart';
-import '../shared/services/media_picker_service.dart';
+import 'dependencies.dart';
 import 'responsive_frame.dart';
 import 'router.dart';
 import 'theme.dart';
 
 class SaveEasyApp extends StatefulWidget {
-  const SaveEasyApp({super.key, required this.storage, required this.database, required this.images, this.mediaPicker});
+  const SaveEasyApp({super.key, required this.deps});
 
-  final LocalStorage storage;
-  final MockDatabase database;
-  final ImageStorage images;
-
-  /// Permite injetar um seletor falso nos testes.
-  final MediaPickerService? mediaPicker;
+  final AppDependencies deps;
 
   @override
   State<SaveEasyApp> createState() => _SaveEasyAppState();
 }
 
 class _SaveEasyAppState extends State<SaveEasyApp> {
-  late final _authRepository = AuthRepository(widget.database, widget.storage);
-  late final _session = SessionCubit(_authRepository);
+  late final _session = SessionCubit(widget.deps.auth);
   late final GoRouter _router = createRouter(_session);
+  StreamSubscription<SessionState>? _mirror;
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.deps.mirrorSession) {
+      _mirror = _session.stream.listen((state) {
+        final user = state.userOrNull;
+        if (user != null) widget.deps.database.mirrorUser(user);
+      });
+    }
+  }
 
   @override
   void dispose() {
+    _mirror?.cancel();
     _session.close();
     _router.dispose();
     super.dispose();
@@ -41,20 +46,20 @@ class _SaveEasyAppState extends State<SaveEasyApp> {
 
   @override
   Widget build(BuildContext context) {
-    final db = widget.database;
+    final deps = widget.deps;
     return MultiRepositoryProvider(
       providers: [
-        RepositoryProvider.value(value: _authRepository),
-        RepositoryProvider.value(value: widget.images),
-        RepositoryProvider(create: (_) => widget.mediaPicker ?? MediaPickerService()),
-        RepositoryProvider(create: (_) => UserRepository(db)),
-        RepositoryProvider(create: (_) => PostRepository(db)),
-        RepositoryProvider(create: (_) => WalletRepository(db)),
-        RepositoryProvider(create: (_) => GamificationRepository(db)),
-        RepositoryProvider(create: (_) => StoreRepository(db)),
-        RepositoryProvider(create: (_) => StoryRepository(db)),
-        RepositoryProvider(create: (_) => ChatRepository(db)),
-        RepositoryProvider(create: (_) => NotificationRepository(db)),
+        RepositoryProvider.value(value: deps.auth),
+        RepositoryProvider.value(value: deps.images),
+        RepositoryProvider.value(value: deps.mediaPicker),
+        RepositoryProvider.value(value: deps.users),
+        RepositoryProvider.value(value: deps.posts),
+        RepositoryProvider.value(value: deps.wallet),
+        RepositoryProvider.value(value: deps.gamification),
+        RepositoryProvider.value(value: deps.store),
+        RepositoryProvider.value(value: deps.stories),
+        RepositoryProvider.value(value: deps.chat),
+        RepositoryProvider.value(value: deps.notifications),
       ],
       child: BlocProvider.value(
         value: _session,

@@ -96,7 +96,8 @@ class AppDrawer extends StatelessWidget {
             _Item(icon: Icons.emoji_events_rounded, label: 'Conquistas', onTap: () => open(AppRoutes.achievements)),
             _Item(icon: Icons.card_giftcard_rounded, label: 'Recompensas', onTap: () => open(AppRoutes.rewards)),
             _Item(icon: Icons.storefront_rounded, label: 'Loja', onTap: () => open(AppRoutes.store)),
-            _Item(icon: Icons.settings_rounded, label: 'Configurações', onTap: () => open(AppRoutes.editProfile)),
+            _Item(icon: Icons.bookmark_rounded, label: 'Salvos', onTap: () => open(AppRoutes.saved)),
+            _Item(icon: Icons.settings_rounded, label: 'Configurações', onTap: () => open(AppRoutes.settings)),
             const Spacer(),
             _Item(
               icon: Icons.logout_rounded,
