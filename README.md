@@ -154,3 +154,6 @@ flutter test
   levando às configurações.
 
 Para decisões e pendências de design, veja [docs/RELATORIO_FIGMA.md](docs/RELATORIO_FIGMA.md).
+
+Arquitetura planejada do back-end (Supabase): [docs/BACKEND_SUPABASE.md](docs/BACKEND_SUPABASE.md).
+Produto, lacunas, monetização e roadmap: [docs/PRODUTO_E_ROADMAP.md](docs/PRODUTO_E_ROADMAP.md).
