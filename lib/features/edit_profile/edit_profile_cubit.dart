@@ -30,6 +30,7 @@ class EditProfileCubit extends Cubit<EditProfileState> {
         status: ViewStatus.success,
         ownedBadges: owned.where((r) => r.kind == RewardKind.badge).toList(),
         ownedTitles: owned.where((r) => r.kind == RewardKind.title).toList(),
+        ownedCovers: owned.where((r) => r.kind == RewardKind.cover).toList(),
       ),
     );
   }
@@ -37,6 +38,8 @@ class EditProfileCubit extends Cubit<EditProfileState> {
   void setAvatar(String? reference) => emit(state.copyWith(user: state.user.copyWith(avatarUrl: reference)));
 
   void setCover(String? reference) => emit(state.copyWith(user: state.user.copyWith(coverUrl: reference)));
+
+  void selectCoverReward(String? id) => emit(state.copyWith(user: state.user.copyWith(coverRewardId: id)));
 
   void selectTitle(String? id) => emit(state.copyWith(user: state.user.copyWith(titleId: id)));
 

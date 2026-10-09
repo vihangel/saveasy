@@ -79,6 +79,7 @@ void main() {
     '/settings/blocked',
     '/admin',
     '/transparencia',
+    '/settings/plans',
   ];
 
   const publicRoutes = ['/welcome', '/login', '/forgot-password', '/signup', '/signup/verify'];

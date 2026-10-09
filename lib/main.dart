@@ -10,6 +10,7 @@ import 'app/env.dart';
 import 'shared/data/datasources/image_storage.dart';
 import 'shared/data/datasources/local_storage.dart';
 import 'shared/data/datasources/mock_database.dart';
+import 'shared/services/admob.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -19,6 +20,7 @@ Future<void> main() async {
   // recarregar mantêm a tela atual.
   GoRouter.optionURLReflectsImperativeAPIs = true;
   await initializeDateFormatting('pt_BR');
+  await AdMob.initialize();
 
   final storage = await LocalStorage.create();
   final database = MockDatabase(storage);

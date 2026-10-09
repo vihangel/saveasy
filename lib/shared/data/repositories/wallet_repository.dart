@@ -33,6 +33,9 @@ abstract interface class WalletRepository {
 
   Future<CommunityPlans> cancelSubscription(String communityId);
 
+  /// Comunidade cria ou edita um plano ([plan] sem id = novo). [active] false desativa.
+  Future<CommunityPlans> savePlan(SubscriptionPlan plan, {bool active = true});
+
   Future<FinanceSummary> finance();
 
   Future<FinanceSummary> requestPayout({required double amount, required String pixKey});

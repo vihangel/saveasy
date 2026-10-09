@@ -121,6 +121,24 @@ class SupabaseWalletRepository implements WalletRepository {
   });
 
   @override
+  Future<CommunityPlans> savePlan(SubscriptionPlan plan, {bool active = true}) => supabaseGuard(() async {
+    final json = await _client.rpc<Map<String, dynamic>>(
+      'save_subscription_plan',
+      params: {
+        'p': {
+          'id': plan.id.isEmpty ? null : plan.id,
+          'name': plan.name.trim(),
+          'price': plan.price,
+          'months': plan.months,
+          'benefits': plan.benefits.trim(),
+          'active': active,
+        },
+      },
+    );
+    return CommunityPlans.fromJson(json);
+  });
+
+  @override
   Future<FinanceSummary> finance() => supabaseGuard(() async {
     return FinanceSummary.fromJson(await _client.rpc<Map<String, dynamic>>('my_finance'));
   });

@@ -65,6 +65,7 @@ abstract final class AppRoutes {
   static const ads = '/ads';
   static const verification = '/settings/verification';
   static const blocked = '/settings/blocked';
+  static const plans = '/settings/plans';
   static const admin = '/admin';
 
   /// Pública: abre sem login.

@@ -7,6 +7,59 @@ Legenda: ✅ no Supabase · 🟡 ainda no mock local · ⏳ pendente
 
 ---
 
+## Ajustes e configuração dos painéis (09/10/2026)
+
+### Feito no painel do Supabase (pelo navegador)
+- **URL Configuration:** Site URL `https://vihangel.github.io/saveasy/` e
+  Redirect URLs `https://vihangel.github.io/saveasy/**`,
+  `http://localhost:8765/**` e `app.saveeasy://login-callback` (pendência 2 ✅).
+- **Provedor de e-mail:** código de confirmação/recuperação passou de **8
+  para 6 dígitos** (o app pede 6; com 8 o cadastro real não funcionaria) e
+  senha mínima de **8 caracteres** (o app foi ajustado para pedir 8).
+- **Senhas vazadas (pendência 4):** só existe no plano Pro do Supabase; o
+  projeto está no plano Free. Fica para quando migrar de plano.
+- **Templates de e-mail (pendência 1):** o Supabase só permite editar com
+  **SMTP próprio** (pendência 6). Até lá, os e-mails padrão já mandam o
+  código `{{ .Token }}` de 6 dígitos no envio por OTP; para editar texto e
+  marca, configure o SMTP (sugestão: Resend, plano gratuito) e me avise.
+
+### Feito no AdMob (pelo navegador)
+- Apps **Save Easy Android** e **Save Easy iOS** criados (ainda "não
+  publicados"), cada um com o bloco de banner **"Barra inferior"**:
+  - Android: app `ca-app-pub-8949237085831318~4183117070`, banner `ca-app-pub-8949237085831318/9413150610`
+  - iOS: app `ca-app-pub-8949237085831318~5683901009`, banner `ca-app-pub-8949237085831318/2952876010`
+- No app: o banner do AdMob aparece na barra inferior **quando não há
+  campanha local** (só Android/iOS; na web segue o "Anuncie aqui"). Em modo
+  debug usa os blocos de teste do Google, como exige a política do AdMob.
+- **Falta da sua parte:** o AdMob mostra "Problema com pagamentos – verificar
+  conta do AdSense" (dados pessoais/bancários) e, depois de publicar nas
+  lojas, "Adicionar loja" em cada app para tirar o limite de veiculação.
+
+### Ajustes no app
+- Identificador do app trocado de `com.example.saveeasy2026` (as lojas
+  recusam) para **`br.com.saveeasy.app`** (Android, iOS e macOS); nome
+  exibido "Save Easy".
+- **Deep link `app.saveeasy://login-callback`** registrado no Android
+  (intent-filter) e no iOS (URL Types), necessário para login social e links
+  de e-mail no celular (parte da pendência 3).
+- Android compila com a API 37 (exigência do `permission_handler`); o APK
+  debug foi gerado com sucesso.
+- **Novas telas/funções** (antes ⏳/🟡):
+  - Editor de **planos de inscrição** para comunidades (Configurações → Planos de inscrição) — item 66 ✅
+  - Escolha da **capa de recompensa** em Editar perfil, exibida no perfil quando não há foto de capa — item 43 ✅
+  - **Leitura do QR de check-in pela câmera** (Participantes → ícone de leitor) — item 51 ✅
+- 33 testes passando, build web e Android OK.
+
+### Pagamento: decisão pendente
+Nenhum gateway está configurado ainda (o app roda em sandbox). O código das
+funções de servidor está escrito para o **Mercado Pago** (recomendado: API
+de Pix bem documentada, webhook pronto). **Stone** funcionaria via API da
+**Pagar.me** (mesmo grupo), com pequena adaptação das duas funções.
+**InfinitePay** tem API limitada para cobrança automática dentro de app
+(foco em maquininha e link). Criar a conta e gerar a chave é com você.
+
+---
+
 ## Entrega 6 · Moderação, bloqueios, verificação, painel da equipe e transparência (08/10/2026)
 
 ### Resumo

@@ -154,6 +154,12 @@ class MockWalletRepository implements WalletRepository {
   Future<CommunityPlans> cancelSubscription(String communityId) => communityPlans(communityId);
 
   @override
+  Future<CommunityPlans> savePlan(SubscriptionPlan plan, {bool active = true}) async {
+    if (plan.name.trim().length < 2 || plan.price <= 0) throw const AppException('Informe nome e preço.');
+    return communityPlans('');
+  }
+
+  @override
   Future<FinanceSummary> finance() async => const FinanceSummary();
 
   @override

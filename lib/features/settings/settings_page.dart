@@ -105,6 +105,14 @@ class SettingsPage extends StatelessWidget {
               trailing: const Icon(Icons.chevron_right_rounded),
               onTap: () => context.push(AppRoutes.verification),
             ),
+          if (user.accountType.name == 'community')
+            ListTile(
+              leading: const Icon(Icons.workspace_premium_outlined),
+              title: const Text('Planos de inscrição'),
+              subtitle: const Text('Preços e benefícios para apoiadores'),
+              trailing: const Icon(Icons.chevron_right_rounded),
+              onTap: () => context.push(AppRoutes.plans),
+            ),
           ListTile(
             leading: const Icon(Icons.block_rounded),
             title: const Text('Perfis bloqueados'),

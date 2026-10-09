@@ -8,6 +8,7 @@ import '../../shared/data/models/models.dart';
 import '../../shared/data/repositories/repositories.dart';
 import '../../shared/utils/context_x.dart';
 import '../../shared/widgets/widgets.dart';
+import 'qr_scan_page.dart';
 
 /// Lista de participantes. O organizador marca presença por pessoa ou pelo
 /// código que o participante mostra (QR/texto).
@@ -113,6 +114,17 @@ class _ParticipantsPageState extends State<ParticipantsPage> {
                           tooltip: 'Confirmar código',
                           onPressed: () => _checkIn(code: _code.text),
                           icon: const Icon(Icons.check_circle_rounded, color: AppColors.primary),
+                        ),
+                        IconButton(
+                          tooltip: 'Ler QR com a câmera',
+                          onPressed: () async {
+                            final code = await Navigator.push<String>(
+                              context,
+                              MaterialPageRoute(builder: (_) => const QrScanPage()),
+                            );
+                            if (code != null) await _checkIn(code: code);
+                          },
+                          icon: const Icon(Icons.qr_code_scanner_rounded, color: AppColors.primary),
                         ),
                       ],
                     ),

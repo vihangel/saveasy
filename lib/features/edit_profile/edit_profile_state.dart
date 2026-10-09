@@ -7,6 +7,7 @@ abstract class EditProfileState with _$EditProfileState {
     required AppUser user,
     @Default(<Reward>[]) List<Reward> ownedBadges,
     @Default(<Reward>[]) List<Reward> ownedTitles,
+    @Default(<Reward>[]) List<Reward> ownedCovers,
     @Default(false) bool saving,
     @Default(false) bool saved,
     String? error,

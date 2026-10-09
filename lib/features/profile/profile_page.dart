@@ -116,13 +116,19 @@ class _Header extends StatelessWidget {
               Container(
                 height: 150,
                 width: double.infinity,
-                decoration: const BoxDecoration(
-                  gradient: LinearGradient(colors: [AppColors.orange, Color(0xFFFFA16C)]),
-                ),
-                // Capa do perfil (foto própria); sem ela fica o gradiente da marca.
-                child: user.coverUrl == null
+                decoration: BoxDecoration(gradient: LinearGradient(colors: _coverColors(state.cover))),
+                // Capa do perfil: foto própria > capa de recompensa > gradiente da marca.
+                child: user.coverUrl != null
+                    ? AppImage(reference: user.coverUrl!, height: 150, width: double.infinity)
+                    : state.cover == null
                     ? null
-                    : AppImage(reference: user.coverUrl!, height: 150, width: double.infinity),
+                    : Align(
+                        alignment: Alignment.centerRight,
+                        child: Padding(
+                          padding: const EdgeInsets.only(right: 24),
+                          child: Icon(AppIcons.byKey(state.cover!.icon), size: 96, color: Colors.white24),
+                        ),
+                      ),
               ),
               SafeArea(
                 child: Row(
@@ -403,3 +409,11 @@ class _VisitorActions extends StatelessWidget {
     );
   }
 }
+
+/// Cores da capa de recompensa (pelo tema do ícone).
+List<Color> _coverColors(Reward? cover) => switch (cover?.icon) {
+  'forest' => const [Color(0xFF2E7D32), Color(0xFF81C784)],
+  'recycle' => const [Color(0xFF00897B), Color(0xFF4DB6AC)],
+  null => const [AppColors.orange, Color(0xFFFFA16C)],
+  _ => const [AppColors.primary, Color(0xFF9FA8FF)],
+};

@@ -5,8 +5,9 @@ plugins {
 }
 
 android {
-    namespace = "com.example.saveeasy2026"
-    compileSdk = flutter.compileSdkVersion
+    namespace = "br.com.saveeasy.app"
+    // 37: exigido pelo permission_handler_android (só compilação; targetSdk segue o Flutter).
+    compileSdk = 37
     ndkVersion = flutter.ndkVersion
 
     compileOptions {
@@ -16,7 +17,7 @@ android {
 
     defaultConfig {
         // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
-        applicationId = "com.example.saveeasy2026"
+        applicationId = "br.com.saveeasy.app"
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
         minSdk = flutter.minSdkVersion

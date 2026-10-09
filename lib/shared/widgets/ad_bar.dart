@@ -9,6 +9,7 @@ import '../../app/theme.dart';
 import '../data/models/models.dart';
 import '../data/repositories/repositories.dart';
 import '../notifiers/session_cubit.dart';
+import '../services/admob.dart';
 import '../utils/links.dart';
 import 'user_avatar.dart';
 
@@ -76,6 +77,13 @@ class _AdBarState extends State<AdBar> {
     final ad = _ad;
     final user = context.select((SessionCubit c) => c.state.userOrNull);
     final canAdvertise = user != null && user.accountType != AccountType.personal;
+    // Sem campanha local no celular: anúncio do AdMob como reserva.
+    if (ad == null && AdMob.enabled) {
+      return const Padding(
+        padding: EdgeInsets.only(bottom: 30),
+        child: Center(child: AdMobBanner()),
+      );
+    }
     if (ad == null && !canAdvertise) return const SizedBox.shrink();
     // Espaço embaixo para o botão "+" do menu não cobrir o anúncio.
     return Padding(padding: const EdgeInsets.only(bottom: 30), child: _content(ad));

@@ -9,7 +9,7 @@ abstract final class Validators {
   }
 
   static String? password(String? value) {
-    if (value == null || value.length < 6) return 'A senha precisa ter ao menos 6 caracteres';
+    if (value == null || value.length < 8) return 'A senha precisa ter ao menos 8 caracteres';
     return null;
   }
 

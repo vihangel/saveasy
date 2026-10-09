@@ -99,6 +99,33 @@ class _EditProfilePageState extends State<EditProfilePage> {
               ),
               const SizedBox(height: 16),
               AppTextField(label: 'Bio', controller: _bio, maxLines: 3),
+              if (state.ownedCovers.isNotEmpty) ...[
+                const SizedBox(height: 24),
+                Text('Capa de recompensa', style: context.text.titleMedium),
+                const Text(
+                  'Aparece quando você não tem foto de capa.',
+                  style: TextStyle(fontSize: 12, color: AppColors.textMuted),
+                ),
+                const SizedBox(height: 8),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: [
+                    ChoiceChip(
+                      label: const Text('Padrão'),
+                      selected: state.user.coverRewardId == null,
+                      onSelected: (_) => cubit.selectCoverReward(null),
+                    ),
+                    for (final cover in state.ownedCovers)
+                      ChoiceChip(
+                        avatar: Icon(AppIcons.byKey(cover.icon), size: 18),
+                        label: Text(cover.name),
+                        selected: state.user.coverRewardId == cover.id,
+                        onSelected: (_) => cubit.selectCoverReward(cover.id),
+                      ),
+                  ],
+                ),
+              ],
               const SizedBox(height: 24),
               Text('Título', style: context.text.titleMedium),
               const SizedBox(height: 8),

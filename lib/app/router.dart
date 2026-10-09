@@ -18,6 +18,7 @@ import '../features/auth/sign_up/sign_up_cubit.dart';
 import '../features/auth/sign_up/sign_up_pages.dart';
 import '../features/chat/chat_page.dart';
 import '../features/community_subscription/community_subscription_page.dart';
+import '../features/community_subscription/plans_editor_page.dart';
 import '../features/create_post/ad_info_page.dart';
 import '../features/create_post/create_post_form_page.dart';
 import '../features/create_post/create_post_type_page.dart';
@@ -187,6 +188,7 @@ GoRouter createRouter(SessionCubit session) {
       GoRoute(path: AppRoutes.finance, builder: (_, _) => const FinancePage()),
       GoRoute(path: AppRoutes.verification, builder: (_, _) => const VerificationPage()),
       GoRoute(path: AppRoutes.blocked, builder: (_, _) => const BlockedPage()),
+      GoRoute(path: AppRoutes.plans, builder: (_, _) => const PlansEditorPage()),
       GoRoute(path: AppRoutes.admin, builder: (_, _) => const AdminPage()),
       GoRoute(path: AppRoutes.transparency, builder: (_, _) => const TransparencyPage()),
       GoRoute(
