@@ -1,20 +1,16 @@
-import '../datasources/mock_database.dart';
 import '../models/models.dart';
 
-class NotificationRepository {
-  NotificationRepository(this._db);
+/// Notificações geradas pelo banco. Implementações:
+/// [MockNotificationRepository] e [SupabaseNotificationRepository].
+abstract interface class NotificationRepository {
+  Future<List<AppNotification>> all();
 
-  final MockDatabase _db;
+  Future<void> markRead(String id);
 
-  Future<List<AppNotification>> all() async {
-    await _db.delay();
-    return [..._db.notifications]..sort((a, b) => b.date.compareTo(a.date));
-  }
+  Future<void> markAllRead();
 
-  int unreadCount() => _db.notifications.where((n) => !n.read).length;
+  Future<int> unreadCount();
 
-  Future<void> markAllRead() async {
-    _db.notifications = [for (final n in _db.notifications) n.copyWith(read: true)];
-    await _db.saveNotifications();
-  }
+  /// Avisa quando chega notificação nova (Realtime).
+  Stream<void> changes();
 }

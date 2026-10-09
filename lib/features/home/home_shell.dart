@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../app/routes.dart';
 import '../../app/theme.dart';
+import '../../shared/data/repositories/repositories.dart';
+import '../../shared/notifiers/badges_cubit.dart';
 import 'app_drawer.dart';
 
 /// Estrutura principal com a barra inferior (Início, Mensagens, Criar,
@@ -14,11 +17,20 @@ class HomeShell extends StatelessWidget {
 
   static final scaffoldKey = GlobalKey<ScaffoldState>();
 
-  void _go(int index) => navigationShell.goBranch(index, initialLocation: index == navigationShell.currentIndex);
+  static Widget route(BuildContext context, StatefulNavigationShell shell) => BlocProvider(
+    create: (context) => BadgesCubit(context.read<ChatRepository>(), context.read<NotificationRepository>()),
+    child: HomeShell(navigationShell: shell),
+  );
 
   @override
   Widget build(BuildContext context) {
     final index = navigationShell.currentIndex;
+    final badges = context.watch<BadgesCubit>().state;
+    void go(int i) {
+      navigationShell.goBranch(i, initialLocation: i == navigationShell.currentIndex);
+      context.read<BadgesCubit>().refresh();
+    }
+
     return Scaffold(
       key: scaffoldKey,
       drawer: const AppDrawer(),
@@ -42,16 +54,23 @@ class HomeShell extends StatelessWidget {
         padding: EdgeInsets.zero,
         child: Row(
           children: [
-            _NavItem(icon: Icons.home_rounded, label: 'Início', selected: index == 0, onTap: () => _go(0)),
-            _NavItem(icon: Icons.chat_bubble_rounded, label: 'Mensagens', selected: index == 1, onTap: () => _go(1)),
+            _NavItem(icon: Icons.home_rounded, label: 'Início', selected: index == 0, onTap: () => go(0)),
+            _NavItem(
+              icon: Icons.chat_bubble_rounded,
+              label: 'Mensagens',
+              selected: index == 1,
+              badge: badges.messages,
+              onTap: () => go(1),
+            ),
             const Expanded(child: SizedBox()),
             _NavItem(
               icon: Icons.notifications_rounded,
               label: 'Notificações',
               selected: index == 2,
-              onTap: () => _go(2),
+              badge: badges.notifications,
+              onTap: () => go(2),
             ),
-            _NavItem(icon: Icons.person_rounded, label: 'Perfil', selected: index == 3, onTap: () => _go(3)),
+            _NavItem(icon: Icons.person_rounded, label: 'Perfil', selected: index == 3, onTap: () => go(3)),
           ],
         ),
       ),
@@ -60,12 +79,21 @@ class HomeShell extends StatelessWidget {
 }
 
 class _NavItem extends StatelessWidget {
-  const _NavItem({required this.icon, required this.label, required this.selected, required this.onTap});
+  const _NavItem({
+    required this.icon,
+    required this.label,
+    required this.selected,
+    required this.onTap,
+    this.badge = 0,
+  });
 
   final IconData icon;
   final String label;
   final bool selected;
   final VoidCallback onTap;
+
+  /// Quantidade de não lidas (0 esconde o selo).
+  final int badge;
 
   @override
   Widget build(BuildContext context) {
@@ -82,7 +110,12 @@ class _NavItem extends StatelessWidget {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(icon, color: color),
+                Badge(
+                  isLabelVisible: badge > 0,
+                  backgroundColor: AppColors.orange,
+                  label: Text(badge > 99 ? '99+' : '$badge'),
+                  child: Icon(icon, color: color),
+                ),
                 const SizedBox(height: 2),
                 Text(
                   label,

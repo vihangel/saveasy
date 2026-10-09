@@ -27,6 +27,10 @@ abstract class ChatThread with _$ChatThread {
     @Default(0) int unread,
     @Default(false) bool online,
     @Default(0) int members,
+    String? avatarUrl,
+    String? peerId,
+    String? peerUsername,
+    @Default(false) bool isGroup,
   }) = _ChatThread;
 
   factory ChatThread.fromJson(Map<String, dynamic> json) => _$ChatThreadFromJson(json);
@@ -42,6 +46,7 @@ abstract class ChatMessage with _$ChatMessage {
     required DateTime sentAt,
     @Default(false) bool fromMe,
     String? sharedPostId,
+    String? authorId,
   }) = _ChatMessage;
 
   factory ChatMessage.fromJson(Map<String, dynamic> json) => _$ChatMessageFromJson(json);

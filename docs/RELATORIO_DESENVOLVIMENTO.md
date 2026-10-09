@@ -7,6 +7,82 @@ Legenda: ✅ no Supabase · 🟡 ainda no mock local · ⏳ pendente
 
 ---
 
+## Entrega 2 · Stories, mensagens em tempo real e notificações (08/10/2026)
+
+### Resumo
+- Migration `20261008000007_stories_chat_notifications.sql` (aplicada).
+- Stories, chat e notificações saíram do mock: no modo Supabase tudo vem do banco.
+- **Tempo real** (Supabase Realtime): mensagens novas aparecem na conversa
+  aberta, a lista de conversas se atualiza e os selos da barra inferior
+  (Mensagens / Notificações) mudam sozinhos.
+- Notificações **geradas pelo banco** (triggers), sem código no app.
+- Lembrete automático 24h antes de evento/ação social (`pg_cron`, a cada 15 min).
+- Seed com stories de Cuiabá, uma conversa direta, um grupo de comunidade e
+  notificações para a conta de teste.
+- 27 testes automatizados passando (3 novos: recompensa do story de anúncio,
+  mensagem do Realtime sem duplicar, selos da barra).
+
+### Banco (o que entrou)
+| Área | Tabelas | Regras principais |
+| --- | --- | --- |
+| Stories | `stories`, `story_views` | Duram 24h. Bandeja = meus + de quem sigo + da minha cidade. 1º story do dia dá +20 moedas/+20 XP. Story de **propaganda** dá +20 moedas uma vez por story, no máx. 5 por dia. Só empresa/influenciador/comunidade publica propaganda. Expirados são apagados após 7 dias (cron) |
+| Mensagens | `conversations`, `conversation_members`, `messages` | Conversa direta única por par (chave ordenada). Perfil de **comunidade** abre o **grupo** dela (a pessoa entra como membro). Só membros leem (RLS também filtra o Realtime). Não lidas por `last_read_at` |
+| Notificações | `notifications` | Geradas por trigger: novo seguidor, comentário no meu post, resposta ao meu comentário, alguém vai participar, moedas recebidas, lembrete de evento (1 por pessoa e evento), sistema |
+
+RPCs novas: `stories_tray`, `view_story`, `create_story`, `delete_story`,
+`my_notifications`, `mark_notifications_read`, `unread_counts`,
+`my_conversations`, `conversation`, `conversation_messages`, `message_by_id`,
+`send_message`, `mark_conversation_read`, `open_conversation`,
+`leave_conversation`.
+
+### Funcionalidades e como validar
+
+| # | Funcionalidade | Status | Como validar |
+| --- | --- | :-: | --- |
+| 25 | Bandeja de stories de Cuiabá | ✅ | Início → círculos no topo mostram Lu, Banco, EcoCuiabá, Instituto… |
+| 26 | Story de propaganda dá moedas uma vez | ✅ | Abrir o story da EcoCuiabá → "+20 moedas". Abrir de novo não dá |
+| 27 | Publicar story (+20 moedas no 1º do dia) | ✅ | "Seu story" → escrever → Publicar. O 2º do dia não dá moedas |
+| 28 | Excluir o próprio story | ✅ | Abrir seu story → lixeira |
+| 29 | Tocar no autor do story abre o perfil | ✅ | (antes dava "Perfil não encontrado") |
+| 30 | Lista de conversas por Pessoas / Comunidades / Empresas | ✅ | Mensagens → Ana Ribeiro em Pessoas, Banco de Sangue em Comunidades |
+| 31 | Conversa em **tempo real** | ✅ | Abrir a conversa em dois navegadores (duas contas) e mandar mensagem; aparece sem recarregar |
+| 32 | Mensagem pelo perfil | ✅ | Perfil de alguém → ícone de mensagem. Pessoa/empresa = conversa direta; comunidade = grupo |
+| 33 | Selos de não lidas na barra inferior | ✅ | Chegam/somem sozinhos; abrir a conversa zera |
+| 34 | Notificações do banco, ao vivo | ✅ | Seguir alguém, comentar no post de outra conta, enviar moedas: a outra conta recebe na hora |
+| 35 | Tocar na notificação | ✅ | Marca como lida e abre o post (ou o perfil de quem gerou) |
+| 36 | "Ler todas" | ✅ | Zera o selo |
+| 37 | Lembrete de evento (24h antes) | ✅ | Automático para quem confirmou presença; conferível em `cron.job` |
+| 38 | Push no celular (fora do app) | ⏳ | Precisa de Firebase (FCM/APNs). Ver pendência 7 |
+| 39 | "Online agora" nas conversas | ⏳ | Mostra o @ da pessoa no lugar; presença fica para depois |
+
+### Validação feita (navegador, contra o Supabase real)
+Feed com stories de Cuiabá e selos (4 mensagens, 2 notificações) → story da
+EcoCuiabá deu +20 moedas → conversa com a Ana → mensagem enviada pelo banco
+como a Ana apareceu **sem recarregar** → minha resposta não duplicou →
+moedas enviadas pela Ana geraram notificação que apareceu ao vivo (selo foi
+de 2 para 3) → "Ler todas" zerou → grupo do Banco de Sangue em Comunidades.
+No SQL: conversa direta não duplica, membro de fora não lê mensagens (RLS),
+conta pessoal não publica story de propaganda, 2º story do dia sem moedas.
+
+### Pendências de configuração (novas)
+7. **Push notifications**: criar projeto no Firebase (Android/iOS) e chave
+   APNs da Apple. Depois disso, uma Edge Function envia o push a cada nova
+   linha em `notifications`.
+
+### Decisões tomadas nesta entrega (validar)
+- Grupo de chat é **um por comunidade** e qualquer pessoa entra ao tocar em
+  "Mensagem" no perfil. Moderação do grupo (remover membro, só admins
+  falam) fica para a fase de moderação.
+- Não há notificação para curtidas (evita excesso); mensagens só geram selo.
+- Stories do seed duram 7 dias para a demo não ficar vazia (os reais duram 24h).
+- Limite de 5 recompensas de story de propaganda por dia por pessoa.
+
+### Problemas conhecidos
+- Bloquear pessoa / denunciar conversa ainda não existe (Entrega 6).
+- Conversa carrega as últimas 50 mensagens (sem "carregar mais" ainda).
+
+---
+
 ## Entrega 1 · Fundação Supabase, conta, perfil e publicações (08/10/2026)
 
 ### Resumo
@@ -72,7 +148,7 @@ do Supabase revisados (ver "Pendências de configuração").
 | 21 | Enviar moedas para o autor / amigo | ✅ | Débito e crédito no ledger; extrato na Carteira |
 | 22 | Extrato de moedas na Carteira | ✅ | Mostra bônus, participação e envios |
 | 23 | Doação em R$, compra de moedas, loja, inscrição em comunidade | 🟡 | Ainda simulados (fase de pagamentos). Funcionam com saldo fictício local |
-| 24 | Stories, mensagens, notificações, recompensas, conquistas | 🟡 | Conteúdo mock (não é de Cuiabá). Tocar no autor de um story mock mostra "Perfil não encontrado" |
+| 24 | Stories, mensagens, notificações, recompensas, conquistas | 🟡 | Stories, mensagens e notificações migraram na Entrega 2; recompensas e conquistas ainda mock |
 
 **Conta de teste** (só desenvolvimento): definida em `supabase/seed.sql`
 (bloco "Conta de teste"). A mesma conta já completou o onboarding e tem uma

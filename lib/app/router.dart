@@ -100,7 +100,7 @@ GoRouter createRouter(SessionCubit session) {
 
       // App logado com barra inferior.
       StatefulShellRoute.indexedStack(
-        builder: (_, _, shell) => HomeShell(navigationShell: shell),
+        builder: (context, _, shell) => HomeShell.route(context, shell),
         branches: [
           StatefulShellBranch(
             routes: [

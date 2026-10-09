@@ -6,6 +6,7 @@ import '../../app/routes.dart';
 import '../../app/theme.dart';
 import '../../shared/data/models/models.dart';
 import '../../shared/data/repositories/repositories.dart';
+import '../../shared/notifiers/badges_cubit.dart';
 import '../../shared/utils/formatters.dart';
 import '../../shared/widgets/widgets.dart';
 import 'messages_cubit.dart';
@@ -31,15 +32,26 @@ class MessagesPage extends StatelessWidget {
             children: [
               Padding(
                 padding: const EdgeInsets.fromLTRB(20, 4, 20, 8),
-                child: SegmentedButton<ChatKind>(
-                  segments: [for (final k in ChatKind.values) ButtonSegment(value: k, label: Text(k.label))],
-                  selected: {state.kind},
-                  showSelectedIcon: false,
-                  onSelectionChanged: (s) => cubit.selectKind(s.first),
-                  style: SegmentedButton.styleFrom(
-                    selectedBackgroundColor: AppColors.primary,
-                    selectedForegroundColor: Colors.white,
-                    side: const BorderSide(color: AppColors.border),
+                child: SizedBox(
+                  width: double.infinity,
+                  child: SegmentedButton<ChatKind>(
+                    segments: [
+                      for (final k in ChatKind.values)
+                        ButtonSegment(
+                          value: k,
+                          // Uma linha só: reduz o texto em telas estreitas.
+                          label: FittedBox(fit: BoxFit.scaleDown, child: Text(k.label, maxLines: 1, softWrap: false)),
+                        ),
+                    ],
+                    selected: {state.kind},
+                    showSelectedIcon: false,
+                    onSelectionChanged: (s) => cubit.selectKind(s.first),
+                    style: SegmentedButton.styleFrom(
+                      selectedBackgroundColor: AppColors.primary,
+                      selectedForegroundColor: Colors.white,
+                      side: const BorderSide(color: AppColors.border),
+                      padding: const EdgeInsets.symmetric(horizontal: 4),
+                    ),
                   ),
                 ),
               ),
@@ -85,11 +97,13 @@ class _ThreadTile extends StatelessWidget {
       contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 4),
       onTap: () async {
         await context.push(AppRoutes.chat(thread.id));
-        if (context.mounted) context.read<MessagesCubit>().load();
+        if (!context.mounted) return;
+        context.read<MessagesCubit>().load();
+        context.read<BadgesCubit>().refresh();
       },
       leading: Stack(
         children: [
-          UserAvatar(name: thread.name, size: 48),
+          UserAvatar(name: thread.name, imageUrl: thread.avatarUrl, size: 48),
           if (thread.online)
             Positioned(
               right: 0,

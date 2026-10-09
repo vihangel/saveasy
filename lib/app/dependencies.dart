@@ -8,9 +8,9 @@ import '../shared/data/repositories/repositories.dart';
 import '../shared/services/media_picker_service.dart';
 
 /// Monta os repositórios do app. Hoje o Supabase cobre conta, perfil,
-/// publicações, interações, participação e envio de moedas; o restante
-/// (stories, chat, notificações, loja, recompensas, dinheiro em R$) ainda usa
-/// o banco mock, que espelha o usuário logado ([mirrorSession]).
+/// publicações, interações, participação, envio de moedas, stories, chat e
+/// notificações; o restante (loja, recompensas, dinheiro em R$) ainda usa o
+/// banco mock, que espelha o usuário logado ([mirrorSession]).
 class AppDependencies {
   AppDependencies({
     required this.auth,
@@ -41,9 +41,9 @@ class AppDependencies {
     wallet: WalletRepository(db),
     gamification: GamificationRepository(db),
     store: StoreRepository(db),
-    stories: StoryRepository(db),
-    chat: ChatRepository(db),
-    notifications: NotificationRepository(db),
+    stories: MockStoryRepository(db),
+    chat: MockChatRepository(db),
+    notifications: MockNotificationRepository(db),
     images: images,
     mediaPicker: mediaPicker ?? MediaPickerService(),
     database: db,
@@ -56,9 +56,9 @@ class AppDependencies {
     wallet: SupabaseWalletRepository(client, db),
     gamification: GamificationRepository(db),
     store: StoreRepository(db),
-    stories: StoryRepository(db),
-    chat: ChatRepository(db),
-    notifications: NotificationRepository(db),
+    stories: SupabaseStoryRepository(client),
+    chat: SupabaseChatRepository(client),
+    notifications: SupabaseNotificationRepository(client),
     images: SupabaseImageStorage(client),
     mediaPicker: MediaPickerService(),
     database: db,

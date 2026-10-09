@@ -350,8 +350,12 @@ class _VisitorActions extends StatelessWidget {
             IconButton.outlined(
               tooltip: 'Mensagem',
               onPressed: () async {
-                final thread = await context.read<ChatRepository>().openWith(user);
-                if (context.mounted) context.push(AppRoutes.chat(thread.id));
+                try {
+                  final thread = await context.read<ChatRepository>().openWith(user);
+                  if (context.mounted) context.push(AppRoutes.chat(thread.id));
+                } on AppException catch (e) {
+                  if (context.mounted) context.showMessage(e.message, error: true);
+                }
               },
               icon: const Icon(Icons.chat_bubble_outline_rounded),
             ),

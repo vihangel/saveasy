@@ -53,16 +53,24 @@ class _NewStoryPageState extends State<NewStoryPage> {
       return context.showMessage('Escreva algo ou adicione uma imagem.', error: true);
     }
     setState(() => _saving = true);
-    final user = await context.read<StoryRepository>().create(
-      author: context.currentUser,
-      type: _type,
-      text: _text.text,
-      imageUrl: _image,
-    );
-    if (!mounted) return;
-    context.read<SessionCubit>().updateUser(user);
-    context.showMessage('Story publicado! +20 moedas');
-    context.pop();
+    final before = context.currentUser.coins;
+    try {
+      final user = await context.read<StoryRepository>().create(
+        author: context.currentUser,
+        type: _type,
+        text: _text.text,
+        imageUrl: _image,
+      );
+      if (!mounted) return;
+      context.read<SessionCubit>().updateUser(user);
+      final gained = user.coins - before;
+      context.showMessage(gained > 0 ? 'Story publicado! +$gained moedas' : 'Story publicado!');
+      context.pop();
+    } on AppException catch (e) {
+      if (!mounted) return;
+      setState(() => _saving = false);
+      context.showMessage(e.message, error: true);
+    }
   }
 
   @override

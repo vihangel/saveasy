@@ -171,3 +171,63 @@ begin
           jsonb_build_object('sub', v_id::text, 'email', 'teste@saveeasy.dev', 'email_verified', true),
           now(), now(), now());
 end $$;
+
+-- Entrega 2: stories, conversas e notificações de demonstração. Os stories
+-- demo duram 7 dias (os reais duram 24h) para a bandeja não ficar vazia.
+do $$
+declare
+  v_test uuid := 'b2000000-0000-4000-8000-000000000001';
+  v_vida uuid := 'a1000000-0000-4000-8000-000000000001';
+  v_pantanal uuid := 'a1000000-0000-4000-8000-000000000002';
+  v_patas uuid := 'a1000000-0000-4000-8000-000000000003';
+  v_eco uuid := 'a1000000-0000-4000-8000-000000000004';
+  v_ludo uuid := 'a1000000-0000-4000-8000-000000000006';
+  v_ana uuid := 'a1000000-0000-4000-8000-000000000007';
+  v_pedro uuid := 'a1000000-0000-4000-8000-000000000008';
+  v_direct bigint;
+  v_group bigint;
+begin
+  if exists (select 1 from public.stories where author_id = v_vida) then return; end if;
+
+  insert into public.stories (author_id, type, body, post_id, created_at, expires_at) values
+    (v_vida, 'donation', 'Estoque de O- está crítico. Doe no Hemocentro esta semana!',
+     (select id from public.posts where author_id = v_vida order by id limit 1),
+     now() - interval '2 hours', now() + interval '7 days'),
+    (v_pantanal, 'social_action', 'Brigada voluntária treinando hoje na Chapada. Bora?',
+     null, now() - interval '5 hours', now() + interval '7 days'),
+    (v_patas, 'event', 'Feira de adoção sábado no Parque das Águas. 30 cães e gatos esperando você.',
+     null, now() - interval '8 hours', now() + interval '7 days'),
+    (v_eco, 'ad', 'Leve seu reciclável no ecoponto da Av. do CPA e ganhe desconto parceiro.',
+     null, now() - interval '3 hours', now() + interval '7 days'),
+    (v_ludo, 'tutorial', 'Mostrei no feed como montar uma composteira de balde. Corre lá!',
+     null, now() - interval '1 hour', now() + interval '7 days');
+
+  if exists (select 1 from public.profiles where id = v_test) then
+    insert into public.conversations (direct_key, last_message_at, last_message_preview)
+    values (least(v_test::text, v_ana::text) || ':' || greatest(v_test::text, v_ana::text),
+            now() - interval '20 minutes', 'Te vejo no mutirão então!')
+    returning id into v_direct;
+    insert into public.conversation_members (conversation_id, profile_id, last_read_at) values
+      (v_direct, v_test, now() - interval '1 hour'), (v_direct, v_ana, now());
+    insert into public.messages (conversation_id, author_id, body, created_at) values
+      (v_direct, v_ana, 'Oi! Você vai no mutirão do Mãe Bonifácia?', now() - interval '2 hours'),
+      (v_direct, v_test, 'Vou sim! Levo luvas extras.', now() - interval '90 minutes'),
+      (v_direct, v_ana, 'Te vejo no mutirão então!', now() - interval '20 minutes');
+
+    insert into public.conversations (is_group, owner_id, last_message_at, last_message_preview)
+    values (true, v_vida, now() - interval '40 minutes', 'Obrigado a todos que doaram ontem!')
+    returning id into v_group;
+    insert into public.conversation_members (conversation_id, profile_id, last_read_at) values
+      (v_group, v_vida, now()), (v_group, v_ana, now()), (v_group, v_pedro, now()),
+      (v_group, v_test, now() - interval '3 hours');
+    insert into public.messages (conversation_id, author_id, body, created_at) values
+      (v_group, v_pedro, 'Alguém sabe se precisa agendar?', now() - interval '2 hours'),
+      (v_group, v_vida, 'Não precisa! Só levar documento com foto.', now() - interval '100 minutes'),
+      (v_group, v_vida, 'Obrigado a todos que doaram ontem!', now() - interval '40 minutes');
+
+    insert into public.notifications (recipient_id, actor_id, kind, title, body, created_at) values
+      (v_test, v_ana, 'follow', 'Ana Ribeiro começou a seguir você', '', now() - interval '1 day'),
+      (v_test, null, 'system', 'Bem-vindo ao Save Easy Cuiabá!',
+       'Participe de ações perto de você e ganhe moedas.', now() - interval '2 days');
+  end if;
+end $$;

@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../app/routes.dart';
 import '../../app/theme.dart';
 import '../../shared/data/models/models.dart';
 import '../../shared/data/repositories/repositories.dart';
 import '../../shared/notifiers/session_cubit.dart';
+import '../../shared/utils/context_x.dart';
 import '../../shared/utils/formatters.dart';
 import '../../shared/widgets/widgets.dart';
 import 'chat_cubit.dart';
@@ -36,9 +38,17 @@ class _ChatPageState extends State<ChatPage> {
     super.dispose();
   }
 
-  void _send() {
-    context.read<ChatCubit>().send(_input.text);
+  Future<void> _send() async {
+    final text = _input.text;
+    if (text.trim().isEmpty) return;
     _input.clear();
+    try {
+      await context.read<ChatCubit>().send(text);
+    } on AppException catch (e) {
+      if (!mounted) return;
+      _input.text = text;
+      context.showMessage(e.message, error: true);
+    }
   }
 
   @override
@@ -55,7 +65,10 @@ class _ChatPageState extends State<ChatPage> {
                 ? null
                 : Row(
                     children: [
-                      UserAvatar(name: thread.name, size: 36),
+                      GestureDetector(
+                        onTap: thread.peerId == null ? null : () => context.push(AppRoutes.user(thread.peerId!)),
+                        child: UserAvatar(name: thread.name, imageUrl: thread.avatarUrl, size: 36),
+                      ),
                       const SizedBox(width: 10),
                       Expanded(
                         child: Column(
@@ -70,7 +83,9 @@ class _ChatPageState extends State<ChatPage> {
                             Text(
                               thread.kind == ChatKind.community
                                   ? '${Formatters.compact(thread.members)} participantes'
-                                  : (thread.online ? 'Online agora' : 'Offline'),
+                                  : thread.online
+                                  ? 'Online agora'
+                                  : (thread.peerUsername == null ? 'Offline' : '@${thread.peerUsername}'),
                               style: const TextStyle(
                                 fontSize: 12,
                                 color: AppColors.textMuted,
@@ -88,6 +103,7 @@ class _ChatPageState extends State<ChatPage> {
               Expanded(
                 child: AsyncBody(
                   status: state.status,
+                  onRetry: context.read<ChatCubit>().load,
                   builder: (context) => ListView.builder(
                     reverse: true,
                     padding: const EdgeInsets.all(16),

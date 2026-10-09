@@ -7,6 +7,7 @@ import '../../app/theme.dart';
 import '../../shared/data/datasources/image_storage.dart';
 import '../../shared/data/repositories/repositories.dart';
 import '../../shared/notifiers/session_cubit.dart';
+import '../../shared/utils/context_x.dart';
 import '../../shared/utils/formatters.dart';
 import '../../shared/widgets/widgets.dart';
 import 'stories_cubit.dart';
@@ -31,6 +32,33 @@ class _StoriesPageState extends State<StoriesPage> with SingleTickerProviderStat
 
   /// Volta para a tela anterior ou para o início quando o story foi aberto por link direto.
   void _close(BuildContext context) => context.canPop() ? context.pop() : context.go(AppRoutes.home);
+
+  Future<void> _delete(BuildContext context) async {
+    _progress.stop();
+    final cubit = context.read<StoriesCubit>();
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Excluir story?'),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('Cancelar')),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            style: TextButton.styleFrom(foregroundColor: AppColors.danger),
+            child: const Text('Excluir'),
+          ),
+        ],
+      ),
+    );
+    if (!context.mounted) return;
+    if (!(ok ?? false)) return _progress.forward();
+    try {
+      await cubit.deleteCurrent();
+      if (context.mounted) context.showMessage('Story excluído.');
+    } on AppException catch (e) {
+      if (context.mounted) context.showMessage(e.message, error: true);
+    }
+  }
 
   @override
   void dispose() {
@@ -103,7 +131,13 @@ class _StoriesPageState extends State<StoriesPage> with SingleTickerProviderStat
                       const SizedBox(height: 12),
                       Row(
                         children: [
-                          UserAvatar(name: story.authorName, imageUrl: story.authorAvatarUrl, size: 40),
+                          GestureDetector(
+                            onTap: () {
+                              _progress.stop();
+                              context.push(AppRoutes.user(story.authorId));
+                            },
+                            child: UserAvatar(name: story.authorName, imageUrl: story.authorAvatarUrl, size: 40),
+                          ),
                           const SizedBox(width: 10),
                           Expanded(
                             child: Column(
@@ -120,6 +154,12 @@ class _StoriesPageState extends State<StoriesPage> with SingleTickerProviderStat
                               ],
                             ),
                           ),
+                          if (story.authorId == context.currentUser.id)
+                            IconButton(
+                              tooltip: 'Excluir story',
+                              icon: const Icon(Icons.delete_outline_rounded, color: Colors.white),
+                              onPressed: () => _delete(context),
+                            ),
                           IconButton(
                             icon: const Icon(Icons.close_rounded, color: Colors.white),
                             onPressed: () => _close(context),
