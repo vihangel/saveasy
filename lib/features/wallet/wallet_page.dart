@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -86,20 +87,24 @@ class WalletPage extends StatelessWidget {
                     ],
                   ),
                 ),
-                const SectionHeader(title: 'Comprar moedas'),
-                SizedBox(
-                  height: 110 + 44 * context.textScale,
-                  child: ListView.separated(
-                    scrollDirection: Axis.horizontal,
-                    padding: const EdgeInsets.symmetric(horizontal: 20),
-                    itemCount: state.packages.length,
-                    separatorBuilder: (_, _) => const SizedBox(width: 12),
-                    itemBuilder: (context, i) {
-                      final package = state.packages[i];
-                      return _PackageCard(package: package, loading: false, onTap: () => _buy(context, package));
-                    },
+                // Moedas são bem digital: nas lojas exigem a cobrança da própria loja
+                // (Play Billing / App Store). Até integrar, a compra fica só na web.
+                if (kIsWeb) ...[
+                  const SectionHeader(title: 'Comprar moedas'),
+                  SizedBox(
+                    height: 110 + 44 * context.textScale,
+                    child: ListView.separated(
+                      scrollDirection: Axis.horizontal,
+                      padding: const EdgeInsets.symmetric(horizontal: 20),
+                      itemCount: state.packages.length,
+                      separatorBuilder: (_, _) => const SizedBox(width: 12),
+                      itemBuilder: (context, i) {
+                        final package = state.packages[i];
+                        return _PackageCard(package: package, loading: false, onTap: () => _buy(context, package));
+                      },
+                    ),
                   ),
-                ),
+                ],
                 const SectionHeader(title: 'Histórico'),
                 AsyncBody(
                   status: state.status,

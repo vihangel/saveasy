@@ -1,6 +1,11 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
     <!-- Câmera para fotos de perfil, publicações e stories. A galeria usa o
          Photo Picker do sistema, que não exige permissão de armazenamento. -->
+    <!-- Internet só entra sozinha nos builds de debug; o release precisa declarar. -->
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <!-- ID de publicidade (AdMob), declarado para a Play Store (Android 13+). -->
+    <uses-permission android:name="com.google.android.gms.permission.AD_ID" />
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-feature android:name="android.hardware.camera" android:required="false" />
 

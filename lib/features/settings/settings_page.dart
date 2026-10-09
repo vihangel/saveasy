@@ -7,6 +7,7 @@ import '../../app/theme.dart';
 import '../../shared/data/repositories/repositories.dart';
 import '../../shared/notifiers/session_cubit.dart';
 import '../../shared/utils/context_x.dart';
+import '../../shared/utils/links.dart';
 import '../../shared/utils/validators.dart';
 import '../../shared/widgets/widgets.dart';
 
@@ -147,13 +148,8 @@ class SettingsPage extends StatelessWidget {
           ListTile(
             leading: const Icon(Icons.privacy_tip_outlined),
             title: const Text('Política de privacidade'),
-            onTap: () => _showText(
-              context,
-              'Privacidade',
-              'Usamos seus dados para operar o app (perfil, publicações e participação em ações). O endereço '
-                  'completo não aparece no perfil; mostramos só a cidade. Você pode excluir sua conta e todos os '
-                  'dados a qualquer momento nesta tela.',
-            ),
+            trailing: const Icon(Icons.open_in_new_rounded, size: 18),
+            onTap: () => openExternalLink('https://vihangel.github.io/saveasy/privacidade.html'),
           ),
           const _Section(''),
           ListTile(
