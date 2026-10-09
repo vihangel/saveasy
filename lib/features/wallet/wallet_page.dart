@@ -50,37 +50,40 @@ class WalletPage extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text('Saldo', style: TextStyle(color: Colors.white70)),
-                      Text(
-                        Formatters.currency(user.balance),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: context.text.headlineMedium?.copyWith(color: Colors.white),
-                      ),
-                      const SizedBox(height: 12),
-                      Wrap(
-                        alignment: WrapAlignment.spaceBetween,
-                        crossAxisAlignment: WrapCrossAlignment.center,
-                        spacing: 8,
-                        children: [
-                          CoinChip(coins: user.coins, light: true),
-                          TextButton.icon(
-                            style: TextButton.styleFrom(foregroundColor: Colors.white),
-                            onPressed: cubit.addFunds,
-                            icon: const Icon(Icons.add_rounded),
-                            label: const Text('Adicionar saldo'),
-                          ),
-                        ],
+                      const Text('Suas moedas', style: TextStyle(color: Colors.white70)),
+                      const SizedBox(height: 6),
+                      CoinChip(coins: user.coins, light: true),
+                      const SizedBox(height: 8),
+                      const Text(
+                        'Use moedas para resgatar recompensas, enviar para amigos ou doar para campanhas.',
+                        style: TextStyle(color: Colors.white, fontSize: 12),
                       ),
                     ],
                   ),
                 ),
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 20),
-                  child: OutlinedButton.icon(
-                    onPressed: () => context.push(AppRoutes.friendPicker),
-                    icon: const Icon(Icons.send_rounded),
-                    label: const Text('Enviar moedas para um amigo'),
+                  child: Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: [
+                      OutlinedButton.icon(
+                        onPressed: () => context.push(AppRoutes.friendPicker),
+                        icon: const Icon(Icons.send_rounded),
+                        label: const Text('Enviar moedas'),
+                      ),
+                      OutlinedButton.icon(
+                        onPressed: () => context.push(AppRoutes.orders),
+                        icon: const Icon(Icons.receipt_long_rounded),
+                        label: const Text('Meus pedidos'),
+                      ),
+                      if (user.accountType != AccountType.personal)
+                        OutlinedButton.icon(
+                          onPressed: () => context.push(AppRoutes.finance),
+                          icon: const Icon(Icons.insights_rounded),
+                          label: const Text('Painel financeiro'),
+                        ),
+                    ],
                   ),
                 ),
                 const SectionHeader(title: 'Comprar moedas'),
@@ -89,15 +92,11 @@ class WalletPage extends StatelessWidget {
                   child: ListView.separated(
                     scrollDirection: Axis.horizontal,
                     padding: const EdgeInsets.symmetric(horizontal: 20),
-                    itemCount: WalletRepository.packages.length,
+                    itemCount: state.packages.length,
                     separatorBuilder: (_, _) => const SizedBox(width: 12),
                     itemBuilder: (context, i) {
-                      final package = WalletRepository.packages[i];
-                      return _PackageCard(
-                        package: package,
-                        loading: state.buying == package,
-                        onTap: () => _confirmPurchase(context, package),
-                      );
+                      final package = state.packages[i];
+                      return _PackageCard(package: package, loading: false, onTap: () => _buy(context, package));
                     },
                   ),
                 ),
@@ -115,26 +114,9 @@ class WalletPage extends StatelessWidget {
     );
   }
 
-  Future<void> _confirmPurchase(BuildContext context, CoinPackage package) async {
-    final ok = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Comprar moedas'),
-        content: Text(
-          'Comprar ${Formatters.number(package.coins)} moedas por ${Formatters.currency(package.price)}? '
-          'O valor será descontado do saldo da carteira.',
-        ),
-        actions: [
-          TextButton(onPressed: () => context.pop(false), child: const Text('Cancelar')),
-          FilledButton(
-            style: FilledButton.styleFrom(minimumSize: const Size(100, 40)),
-            onPressed: () => context.pop(true),
-            child: const Text('Comprar'),
-          ),
-        ],
-      ),
-    );
-    if ((ok ?? false) && context.mounted) context.read<WalletCubit>().buy(package);
+  Future<void> _buy(BuildContext context, CoinPackage package) async {
+    final user = await showCheckout(context, PaymentIntent.coins(package));
+    if (user != null && context.mounted) await context.read<WalletCubit>().purchased(package, user);
   }
 }
 

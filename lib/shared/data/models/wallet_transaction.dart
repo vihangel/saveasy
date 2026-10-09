@@ -41,10 +41,3 @@ abstract class WalletTransaction with _$WalletTransaction {
 
   factory WalletTransaction.fromJson(Map<String, dynamic> json) => _$WalletTransactionFromJson(json);
 }
-
-class CoinPackage {
-  const CoinPackage({required this.coins, required this.price});
-
-  final int coins;
-  final double price;
-}

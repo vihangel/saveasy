@@ -10,6 +10,7 @@ import '../../shared/utils/view_status.dart';
 part 'wallet_cubit.freezed.dart';
 part 'wallet_state.dart';
 
+/// Carteira: moedas, pacotes (pagos com Pix pelo checkout) e extrato.
 class WalletCubit extends Cubit<WalletState> {
   WalletCubit(this._wallet, this._session) : super(const WalletState());
 
@@ -18,25 +19,18 @@ class WalletCubit extends Cubit<WalletState> {
 
   Future<void> load() async {
     emit(state.copyWith(status: state.history.isEmpty ? ViewStatus.loading : state.status));
-    emit(state.copyWith(status: ViewStatus.success, history: await _wallet.history()));
-  }
-
-  Future<void> buy(CoinPackage package) async {
-    emit(state.copyWith(buying: package, error: null, message: null));
     try {
-      final user = await _wallet.buyCoins(userId: _session.user.id, package: package);
-      _session.updateUser(user);
-      emit(state.copyWith(buying: null, message: '+${Formatters.number(package.coins)} moedas na sua conta!'));
-      await load();
-    } on AppException catch (e) {
-      emit(state.copyWith(buying: null, error: e.message));
+      final (history, packages) = await (_wallet.history(), _wallet.packages()).wait;
+      emit(state.copyWith(status: ViewStatus.success, history: history, packages: packages));
+    } on ParallelWaitError {
+      emit(state.copyWith(status: ViewStatus.failure));
     }
   }
 
-  /// Adiciona saldo fictício (não existe gateway de pagamento no protótipo).
-  Future<void> addFunds() async {
-    final user = await _wallet.addFunds(userId: _session.user.id, amount: 100);
+  /// Checkout confirmou a compra do pacote.
+  Future<void> purchased(CoinPackage package, AppUser user) async {
     _session.updateUser(user);
-    emit(state.copyWith(message: 'R\$ 100,00 adicionados (simulado).'));
+    emit(state.copyWith(message: '+${Formatters.number(package.coins)} moedas na sua conta!', error: null));
+    await load();
   }
 }

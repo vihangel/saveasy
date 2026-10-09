@@ -42,7 +42,10 @@ import '../features/splash/splash_page.dart';
 import '../features/stories/new_story_page.dart';
 import '../features/stories/stories_page.dart';
 import '../features/store/store_cubit.dart';
+import '../features/store/my_store_page.dart';
+import '../features/store/orders_page.dart';
 import '../features/store/store_page.dart';
+import '../features/wallet/finance_page.dart';
 import '../features/wallet/friend_picker_page.dart';
 import '../features/wallet/wallet_page.dart';
 import '../shared/data/models/models.dart';
@@ -174,6 +177,8 @@ GoRouter createRouter(SessionCubit session) {
       GoRoute(path: AppRoutes.settings, builder: (_, _) => const SettingsPage()),
       GoRoute(path: AppRoutes.saved, builder: (_, _) => const SavedPage()),
       GoRoute(path: AppRoutes.invite, builder: (_, _) => const InvitePage()),
+      GoRoute(path: AppRoutes.orders, builder: (_, _) => const OrdersPage()),
+      GoRoute(path: AppRoutes.finance, builder: (_, _) => const FinancePage()),
       GoRoute(
         path: '/users/:id',
         builder: (context, state) => ProfilePage.route(context, state.pathParameters['id']!),
@@ -234,19 +239,24 @@ GoRouter createRouter(SessionCubit session) {
         ],
       ),
       ShellRoute(
-        builder: (context, _, child) => BlocProvider(
-          create: (context) => StoreCubit(
-            context.read<StoreRepository>(),
-            context.read<WalletRepository>(),
-            context.read<SessionCubit>(),
-          )..load(),
-          child: child,
-        ),
+        builder: (context, _, child) =>
+            BlocProvider(create: (context) => StoreCubit(context.read<StoreRepository>())..load(), child: child),
         routes: [
           GoRoute(
             path: AppRoutes.store,
             builder: (_, _) => const StorePage(),
             routes: [
+              GoRoute(
+                path: 'manage',
+                builder: (_, _) => const MyStorePage(),
+                routes: [
+                  GoRoute(path: 'new', builder: (_, _) => const ProductFormPage()),
+                  GoRoute(
+                    path: ':id',
+                    builder: (_, state) => ProductFormPage(productId: state.pathParameters['id']),
+                  ),
+                ],
+              ),
               GoRoute(
                 path: ':id',
                 builder: (_, state) => ProductPage(productId: state.pathParameters['id']!),

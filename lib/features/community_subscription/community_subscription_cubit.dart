@@ -9,6 +9,8 @@ import '../../shared/utils/view_status.dart';
 part 'community_subscription_cubit.freezed.dart';
 part 'community_subscription_state.dart';
 
+/// Inscrição (assinatura) numa comunidade. Os planos vêm da comunidade; o
+/// pagamento passa pelo checkout na tela.
 class CommunitySubscriptionCubit extends Cubit<CommunitySubscriptionState> {
   CommunitySubscriptionCubit(this.communityId, this._users, this._wallet, this._session)
     : super(const CommunitySubscriptionState());
@@ -18,25 +20,37 @@ class CommunitySubscriptionCubit extends Cubit<CommunitySubscriptionState> {
   final WalletRepository _wallet;
   final SessionCubit _session;
 
-  static const plans = {'Mensal': 9.90, 'Anual': 99.00};
-
   Future<void> load() async {
     emit(state.copyWith(status: ViewStatus.loading));
-    emit(state.copyWith(status: ViewStatus.success, community: await _users.getById(communityId)));
+    try {
+      final (community, plans) = await (_users.getById(communityId), _wallet.communityPlans(communityId)).wait;
+      emit(
+        state.copyWith(
+          status: ViewStatus.success,
+          community: community,
+          plans: plans,
+          planId: plans.plans.firstOrNull?.id,
+        ),
+      );
+    } on ParallelWaitError {
+      emit(state.copyWith(status: ViewStatus.failure));
+    }
   }
 
-  void selectPlan(String plan) => emit(state.copyWith(plan: plan));
+  void selectPlan(String planId) => emit(state.copyWith(planId: planId));
 
-  Future<void> subscribe() async {
+  PaymentIntent? get intent => state.planId == null ? null : PaymentIntent.subscription(planId: state.planId!);
+
+  Future<void> paid(AppUser user) async {
+    _session.updateUser(user);
+    emit(state.copyWith(done: true));
+  }
+
+  Future<void> cancel() async {
     emit(state.copyWith(submitting: true, error: null));
     try {
-      final user = await _wallet.subscribe(
-        userId: _session.user.id,
-        community: state.community!,
-        price: plans[state.plan]!,
-      );
-      _session.updateUser(user);
-      emit(state.copyWith(submitting: false, done: true));
+      final plans = await _wallet.cancelSubscription(communityId);
+      emit(state.copyWith(submitting: false, plans: plans));
     } on AppException catch (e) {
       emit(state.copyWith(submitting: false, error: e.message));
     }

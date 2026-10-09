@@ -51,6 +51,14 @@ class SessionCubit extends Cubit<SessionState> {
     if (state is SessionAuthenticated) emit(SessionState.authenticated(user));
   }
 
+  /// Recarrega o perfil do servidor (ex.: depois de um pagamento confirmado
+  /// pelo gateway) e devolve o usuário atualizado.
+  Future<AppUser?> refreshUser() async {
+    final user = await _auth.restoreSession();
+    if (user != null) updateUser(user);
+    return user;
+  }
+
   Future<void> logout() async {
     await _auth.logout();
     emit(const SessionState.unauthenticated(onboardingSeen: true));

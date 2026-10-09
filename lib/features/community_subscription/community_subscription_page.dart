@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../app/theme.dart';
+import '../../shared/data/models/models.dart';
 import '../../shared/data/repositories/repositories.dart';
 import '../../shared/notifiers/session_cubit.dart';
 import '../../shared/utils/context_x.dart';
@@ -25,10 +26,10 @@ class CommunitySubscriptionPage extends StatelessWidget {
   );
 
   static const _benefits = [
-    (Icons.workspace_premium_rounded, 'Selo exclusivo de apoiador no seu perfil'),
-    (Icons.image_rounded, 'Capas e títulos liberados pela comunidade'),
-    (Icons.forum_rounded, 'Acesso ao chat de apoiadores'),
-    (Icons.monetization_on_rounded, '+50 moedas por mês'),
+    (Icons.volunteer_activism_rounded, 'Apoio direto à causa, repassado via Pix à comunidade'),
+    (Icons.notifications_active_rounded, 'Novidades e atualizações das campanhas'),
+    (Icons.forum_rounded, 'Grupo de mensagens da comunidade'),
+    (Icons.monetization_on_rounded, '+50 moedas e +80 XP na primeira inscrição'),
   ];
 
   @override
@@ -77,24 +78,64 @@ class CommunitySubscriptionPage extends StatelessWidget {
                     title: Text(text, style: const TextStyle(fontSize: 14)),
                   ),
                 const SizedBox(height: 12),
-                Text('Escolha o plano', style: context.text.titleMedium),
-                const SizedBox(height: 8),
-                RadioGroup<String>(
-                  groupValue: state.plan,
-                  onChanged: (v) => cubit.selectPlan(v!),
-                  child: Column(
-                    children: [
-                      for (final MapEntry(key: plan, value: price) in CommunitySubscriptionCubit.plans.entries)
-                        RadioListTile<String>(
-                          value: plan,
-                          title: Text(plan),
-                          secondary: Text(Formatters.currency(price), style: context.text.titleMedium),
-                        ),
-                    ],
+                if (state.plans?.mine case final mine? when mine.isActive) ...[
+                  Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: AppColors.success.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Text(
+                      mine.status == 'cancelled'
+                          ? 'Inscrição cancelada. Você continua apoiador até ${Formatters.date(mine.currentPeriodEnd.toLocal())}.'
+                          : 'Você é apoiador até ${Formatters.date(mine.currentPeriodEnd.toLocal())}. Obrigado!',
+                    ),
                   ),
-                ),
-                const SizedBox(height: 24),
-                PrimaryButton(label: 'Confirmar inscrição', loading: state.submitting, onPressed: cubit.subscribe),
+                  const SizedBox(height: 12),
+                  if (mine.status == 'active')
+                    TextButton(
+                      onPressed: state.submitting ? null : cubit.cancel,
+                      style: TextButton.styleFrom(foregroundColor: AppColors.danger),
+                      child: const Text('Cancelar renovação'),
+                    ),
+                ] else ...[
+                  Text('Escolha o plano', style: context.text.titleMedium),
+                  const SizedBox(height: 8),
+                  RadioGroup<String>(
+                    groupValue: state.planId,
+                    onChanged: (v) => cubit.selectPlan(v!),
+                    child: Column(
+                      children: [
+                        for (final plan in state.plans?.plans ?? const <SubscriptionPlan>[])
+                          RadioListTile<String>(
+                            value: plan.id,
+                            title: Text(plan.name),
+                            subtitle: plan.benefits.isEmpty ? null : Text(plan.benefits),
+                            secondary: Text(Formatters.currency(plan.price), style: context.text.titleMedium),
+                          ),
+                      ],
+                    ),
+                  ),
+                  if ((state.plans?.subscribers ?? 0) > 0)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 8),
+                      child: Text(
+                        '${state.plans!.subscribers} apoiador(es) ativos',
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(color: AppColors.textMuted),
+                      ),
+                    ),
+                  const SizedBox(height: 24),
+                  PrimaryButton(
+                    label: 'Confirmar inscrição',
+                    onPressed: cubit.intent == null
+                        ? null
+                        : () async {
+                            final user = await showCheckout(context, cubit.intent!);
+                            if (user != null) await cubit.paid(user);
+                          },
+                  ),
+                ],
               ],
             ),
           ),

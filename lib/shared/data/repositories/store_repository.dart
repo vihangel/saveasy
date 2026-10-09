@@ -1,19 +1,22 @@
-import '../datasources/mock_database.dart';
 import '../models/models.dart';
 
-class StoreRepository {
-  StoreRepository(this._db);
+/// Lojas das comunidades/empresas: produtos, pedidos e avaliações.
+/// Implementações: [MockStoreRepository] e [SupabaseStoreRepository].
+abstract interface class StoreRepository {
+  Future<List<Product>> products({String query = '', String? sellerId});
 
-  final MockDatabase _db;
+  Future<ProductDetail> detail(String productId);
 
-  Future<List<Product>> products({String query = ''}) async {
-    await _db.delay();
-    final q = query.trim().toLowerCase();
-    return _db.products.where((p) => q.isEmpty || '${p.name} ${p.communityName}'.toLowerCase().contains(q)).toList();
-  }
+  /// Cria ou edita (quando [product] tem id) um produto do vendedor logado.
+  Future<Product> save(Product product);
 
-  Future<Product> getById(String id) async {
-    await _db.delay();
-    return _db.products.firstWhere((p) => p.id == id);
-  }
+  Future<void> delete(String productId);
+
+  Future<List<StoreOrder>> myOrders();
+
+  Future<List<StoreOrder>> sellerOrders();
+
+  Future<StoreOrder> updateOrderStatus(String orderId, OrderStatus status);
+
+  Future<ProductDetail> review(String productId, {required int rating, String comment = ''});
 }

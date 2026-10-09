@@ -69,6 +69,10 @@ void main() {
     '/users/u_me/activity',
     '/post/p_sangue/participants',
     '/post/p_reciclagem/requests',
+    '/orders',
+    '/finance',
+    '/store/manage',
+    '/store/manage/new',
   ];
 
   const publicRoutes = ['/welcome', '/login', '/forgot-password', '/signup', '/signup/verify'];

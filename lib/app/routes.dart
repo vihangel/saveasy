@@ -57,4 +57,9 @@ abstract final class AppRoutes {
   static const achievements = '/achievements';
   static const store = '/store';
   static String product(String id) => '/store/$id';
+  static const myStore = '/store/manage';
+  static const newProduct = '/store/manage/new';
+  static String editProduct(String id) => '/store/manage/$id';
+  static const orders = '/orders';
+  static const finance = '/finance';
 }

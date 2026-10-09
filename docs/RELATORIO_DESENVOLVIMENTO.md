@@ -7,6 +7,88 @@ Legenda: ✅ no Supabase · 🟡 ainda no mock local · ⏳ pendente
 
 ---
 
+## Entrega 4 · Pagamentos (sandbox), doações, inscrições e loja (08/10/2026)
+
+### Resumo
+- Migration `20261008000009_payments_store.sql` (aplicada).
+- Acabou o "saldo fictício" da carteira: tudo em R$ passa por **cobrança Pix**
+  criada no banco (o valor é calculado no servidor). Hoje o ambiente está em
+  **sandbox**: o checkout mostra QR/copia-e-cola e um botão "Simular pagamento
+  aprovado". Em produção a confirmação vem só do gateway (webhook).
+- Doação com **dinheiro** (Pix) ou com **moedas** (pagas pelo fundo de doações).
+- Pacotes de moedas, inscrições em comunidades com planos do banco, loja com
+  pedidos, estoque, avaliações e gestão do vendedor, painel financeiro com
+  pedido de repasse.
+- Edge Functions prontas no repositório (`supabase/functions/payment-pix`,
+  `payment-webhook`) para Mercado Pago, **não publicadas** (precisam de credenciais).
+- 34 testes automatizados (carteira reescrita + 4 rotas novas no overflow).
+
+### Banco (o que entrou)
+| Área | Tabelas | Regras principais |
+| --- | --- | --- |
+| Configuração | `private.settings` | `payments_mode` (sandbox/live), `coins_per_real` (100), `platform_fee_percent` (0), `min_reward_donation` (R$ 5) |
+| Pagamentos | `payments` | Valor e descrição definidos pelo banco. Status pending → paid/expired/refunded. Entrega idempotente (`private.fulfill_payment`). Pix expira em 30 min (cron) |
+| Doações | `donations` | Soma no "arrecadado" do post. Recompensa só a partir de R$ 5 e 1× por dia por campanha (evita farm de moedas com doações de R$ 1) |
+| Fundo de doações | `fund_ledger` | Aporte inicial de R$ 500. Doação com moedas: 100 moedas = R$ 1 pagos pelo fundo; recusa se o fundo não tiver saldo. Recebe 30% dos anúncios na Entrega 5 |
+| Moedas | `coin_packages` | 1.000 / 2.500 / 5.000 moedas (R$ 4,99 / 11,99 / 24,90) |
+| Inscrições | `subscription_plans`, `community_subscriptions` | Toda comunidade ganha Mensal (R$ 9,90) e Anual (R$ 99) automaticamente; pode editar. Renovar soma o período; cancelar mantém até o fim do período. +50 moedas/+80 XP na 1ª inscrição |
+| Loja | `products`, `orders`, `product_reviews` | Só comunidade e empresa vendem. Pedido nasce "aguardando pagamento"; pago baixa o estoque e dá +20 moedas/+30 XP. Vendedor marca enviado/entregue ou cancela (reembolso). Só quem comprou avalia (média automática) |
+| Repasses | `payouts` | Só contas verificadas, mínimo R$ 10, até o disponível (doações + inscrições + vendas − taxa − repasses) |
+
+### Funcionalidades e como validar
+
+| # | Funcionalidade | Status | Como validar |
+| --- | --- | :-: | --- |
+| 56 | Checkout Pix (QR + copia e cola) | ✅ | Qualquer pagamento abre a folha "Pagar com Pix" |
+| 57 | Simular pagamento aprovado (sandbox) | ✅ | Botão na folha; só funciona com `payments_mode = sandbox` |
+| 58 | Pix real (Mercado Pago) | ⏳ | Pendência 8: credenciais + publicar as Edge Functions + trocar para `live` |
+| 59 | Cartão de crédito / IAP nas lojas | ⏳ | Pendência 8; moedas no iOS/Android exigem compra no app (ver PRODUTO §6.4) |
+| 60 | Doar com Pix | ✅ | Post de doação → Doar → valor → pagar. Arrecadado sobe; +moedas se ≥ R$ 5 |
+| 61 | Doar com moedas | ✅ | Doar → aba Moedas → 100/500/1.000. Mostra a conversão e o saldo do fundo |
+| 62 | Comprar pacote de moedas | ✅ | Carteira → Comprar moedas |
+| 63 | Extrato com moedas e R$ | ✅ | Carteira → Histórico |
+| 64 | Inscrever-se numa comunidade | ✅ | Perfil de comunidade → Inscrever-se → plano → pagar |
+| 65 | Cancelar renovação | ✅ | Mesma tela, depois de inscrito |
+| 66 | Editar planos (comunidade) | 🟡 | RPC `save_subscription_plan` pronta; falta a tela |
+| 67 | Loja: vitrine, detalhe, avaliações | ✅ | Menu → Loja |
+| 68 | Comprar produto (quantidade + endereço) | ✅ | Produto → Comprar → pagar. Estoque baixa |
+| 69 | Meus pedidos + avaliar | ✅ | Loja → ícone de pedidos (ou Carteira → Meus pedidos) |
+| 70 | Minha loja: criar/editar/remover produto | ✅ | Conta comunidade/empresa: Loja → ícone de loja → + Produto |
+| 71 | Vendas: enviado / entregue / cancelar com reembolso | ✅ | Pedidos → aba Vendas |
+| 72 | Painel financeiro + pedido de repasse | ✅ | Carteira → Painel financeiro (contas não pessoais) |
+| 73 | Pagar repasses (admin) | ⏳ | Entra no painel admin da Entrega 6 |
+
+### Validação feita
+No navegador (conta de teste): doação de R$ 20 por Pix sandbox na "Cirurgia
+da Mel" → tela de agradecimento com +50 moedas/+100 XP → loja → Camiseta →
+quantidade/endereço → Pix → "Compra realizada" (estoque 30 → 29) → Carteira
+com o extrato em R$ e moedas → Meus pedidos com "Avaliar" → planos de
+inscrição do Instituto Pantanal Vivo. No SQL: confirmação repetida não
+credita de novo, pacote de moedas, doação com moedas debitando o fundo,
+inscrição com período, pedido → enviado, avaliação, painel financeiro do
+vendedor e saldo do fundo.
+
+### Pendências de configuração (novas)
+8. **Gateway de pagamento** (sugestão: Mercado Pago, Pix com taxa baixa):
+   criar conta PJ, gerar `MP_ACCESS_TOKEN`, cadastrar como secret das Edge
+   Functions, publicar `payment-pix` e `payment-webhook` (esta com
+   `verify_jwt = false`), configurar a URL do webhook no painel do Mercado
+   Pago e só então mudar `private.settings.payments_mode` para `live`.
+   Para moedas no iOS/Android, configurar compras no app (App Store/Play) —
+   Pix no app para bens digitais não é permitido pelas lojas.
+
+### Decisões tomadas nesta entrega (validar)
+- **100 moedas = R$ 1** no fundo de doações; o fundo começa com R$ 500 da plataforma.
+- Doação em dinheiro só dá moedas/XP a partir de **R$ 5** e uma vez por dia por campanha.
+- Taxa da plataforma **0%** por enquanto (configurável).
+- Planos padrão de toda comunidade: Mensal R$ 9,90 e Anual R$ 99.
+- Benefícios da inscrição foram reescritos para só prometer o que existe.
+
+### Problemas conhecidos
+- O saldo em R$ antigo do modo mock deixou de existir na interface (no modo mock tudo é sandbox).
+
+---
+
 ## Entrega 3 · Gamificação, convites e extras das ações (08/10/2026)
 
 ### Resumo
@@ -225,7 +307,7 @@ do Supabase revisados (ver "Pendências de configuração").
 | 20 | **Salvos e interesses** | ✅ | Menu lateral → Salvos |
 | 21 | Enviar moedas para o autor / amigo | ✅ | Débito e crédito no ledger; extrato na Carteira |
 | 22 | Extrato de moedas na Carteira | ✅ | Mostra bônus, participação e envios |
-| 23 | Doação em R$, compra de moedas, loja, inscrição em comunidade | 🟡 | Ainda simulados (fase de pagamentos). Funcionam com saldo fictício local |
+| 23 | Doação em R$, compra de moedas, loja, inscrição em comunidade | ✅ | Migrados na Entrega 4 (Pix sandbox) |
 | 24 | Stories, mensagens, notificações, recompensas, conquistas | ✅ | Migrados nas Entregas 2 e 3 |
 
 **Conta de teste** (só desenvolvimento): definida em `supabase/seed.sql`

@@ -231,3 +231,16 @@ begin
        'Participe de ações perto de você e ganhe moedas.', now() - interval '2 days');
   end if;
 end $$;
+
+-- Entrega 4: produtos das lojas de Cuiabá (vendas revertidas às causas).
+do $$
+begin
+  if exists (select 1 from public.products) then return; end if;
+  insert into public.products (seller_id, name, description, price, icon, stock) values
+    ('a1000000-0000-4000-8000-000000000003', 'Camiseta Patas do Coxipó', 'Algodão, estampa de cão e gato. Renda vai para ração e castração.', 49.90, 'pets', 30),
+    ('a1000000-0000-4000-8000-000000000003', 'Caneca Adote um Amigo', 'Cerâmica 300 ml.', 34.90, 'coffee', 20),
+    ('a1000000-0000-4000-8000-000000000002', 'Ecobag Pantanal Vivo', 'Lona reciclada com ilustração de tuiuiú.', 29.90, 'eco', 50),
+    ('a1000000-0000-4000-8000-000000000002', 'Kit sementes do Cerrado', 'Ipê, pequi e baru para plantar em casa.', 24.90, 'forest', 40),
+    ('a1000000-0000-4000-8000-000000000004', 'Porta-copos de garrafa PET', 'Feito com material da coleta seletiva.', 19.90, 'recycle', null),
+    ('a1000000-0000-4000-8000-000000000005', 'Cesta básica solidária', 'Você compra e a Mãos do Porto entrega a uma família.', 89.90, 'shopping_bag', null);
+end $$;

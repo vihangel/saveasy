@@ -29,6 +29,14 @@ abstract class Product with _$Product {
     required StoreSection section,
     @Default('shopping_bag') String icon,
     @Default(4.5) double rating,
+    @Default(0) int ratingCount,
+    @Default(0) int salesCount,
+    String? imageUrl,
+    String? sellerAvatarUrl,
+
+    /// null = sem controle de estoque.
+    int? stock,
+    @Default(true) bool active,
   }) = _Product;
 
   factory Product.fromJson(Map<String, dynamic> json) => _$ProductFromJson(json);
