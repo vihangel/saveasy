@@ -17,3 +17,4 @@ export 'app_image.dart';
 export 'image_picker_sheet.dart';
 export 'avatar_picker.dart';
 export 'app_back_button.dart';
+export 'people_picker_sheet.dart';

@@ -19,7 +19,11 @@ class RewardsCubit extends Cubit<RewardsState> {
 
   Future<void> load() async {
     emit(state.copyWith(status: state.rewards.isEmpty ? ViewStatus.loading : state.status));
-    emit(state.copyWith(status: ViewStatus.success, rewards: await _gamification.rewards()));
+    try {
+      emit(state.copyWith(status: ViewStatus.success, rewards: await _gamification.rewards()));
+    } on AppException {
+      emit(state.copyWith(status: ViewStatus.failure));
+    }
   }
 
   List<Reward> byKind(RewardKind kind) => state.rewards.where((r) => r.kind == kind).toList();

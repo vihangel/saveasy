@@ -96,11 +96,11 @@ class _InviteBanner extends StatelessWidget {
                   'Convide e ganhe pontos',
                   style: TextStyle(fontWeight: FontWeight.w700, color: AppColors.textDark),
                 ),
-                Text('Ganhe 250 moedas por amigo que criar uma conta.', style: TextStyle(fontSize: 12)),
+                Text('50 moedas por amigo e mais 1.000 quando ele chegar ao nível 20.', style: TextStyle(fontSize: 12)),
               ],
             ),
           ),
-          TextButton(onPressed: () => context.showMessage('Link de convite copiado!'), child: const Text('Convidar')),
+          TextButton(onPressed: () => context.push(AppRoutes.invite), child: const Text('Convidar')),
         ],
       ),
     );

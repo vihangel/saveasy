@@ -40,6 +40,10 @@ abstract class AppUser with _$AppUser {
     @Default(0.0) double rating,
     @Default(<String>[]) List<String> badgeIds,
     String? titleId,
+    String? coverRewardId,
+
+    /// user, moderator ou admin.
+    @Default('user') String role,
     @Default(false) bool emailNews,
     @Default(<String>[]) List<String> followingIds,
     @Default(<String>[]) List<String> subscribedCommunityIds,
@@ -49,6 +53,8 @@ abstract class AppUser with _$AppUser {
 
   /// XP necessário para passar de nível (regra mockada).
   static const xpPerLevel = 300;
+
+  bool get isStaff => role == 'admin' || role == 'moderator';
 
   double get levelProgress => (xp % xpPerLevel) / xpPerLevel;
 

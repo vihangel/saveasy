@@ -7,6 +7,84 @@ Legenda: ✅ no Supabase · 🟡 ainda no mock local · ⏳ pendente
 
 ---
 
+## Entrega 3 · Gamificação, convites e extras das ações (08/10/2026)
+
+### Resumo
+- Migration `20261008000008_gamification.sql` (aplicada).
+- Recompensas e conquistas saíram do mock: catálogo, resgate, equipar e
+  progresso calculados no banco.
+- Novas telas: **Convide amigos**, **Participantes** (com check-in),
+  **Pedidos do item** e **Atividades** (currículo + álbum). As abas
+  Currículo/Álbum do perfil passaram a usar os dados reais.
+- O detalhe da publicação ganhou: pessoas marcadas, participantes, "Meu
+  check-in" (QR + código), atualizações da campanha, fotos de quem participou
+  e "Quero receber" (doação de itens).
+- 30 testes automatizados (3 novos + 4 rotas novas no teste de overflow).
+
+### Banco (o que entrou)
+| Área | Tabelas | Regras principais |
+| --- | --- | --- |
+| Recompensas | `rewards`, `user_rewards` | Catálogo no banco (13 itens, patrocinadores de Cuiabá). Resgate debita moedas pelo livro-razão. Equipar: 1 título, até 3 selos, 1 capa |
+| Conquistas | `achievements`, `achievement_claims` | Diárias, semanais e gerais. O progresso é **contado no banco** (curtidas, comentários, stories, posts, participações, ações de meio ambiente, doações, convites, seguidos). Resgate 1× por período (fuso de Cuiabá) |
+| Convites | `invites` | Código pessoal. Quem entra: +100 moedas (até 30 dias após o cadastro). Quem convida: +50 moedas/+20 XP na hora e **+1.000** quando o convidado chega ao nível 20 (trigger) |
+| Check-in | `participations.checked_in_at` | Participante mostra QR/código de 6 caracteres; organizador digita o código ou marca Presente/Faltou. Presença dá +10 XP (uma vez) |
+| Fotos | `post_photos` | Só autor ou quem confirmou presença envia. Viram o álbum do perfil |
+| Atualizações | `post_updates` | Só o autor publica; avisa participantes e interessados (notificação) |
+| Doação de itens | `item_requests` | Pedido → aceito/recusado → entregue. Entregue dá a recompensa do post a quem doou (1× por pedido) |
+| Marcar pessoas | `post_mentions` | Até 20 por post; marcados recebem notificação |
+
+RPCs novas: `rewards_catalog`, `rewards_by_ids`, `redeem_reward`,
+`equip_rewards`, `my_achievements`, `claim_achievement`, `my_invite`,
+`redeem_invite`, `action_resume`, `post_participants`, `my_checkin_code`,
+`check_in`, `post_photos_list`, `add_post_photo`, `delete_post_photo`,
+`profile_album`, `post_updates_list`, `add_post_update`,
+`item_requests_for_post`, `request_item`, `update_item_request`,
+`set_post_mentions`, `post_mentions_list`, `post_extras`.
+
+### Funcionalidades e como validar
+
+| # | Funcionalidade | Status | Como validar |
+| --- | --- | :-: | --- |
+| 40 | Catálogo de recompensas do banco | ✅ | Menu → Recompensas |
+| 41 | Resgatar recompensa com moedas | ✅ | Abrir um item → Resgatar. Saldo cai; de novo mostra "Você já possui" |
+| 42 | Equipar título e até 3 selos | ✅ | Editar perfil → escolher → Salvar. Aparece no perfil para todos |
+| 43 | Equipar capa | 🟡 | O banco aceita (`p_cover_id`), mas a tela ainda não tem seletor de capa-recompensa |
+| 44 | Conquistas diárias/semanais/gerais com progresso real | ✅ | Comentar algo → "Comente em 1 publicação" fica 1/1 → Resgatar (+10) |
+| 45 | Convide amigos (código, copiar convite, usar código) | ✅ | Menu → Convide amigos. Com outra conta nova, usar o código |
+| 46 | Recompensa de convite no nível 20 | ✅ | Automática (trigger); conferível em `coin_ledger` |
+| 47 | Currículo de ações com filtro de período | ✅ | Perfil → aba Currículo (7 dias / 30 dias / 12 meses / tudo) |
+| 48 | Álbum (fotos enviadas nas ações) | ✅ | Perfil → aba Álbum |
+| 49 | Lista de participantes | ✅ | Detalhe de evento → Participantes → Ver todos |
+| 50 | Check-in por QR/código | ✅ | Participante: "Meu check-in". Organizador: Participantes → digitar o código ou marcar Presente |
+| 51 | Leitura do QR pela câmera | ⏳ | Hoje o organizador digita o código de 6 caracteres |
+| 52 | Fotos de quem participou | ✅ | Detalhe → "Fotos de quem participou" → Adicionar. Segurar a foto remove |
+| 53 | Atualizações de campanha | ✅ | Autor: detalhe → Atualizações → Publicar. Interessados recebem notificação |
+| 54 | Doação de itens | ✅ | Post de atividade "doação de itens" → "Quero receber". Autor: Pedidos → Aceitar → Marcar entregue |
+| 55 | Marcar pessoas na publicação | ✅ | Criar/editar publicação → "Marcar pessoas". Marcados recebem notificação |
+
+### Validação feita (navegador, contra o Supabase real)
+Detalhe do mutirão: participantes e "Meu check-in" com QR → lista de
+participantes → catálogo de recompensas → resgate do selo Café Solidário
+(1.155 → 755 moedas) → equipado em Editar perfil e exibido no perfil →
+conquista diária resgatada (+10 moedas, +5 XP) → convite com código →
+currículo com o mutirão. No SQL: check-in pelo código (+10 XP uma vez),
+atualização notificando 4 pessoas, marcação, pedido → entrega com recompensa
+para quem doou, convite (+100/+50), resgate duplicado e sem saldo recusados.
+A conta de teste recebeu +1.000 moedas (`admin_adjustment`) para validar o resgate.
+
+### Decisões tomadas nesta entrega (validar)
+- "Compartilhe 1 boa ação" (diária) conta **stories publicados** no dia.
+- Convite só vale nos primeiros 30 dias de conta; quem convida ganha 50 na
+  hora (o protótipo falava em 250 sem regra; o banner foi corrigido).
+- Doação de itens recompensa quem **doa** quando o item é entregue.
+- Recompensas renomeadas para temas de Cuiabá/MT (Pantanal, Chapada,
+  Guardião do Pantanal, Doador de Sangue).
+
+### Problemas conhecidos
+- Os itens resgatados no modo mock antes desta entrega não migram (só valia localmente).
+
+---
+
 ## Entrega 2 · Stories, mensagens em tempo real e notificações (08/10/2026)
 
 ### Resumo
@@ -148,7 +226,7 @@ do Supabase revisados (ver "Pendências de configuração").
 | 21 | Enviar moedas para o autor / amigo | ✅ | Débito e crédito no ledger; extrato na Carteira |
 | 22 | Extrato de moedas na Carteira | ✅ | Mostra bônus, participação e envios |
 | 23 | Doação em R$, compra de moedas, loja, inscrição em comunidade | 🟡 | Ainda simulados (fase de pagamentos). Funcionam com saldo fictício local |
-| 24 | Stories, mensagens, notificações, recompensas, conquistas | 🟡 | Stories, mensagens e notificações migraram na Entrega 2; recompensas e conquistas ainda mock |
+| 24 | Stories, mensagens, notificações, recompensas, conquistas | ✅ | Migrados nas Entregas 2 e 3 |
 
 **Conta de teste** (só desenvolvimento): definida em `supabase/seed.sql`
 (bloco "Conta de teste"). A mesma conta já completou o onboarding e tem uma

@@ -5,6 +5,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
 import '../features/achievements/achievements_page.dart';
+import '../features/activity/activity_page.dart';
 import '../features/auth/forgot_password/forgot_password_cubit.dart';
 import '../features/auth/forgot_password/forgot_password_pages.dart';
 import '../features/auth/login/login_cubit.dart';
@@ -25,8 +26,11 @@ import '../features/feed/feed_page.dart';
 import '../features/follows/follow_list_page.dart';
 import '../features/home/home_shell.dart';
 import '../features/messages/messages_page.dart';
+import '../features/invite/invite_page.dart';
 import '../features/notifications/notifications_page.dart';
 import '../features/onboarding/welcome_page.dart';
+import '../features/post_detail/item_requests_page.dart';
+import '../features/post_detail/participants_page.dart';
 import '../features/post_detail/post_detail_page.dart';
 import '../features/profile/profile_page.dart';
 import '../features/rewards/rewards_cubit.dart';
@@ -148,6 +152,14 @@ GoRouter createRouter(SessionCubit session) {
             path: 'confirmed',
             builder: (_, state) => EventConfirmedPage(postId: state.pathParameters['id']!),
           ),
+          GoRoute(
+            path: 'participants',
+            builder: (_, state) => ParticipantsPage(postId: state.pathParameters['id']!),
+          ),
+          GoRoute(
+            path: 'requests',
+            builder: (_, state) => ItemRequestsPage(postId: state.pathParameters['id']!),
+          ),
         ],
       ),
       GoRoute(path: AppRoutes.newStory, builder: (_, _) => const NewStoryPage()),
@@ -161,6 +173,7 @@ GoRouter createRouter(SessionCubit session) {
       GoRoute(path: AppRoutes.editProfile, builder: (context, _) => EditProfilePage.route(context)),
       GoRoute(path: AppRoutes.settings, builder: (_, _) => const SettingsPage()),
       GoRoute(path: AppRoutes.saved, builder: (_, _) => const SavedPage()),
+      GoRoute(path: AppRoutes.invite, builder: (_, _) => const InvitePage()),
       GoRoute(
         path: '/users/:id',
         builder: (context, state) => ProfilePage.route(context, state.pathParameters['id']!),
@@ -173,6 +186,10 @@ GoRouter createRouter(SessionCubit session) {
                   ? FollowListKind.following
                   : FollowListKind.followers,
             ),
+          ),
+          GoRoute(
+            path: 'activity',
+            builder: (_, state) => ActivityPage(profileId: state.pathParameters['id']!),
           ),
           GoRoute(
             path: 'subscribe',

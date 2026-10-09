@@ -1,56 +1,29 @@
-import '../datasources/mock_database.dart';
 import '../models/models.dart';
-import 'app_exception.dart';
 
-/// Recompensas (capas, selos e títulos) e conquistas.
-class GamificationRepository {
-  GamificationRepository(this._db);
+/// Recompensas, conquistas, convites e currículo de ações. Implementações:
+/// [MockGamificationRepository] e [SupabaseGamificationRepository].
+abstract interface class GamificationRepository {
+  /// Catálogo com `owned`/`equipped` do usuário logado.
+  Future<List<Reward>> rewards({RewardKind? kind});
 
-  final MockDatabase _db;
+  Future<Reward> rewardById(String id);
 
-  Future<List<Reward>> rewards({RewardKind? kind}) async {
-    await _db.delay();
-    return _db.rewards.where((r) => kind == null || r.kind == kind).toList();
-  }
+  /// Itens exibidos no perfil de alguém (selos e título).
+  Future<List<Reward>> rewardsByIds(Iterable<String> ids);
 
-  Future<Reward> rewardById(String id) async {
-    await _db.delay();
-    return _db.rewards.firstWhere((r) => r.id == id);
-  }
+  Future<(Reward, AppUser)> redeem({required String rewardId, required String userId});
 
-  List<Reward> rewardsByIds(Iterable<String> ids) => _db.rewards.where((r) => ids.contains(r.id)).toList();
+  /// Equipa até 1 título, 3 selos e 1 capa. Retorna o usuário atualizado.
+  Future<AppUser> equip({required String userId, String? titleId, List<String> badgeIds = const [], String? coverId});
 
-  Future<(Reward, AppUser)> redeem({required String rewardId, required String userId}) async {
-    await _db.delay();
-    final reward = _db.rewards.firstWhere((r) => r.id == rewardId);
-    final user = _db.userById(userId);
-    if (reward.owned) throw const AppException('Você já possui esse item.');
-    if (user.coins < reward.price) throw const AppException('Moedas insuficientes.');
-    final updatedReward = reward.copyWith(owned: true);
-    _db.rewards = [for (final r in _db.rewards) r.id == rewardId ? updatedReward : r];
-    await _db.saveRewards();
-    final updatedUser = user.copyWith(coins: user.coins - reward.price);
-    await _db.replaceUser(updatedUser);
-    return (updatedReward, updatedUser);
-  }
+  Future<List<Achievement>> achievements();
 
-  Future<List<Achievement>> achievements() async {
-    await _db.delay();
-    return _db.achievements;
-  }
+  Future<(Achievement, AppUser)> claim({required String achievementId, required String userId});
 
-  Future<(Achievement, AppUser)> claim({required String achievementId, required String userId}) async {
-    await _db.delay();
-    final achievement = _db.achievements.firstWhere((a) => a.id == achievementId);
-    if (!achievement.completed || achievement.claimed) {
-      throw const AppException('Essa conquista ainda não pode ser resgatada.');
-    }
-    final updated = achievement.copyWith(claimed: true);
-    _db.achievements = [for (final a in _db.achievements) a.id == achievementId ? updated : a];
-    await _db.saveAchievements();
-    final user = _db.userById(userId);
-    final updatedUser = user.copyWith(coins: user.coins + achievement.rewardCoins);
-    await _db.replaceUser(updatedUser);
-    return (updated, updatedUser);
-  }
+  Future<InviteInfo> invite();
+
+  /// Usa o código de quem convidou (até 30 dias depois do cadastro).
+  Future<AppUser> redeemInvite(String code, {required String userId});
+
+  Future<ActionResume> actionResume(String profileId, {DateTime? from, DateTime? to});
 }

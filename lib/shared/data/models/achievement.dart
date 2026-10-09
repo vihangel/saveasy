@@ -16,6 +16,10 @@ abstract class Achievement with _$Achievement {
     required int rewardCoins,
     @Default(false) bool daily,
     @Default(false) bool claimed,
+    @Default(0) int rewardXp,
+
+    /// daily, weekly ou general.
+    @Default('general') String period,
   }) = _Achievement;
 
   factory Achievement.fromJson(Map<String, dynamic> json) => _$AchievementFromJson(json);

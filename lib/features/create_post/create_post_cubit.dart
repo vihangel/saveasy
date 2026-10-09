@@ -34,7 +34,7 @@ class CreatePostInput {
 
 /// Criar ou editar publicação (o mesmo formulário: "22. Edit post detail").
 class CreatePostCubit extends Cubit<CreatePostState> {
-  CreatePostCubit(PostType type, this._posts, this._session, {this.editing})
+  CreatePostCubit(PostType type, this._posts, this._session, {this.editing, this.engagement})
     : super(
         CreatePostState(
           type: editing?.type ?? type,
@@ -50,6 +50,9 @@ class CreatePostCubit extends Cubit<CreatePostState> {
 
   final PostRepository _posts;
   final SessionCubit _session;
+
+  /// Para salvar as pessoas marcadas (opcional nos testes).
+  final EngagementRepository? engagement;
 
   /// Publicação sendo editada (null = criando).
   final Post? editing;
@@ -89,6 +92,31 @@ class CreatePostCubit extends Cubit<CreatePostState> {
 
   void selectAdPlan(String plan) => emit(state.copyWith(adPlan: plan));
 
+  void setMentions(List<AppUser> people) => emit(state.copyWith(mentions: people));
+
+  /// Na edição, carrega quem já estava marcado.
+  Future<void> loadMentions() async {
+    final post = editing;
+    final engagement = this.engagement;
+    if (post == null || engagement == null) return;
+    try {
+      final extras = await engagement.extras(post.id);
+      emit(state.copyWith(mentions: extras.mentions));
+    } on AppException {
+      // Sem marcações: segue com a lista vazia.
+    }
+  }
+
+  Future<void> _saveMentions(String postId) async {
+    final engagement = this.engagement;
+    if (engagement == null || (state.mentions.isEmpty && !isEditing)) return;
+    try {
+      await engagement.setMentions(postId, state.mentions.map((u) => u.id).toList());
+    } on AppException {
+      // A publicação já foi salva; marcar pessoas é secundário.
+    }
+  }
+
   Future<void> submit(CreatePostInput input) async {
     final error = _validate(input);
     if (error != null) return emit(state.copyWith(status: ViewStatus.failure, error: error));
@@ -97,6 +125,7 @@ class CreatePostCubit extends Cubit<CreatePostState> {
     try {
       if (isEditing) {
         final updated = await _posts.update(_fill(editing!, input));
+        await _saveMentions(updated.id);
         return emit(state.copyWith(status: ViewStatus.success, createdPostId: updated.id));
       }
       final user = _session.user;
@@ -117,6 +146,7 @@ class CreatePostCubit extends Cubit<CreatePostState> {
         ),
       );
       _session.updateUser(author);
+      await _saveMentions(post.id);
       emit(state.copyWith(status: ViewStatus.success, createdPostId: post.id));
     } on AppException catch (e) {
       emit(state.copyWith(status: ViewStatus.failure, error: e.message));

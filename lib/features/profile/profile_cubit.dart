@@ -33,6 +33,7 @@ class ProfileCubit extends Cubit<ProfileState> {
       final isMe = userId == _session.user.id;
       final (user, posts) = await (_users.getById(userId), _posts.byAuthor(userId)).wait;
       final history = isMe ? await _wallet.history() : <WalletTransaction>[];
+      final shown = await _gamification.rewardsByIds([...user.badgeIds, ?user.titleId]);
       emit(
         state.copyWith(
           status: ViewStatus.success,
@@ -40,8 +41,8 @@ class ProfileCubit extends Cubit<ProfileState> {
           posts: posts,
           isMe: isMe,
           history: history,
-          badges: _gamification.rewardsByIds(user.badgeIds),
-          title: user.titleId == null ? null : _gamification.rewardsByIds([user.titleId!]).firstOrNull,
+          badges: shown.where((r) => r.kind == RewardKind.badge).toList(),
+          title: shown.where((r) => r.id == user.titleId).firstOrNull,
         ),
       );
     } catch (_) {

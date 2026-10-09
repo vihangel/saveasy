@@ -17,17 +17,25 @@ class AchievementsCubit extends Cubit<AchievementsState> {
 
   Future<void> load() async {
     emit(state.copyWith(status: ViewStatus.loading));
-    emit(state.copyWith(status: ViewStatus.success, items: await _gamification.achievements()));
+    try {
+      emit(state.copyWith(status: ViewStatus.success, items: await _gamification.achievements()));
+    } on AppException {
+      emit(state.copyWith(status: ViewStatus.failure));
+    }
   }
 
   Future<void> claim(String id) async {
-    final (achievement, user) = await _gamification.claim(achievementId: id, userId: _session.user.id);
-    _session.updateUser(user);
-    emit(
-      state.copyWith(
-        items: [for (final a in state.items) a.id == id ? achievement : a],
-        message: '+${achievement.rewardCoins} moedas resgatadas!',
-      ),
-    );
+    try {
+      final (achievement, user) = await _gamification.claim(achievementId: id, userId: _session.user.id);
+      _session.updateUser(user);
+      emit(
+        state.copyWith(
+          items: [for (final a in state.items) a.id == id ? achievement : a],
+          message: '+${achievement.rewardCoins} moedas resgatadas!',
+        ),
+      );
+    } on AppException catch (e) {
+      emit(state.copyWith(message: e.message));
+    }
   }
 }

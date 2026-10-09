@@ -28,6 +28,7 @@ abstract class Reward with _$Reward {
     required String sponsor,
     @Default('star') String icon,
     @Default(false) bool owned,
+    @Default(false) bool equipped,
   }) = _Reward;
 
   factory Reward.fromJson(Map<String, dynamic> json) => _$RewardFromJson(json);

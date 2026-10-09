@@ -19,8 +19,13 @@ class CreatePostFormPage extends StatefulWidget {
   const CreatePostFormPage({super.key});
 
   static Widget route(BuildContext context, PostType type, {Post? editing}) => BlocProvider(
-    create: (context) =>
-        CreatePostCubit(type, context.read<PostRepository>(), context.read<SessionCubit>(), editing: editing),
+    create: (context) => CreatePostCubit(
+      type,
+      context.read<PostRepository>(),
+      context.read<SessionCubit>(),
+      editing: editing,
+      engagement: context.read<EngagementRepository>(),
+    )..loadMentions(),
     child: const CreatePostFormPage(),
   );
 
@@ -156,6 +161,28 @@ class _CreatePostFormPageState extends State<CreatePostFormPage> {
               ),
               const SizedBox(height: 16),
               TagInput(tags: state.tags, onChanged: cubit.setTags),
+              const SizedBox(height: 16),
+              Wrap(
+                spacing: 6,
+                runSpacing: 6,
+                crossAxisAlignment: WrapCrossAlignment.center,
+                children: [
+                  for (final u in state.mentions)
+                    InputChip(
+                      avatar: UserAvatar(name: u.name, imageUrl: u.avatarUrl, size: 20),
+                      label: Text('@${u.username}'),
+                      onDeleted: () => cubit.setMentions(state.mentions.where((m) => m.id != u.id).toList()),
+                    ),
+                  ActionChip(
+                    avatar: const Icon(Icons.person_add_alt_1_rounded, size: 18),
+                    label: const Text('Marcar pessoas'),
+                    onPressed: () async {
+                      final people = await showPeoplePicker(context, selected: state.mentions);
+                      if (people != null) cubit.setMentions(people);
+                    },
+                  ),
+                ],
+              ),
               const SizedBox(height: 32),
               PrimaryButton(
                 label: cubit.isEditing ? 'Salvar alterações' : 'Criar',

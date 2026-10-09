@@ -11,6 +11,7 @@ import '../../shared/utils/app_icons.dart';
 import '../../shared/utils/context_x.dart';
 import '../../shared/utils/formatters.dart';
 import '../../shared/widgets/widgets.dart';
+import '../activity/activity_page.dart';
 import 'profile_cubit.dart';
 
 /// Perfil / Perfil Pessoal / Influencer / Comunidade / Empresa, com as abas
@@ -87,8 +88,8 @@ class _Body extends StatelessWidget {
                     itemCount: state.posts.length,
                     itemBuilder: (context, i) => PostCard(post: state.posts[i]),
                   ),
-            _ActionResume(state: state),
-            _Album(posts: state.posts, name: user.name),
+            ActionResumeView(profileId: user.id),
+            PhotoAlbumView(profileId: user.id),
           ],
         ),
       ),
@@ -377,129 +378,6 @@ class _VisitorActions extends StatelessWidget {
                 ),
         ],
       ],
-    );
-  }
-}
-
-/// "Currículo de Ações": resumo das boas ações do usuário.
-class _ActionResume extends StatelessWidget {
-  const _ActionResume({required this.state});
-
-  final ProfileState state;
-
-  @override
-  Widget build(BuildContext context) {
-    final user = state.user!;
-    final donations = state.history.where((t) => t.kind == TransactionKind.donation).toList();
-    final donated = donations.fold<double>(0, (sum, t) => sum - t.money);
-    final byType = <PostType, int>{};
-    for (final p in state.posts) {
-      byType[p.type] = (byType[p.type] ?? 0) + 1;
-    }
-    return ListView(
-      padding: const EdgeInsets.fromLTRB(20, 16, 20, 100),
-      children: [
-        Row(
-          children: [
-            _ResumeCard(icon: Icons.bolt_rounded, value: '${user.xp}', label: 'XP total'),
-            const SizedBox(width: 12),
-            _ResumeCard(
-              icon: Icons.volunteer_activism_rounded,
-              value: state.isMe ? Formatters.currency(donated) : '${state.posts.length}',
-              label: state.isMe ? 'Doado' : 'Ações publicadas',
-            ),
-          ],
-        ),
-        const SizedBox(height: 20),
-        Text('Ações por tipo', style: context.text.titleMedium),
-        const SizedBox(height: 8),
-        if (byType.isEmpty) const Text('Nenhuma ação publicada ainda.', style: TextStyle(color: AppColors.textMuted)),
-        for (final MapEntry(key: type, value: count) in byType.entries)
-          ListTile(
-            contentPadding: EdgeInsets.zero,
-            leading: CircleAvatar(
-              backgroundColor: PostCover.colorsFor(type).last.withValues(alpha: 0.12),
-              child: Icon(AppIcons.postType(type), color: PostCover.colorsFor(type).last),
-            ),
-            title: Text(type.label),
-            trailing: Text('$count', style: context.text.titleMedium),
-          ),
-        if (state.isMe && donations.isNotEmpty) ...[
-          const SizedBox(height: 12),
-          Text('Doações recentes', style: context.text.titleMedium),
-          for (final t in donations)
-            ListTile(
-              contentPadding: EdgeInsets.zero,
-              title: Text(t.description, maxLines: 1, overflow: TextOverflow.ellipsis),
-              subtitle: Text(Formatters.date(t.date)),
-              trailing: Text(
-                Formatters.currency(-t.money),
-                style: const TextStyle(fontWeight: FontWeight.w700, color: AppColors.success),
-              ),
-            ),
-        ],
-      ],
-    );
-  }
-}
-
-class _ResumeCard extends StatelessWidget {
-  const _ResumeCard({required this.icon, required this.value, required this.label});
-
-  final IconData icon;
-  final String value;
-  final String label;
-
-  @override
-  Widget build(BuildContext context) {
-    return Expanded(
-      child: Container(
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(color: AppColors.surface, borderRadius: BorderRadius.circular(12)),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Icon(icon, color: AppColors.orange),
-            const SizedBox(height: 8),
-            Text(value, style: context.text.titleLarge),
-            Text(label, style: const TextStyle(fontSize: 12, color: AppColors.textMuted)),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-/// "Álbum de boas ações": grade com as capas das publicações.
-class _Album extends StatelessWidget {
-  const _Album({required this.posts, required this.name});
-
-  final List<Post> posts;
-  final String name;
-
-  @override
-  Widget build(BuildContext context) {
-    if (posts.isEmpty) {
-      return const EmptyState(message: 'O álbum ainda está vazio.', icon: Icons.photo_library_outlined);
-    }
-    return GridView.builder(
-      padding: const EdgeInsets.fromLTRB(4, 4, 4, 100),
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 3,
-        mainAxisSpacing: 4,
-        crossAxisSpacing: 4,
-      ),
-      itemCount: posts.length,
-      itemBuilder: (context, i) => InkWell(
-        onTap: () => context.push(AppRoutes.post(posts[i].id)),
-        child: PostCover(
-          type: posts[i].type,
-          imageUrl: posts[i].imageUrl,
-          height: double.infinity,
-          radius: 4,
-          iconSize: 32,
-        ),
-      ),
     );
   }
 }

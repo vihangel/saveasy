@@ -27,7 +27,8 @@ class AchievementsPage extends StatelessWidget {
       listener: (context, state) => context.showMessage(state.message!),
       builder: (context, state) {
         final daily = state.items.where((a) => a.daily).toList();
-        final general = state.items.where((a) => !a.daily).toList();
+        final weekly = state.items.where((a) => a.period == 'weekly').toList();
+        final general = state.items.where((a) => !a.daily && a.period != 'weekly').toList();
         return Scaffold(
           appBar: AppBar(leading: const AppBackButton(), title: const Text('Conquistas')),
           body: AsyncBody(
@@ -38,6 +39,8 @@ class AchievementsPage extends StatelessWidget {
                 if (user != null) LevelCard(user: user),
                 const SectionHeader(title: 'Faça objetivos diários'),
                 for (final a in daily) _AchievementTile(achievement: a),
+                if (weekly.isNotEmpty) const SectionHeader(title: 'Objetivos da semana'),
+                for (final a in weekly) _AchievementTile(achievement: a),
                 const SectionHeader(title: 'Conquistas populares'),
                 for (final a in general.where((a) => !a.completed)) _AchievementTile(achievement: a),
                 const SectionHeader(title: 'Concluídas'),

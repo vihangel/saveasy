@@ -57,6 +57,7 @@ class _SaveEasyAppState extends State<SaveEasyApp> {
         RepositoryProvider.value(value: deps.wallet),
         RepositoryProvider.value(value: deps.gamification),
         RepositoryProvider.value(value: deps.store),
+        RepositoryProvider.value(value: deps.engagement),
         RepositoryProvider.value(value: deps.stories),
         RepositoryProvider.value(value: deps.chat),
         RepositoryProvider.value(value: deps.notifications),

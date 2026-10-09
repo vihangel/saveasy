@@ -11,6 +11,7 @@ import '../../shared/utils/context_x.dart';
 import '../../shared/utils/formatters.dart';
 import '../../shared/widgets/widgets.dart';
 import 'post_detail_cubit.dart';
+import 'post_extras_section.dart';
 
 /// Detalhe de qualquer publicação (Doação 1-5, Evento 1-4, Ação Social 1-5,
 /// Atividade 1-4, Tutorial 1-2, Discussão 2-3). As seções específicas
@@ -107,6 +108,7 @@ class _Content extends StatelessWidget {
                     const SizedBox(height: 20),
                     ..._typeSection(context, post),
                     const SizedBox(height: 20),
+                    PostExtrasSection(post: post, isAuthor: cubit.isAuthor),
                     if (state.author != null) _AuthorCard(author: state.author!),
                     const SizedBox(height: 16),
                     _RewardInfo(post: post),

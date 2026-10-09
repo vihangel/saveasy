@@ -19,7 +19,12 @@ class EditProfileCubit extends Cubit<EditProfileState> {
   static const maxBadges = 3;
 
   Future<void> load() async {
-    final owned = (await _gamification.rewards()).where((r) => r.owned).toList();
+    final List<Reward> owned;
+    try {
+      owned = (await _gamification.rewards()).where((r) => r.owned).toList();
+    } on AppException {
+      return emit(state.copyWith(status: ViewStatus.success));
+    }
     emit(
       state.copyWith(
         status: ViewStatus.success,
@@ -56,15 +61,26 @@ class EditProfileCubit extends Cubit<EditProfileState> {
       return emit(state.copyWith(error: 'Nome e usuário são obrigatórios.'));
     }
     emit(state.copyWith(saving: true, error: null));
-    final updated = await _users.update(
-      state.user.copyWith(
-        name: name.trim(),
-        username: username.trim().replaceAll('@', ''),
-        bio: bio.trim(),
-        pronouns: pronouns,
-      ),
-    );
-    _session.updateUser(updated);
-    emit(state.copyWith(saving: false, saved: true, user: updated));
+    try {
+      await _users.update(
+        state.user.copyWith(
+          name: name.trim(),
+          username: username.trim().replaceAll('@', ''),
+          bio: bio.trim(),
+          pronouns: pronouns,
+        ),
+      );
+      // Título e selos ficam no catálogo de recompensas (equipar).
+      final updated = await _gamification.equip(
+        userId: state.user.id,
+        titleId: state.user.titleId,
+        badgeIds: state.user.badgeIds,
+        coverId: state.user.coverRewardId,
+      );
+      _session.updateUser(updated);
+      emit(state.copyWith(saving: false, saved: true, user: updated));
+    } on AppException catch (e) {
+      emit(state.copyWith(saving: false, error: e.message));
+    }
   }
 }

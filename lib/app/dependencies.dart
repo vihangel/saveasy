@@ -18,6 +18,7 @@ class AppDependencies {
     required this.posts,
     required this.wallet,
     required this.gamification,
+    required this.engagement,
     required this.store,
     required this.stories,
     required this.chat,
@@ -39,7 +40,8 @@ class AppDependencies {
     users: MockUserRepository(db),
     posts: MockPostRepository(db),
     wallet: WalletRepository(db),
-    gamification: GamificationRepository(db),
+    gamification: MockGamificationRepository(db),
+    engagement: MockEngagementRepository(db),
     store: StoreRepository(db),
     stories: MockStoryRepository(db),
     chat: MockChatRepository(db),
@@ -54,7 +56,8 @@ class AppDependencies {
     users: SupabaseUserRepository(client),
     posts: SupabasePostRepository(client),
     wallet: SupabaseWalletRepository(client, db),
-    gamification: GamificationRepository(db),
+    gamification: SupabaseGamificationRepository(client),
+    engagement: SupabaseEngagementRepository(client),
     store: StoreRepository(db),
     stories: SupabaseStoryRepository(client),
     chat: SupabaseChatRepository(client),
@@ -70,6 +73,7 @@ class AppDependencies {
   final PostRepository posts;
   final WalletRepository wallet;
   final GamificationRepository gamification;
+  final EngagementRepository engagement;
   final StoreRepository store;
   final StoryRepository stories;
   final ChatRepository chat;

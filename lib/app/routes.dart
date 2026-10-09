@@ -30,6 +30,8 @@ abstract final class AppRoutes {
   static String editPost(String id) => '/post/$id/edit';
   static String donate(String postId) => '/post/$postId/donate';
   static String eventConfirmed(String postId) => '/post/$postId/confirmed';
+  static String participants(String postId) => '/post/$postId/participants';
+  static String itemRequests(String postId) => '/post/$postId/requests';
 
   static String stories(int index) => '/stories/$index';
   static const newStory = '/stories/new';
@@ -41,6 +43,8 @@ abstract final class AppRoutes {
   static const editProfile = '/profile/edit';
   static const settings = '/settings';
   static const saved = '/saved';
+  static String activity(String userId) => '/users/$userId/activity';
+  static const invite = '/invite';
   static String follows(String userId, {bool following = false}) =>
       '/users/$userId/follows${following ? '?kind=following' : ''}';
 

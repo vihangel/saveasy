@@ -14,5 +14,8 @@ abstract class CreatePostState with _$CreatePostState {
     @Default(ViewStatus.initial) ViewStatus status,
     String? error,
     String? createdPostId,
+
+    /// Pessoas marcadas (salvas depois de criar/editar).
+    @Default(<AppUser>[]) List<AppUser> mentions,
   }) = _CreatePostState;
 }

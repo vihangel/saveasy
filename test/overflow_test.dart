@@ -65,6 +65,10 @@ void main() {
     '/achievements',
     '/store',
     '/store/pr_portacopo',
+    '/invite',
+    '/users/u_me/activity',
+    '/post/p_sangue/participants',
+    '/post/p_reciclagem/requests',
   ];
 
   const publicRoutes = ['/welcome', '/login', '/forgot-password', '/signup', '/signup/verify'];
