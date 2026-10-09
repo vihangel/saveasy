@@ -19,9 +19,11 @@ Legenda: ✅ no Supabase · 🟡 ainda no mock local · ⏳ pendente
 - **Senhas vazadas (pendência 4):** só existe no plano Pro do Supabase; o
   projeto está no plano Free. Fica para quando migrar de plano.
 - **Templates de e-mail (pendência 1):** o Supabase só permite editar com
-  **SMTP próprio** (pendência 6). Até lá, os e-mails padrão já mandam o
-  código `{{ .Token }}` de 6 dígitos no envio por OTP; para editar texto e
-  marca, configure o SMTP (sugestão: Resend, plano gratuito) e me avise.
+  **SMTP próprio** (pendência 6). Os e-mails padrão mandam só o **link** de
+  confirmação (sem o código de 6 dígitos que a tela do app pede). Com o Site
+  URL e os redirecionamentos já configurados, clicar no link confirma a conta
+  e entra no app (web e celular). Para o código aparecer no e-mail, configure
+  o SMTP (sugestão: Resend, plano gratuito) e me avise que eu edito os templates.
 
 ### Feito no AdMob (pelo navegador)
 - Apps **Save Easy Android** e **Save Easy iOS** criados (ainda "não
