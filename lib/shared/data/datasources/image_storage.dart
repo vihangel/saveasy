@@ -10,11 +10,15 @@ import 'image_storage_io.dart' if (dart.library.js_interop) 'image_storage_web.d
 enum ImageBucket {
   avatars('avatars'),
   postCovers('post-covers'),
-  stories('stories');
+  stories('stories'),
 
-  const ImageBucket(this.id);
+  /// Documentos da verificação de conta (privado: só o dono e a equipe).
+  verificationDocs('verification-docs', isPrivate: true);
+
+  const ImageBucket(this.id, {this.isPrivate = false});
 
   final String id;
+  final bool isPrivate;
 }
 
 /// Guarda as imagens escolhidas pelo usuário e devolve uma referência em

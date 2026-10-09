@@ -80,7 +80,14 @@ class _Content extends StatelessWidget {
                     onPressed: cubit.toggleSave,
                   ),
                   IconButton(icon: const Icon(Icons.share_outlined), onPressed: cubit.share),
-                  if (cubit.isAuthor) _AuthorMenu(post: post),
+                  if (cubit.isAuthor)
+                    _AuthorMenu(post: post)
+                  else
+                    IconButton(
+                      tooltip: 'Denunciar',
+                      icon: const Icon(Icons.flag_outlined),
+                      onPressed: () => showReportSheet(context, ReportTarget.post, post.id),
+                    ),
                 ],
                 flexibleSpace: FlexibleSpaceBar(
                   background: PostCover(type: post.type, imageUrl: post.imageUrl, height: 280, radius: 0, iconSize: 72),
@@ -134,6 +141,9 @@ class _Content extends StatelessWidget {
                         onLike: () => cubit.toggleCommentLike(comment.id),
                         onDelete: comment.authorId != null && comment.authorId == context.currentUser.id
                             ? () => cubit.deleteComment(comment.id)
+                            : null,
+                        onReport: comment.authorId != null && comment.authorId != context.currentUser.id
+                            ? () => showReportSheet(context, ReportTarget.comment, comment.id)
                             : null,
                       ),
                   ],

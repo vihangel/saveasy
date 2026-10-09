@@ -6,13 +6,14 @@ import '../utils/formatters.dart';
 import 'user_avatar.dart';
 
 class CommentTile extends StatelessWidget {
-  const CommentTile({super.key, required this.comment, this.onLike, this.onDelete});
+  const CommentTile({super.key, required this.comment, this.onLike, this.onDelete, this.onReport});
 
   final Comment comment;
   final VoidCallback? onLike;
 
   /// Só para o autor do comentário.
   final VoidCallback? onDelete;
+  final VoidCallback? onReport;
 
   @override
   Widget build(BuildContext context) {
@@ -68,6 +69,16 @@ class CommentTile extends StatelessWidget {
                       'Responder',
                       style: TextStyle(fontSize: 12, color: AppColors.primary, fontWeight: FontWeight.w600),
                     ),
+                    if (onReport != null) ...[
+                      const SizedBox(width: 16),
+                      InkWell(
+                        onTap: onReport,
+                        child: const Text(
+                          'Denunciar',
+                          style: TextStyle(fontSize: 12, color: AppColors.textMuted, fontWeight: FontWeight.w600),
+                        ),
+                      ),
+                    ],
                     if (onDelete != null) ...[
                       const SizedBox(width: 16),
                       InkWell(

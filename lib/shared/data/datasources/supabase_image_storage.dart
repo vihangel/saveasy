@@ -30,7 +30,8 @@ class SupabaseImageStorage extends ImageStorage {
     } on StorageException {
       throw const AppException('Não foi possível enviar a imagem.');
     }
-    return _client.storage.from(bucket.id).getPublicUrl(path);
+    // Bucket privado: devolve só o caminho (a equipe abre com link temporário).
+    return bucket.isPrivate ? path : _client.storage.from(bucket.id).getPublicUrl(path);
   }
 
   @override

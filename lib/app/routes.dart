@@ -63,5 +63,11 @@ abstract final class AppRoutes {
   static const orders = '/orders';
   static const finance = '/finance';
   static const ads = '/ads';
+  static const verification = '/settings/verification';
+  static const blocked = '/settings/blocked';
+  static const admin = '/admin';
+
+  /// Pública: abre sem login.
+  static const transparency = '/transparencia';
   static const newAd = '/ads/new';
 }

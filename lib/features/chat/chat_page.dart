@@ -59,6 +59,25 @@ class _ChatPageState extends State<ChatPage> {
         return Scaffold(
           appBar: AppBar(
             leading: const AppBackButton(fallback: AppRoutes.messages),
+            actions: [
+              if (thread?.peerId != null && !(thread?.isGroup ?? true))
+                PopupMenuButton<String>(
+                  onSelected: (action) async {
+                    final peer = thread!.peerId!;
+                    if (action == 'report') return showReportSheet(context, ReportTarget.profile, peer);
+                    try {
+                      final (blocked, _) = await context.read<ModerationRepository>().toggleBlock(peer);
+                      if (context.mounted) context.showMessage(blocked ? 'Perfil bloqueado.' : 'Perfil desbloqueado.');
+                    } on AppException catch (e) {
+                      if (context.mounted) context.showMessage(e.message, error: true);
+                    }
+                  },
+                  itemBuilder: (_) => const [
+                    PopupMenuItem(value: 'block', child: Text('Bloquear / desbloquear')),
+                    PopupMenuItem(value: 'report', child: Text('Denunciar')),
+                  ],
+                ),
+            ],
             centerTitle: false,
             titleSpacing: 0,
             title: thread == null

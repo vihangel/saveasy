@@ -66,4 +66,16 @@ void main() {
     expect(campaign.status, AdStatus.pendingPayment);
     expect((await ads.myCampaigns()).single.id, campaign.id);
   });
+
+  test('denunciar e bloquear (mock)', () async {
+    final moderation = MockModerationRepository(db);
+    await moderation.report(ReportTarget.post, 'p_escola', ReportReason.spam, details: 'teste');
+    expect((await moderation.reports()).single.reason, ReportReason.spam);
+    final other = db.users.firstWhere((u) => u.id != MockSeed.demoUserId);
+    final (blocked, _) = await moderation.toggleBlock(other.id);
+    expect(blocked, isTrue);
+    expect((await moderation.blocked()).single.id, other.id);
+    final (unblocked, _) = await moderation.toggleBlock(other.id);
+    expect(unblocked, isFalse);
+  });
 }

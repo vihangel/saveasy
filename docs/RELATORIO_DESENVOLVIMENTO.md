@@ -7,6 +7,92 @@ Legenda: ✅ no Supabase · 🟡 ainda no mock local · ⏳ pendente
 
 ---
 
+## Entrega 6 · Moderação, bloqueios, verificação, painel da equipe e transparência (08/10/2026)
+
+### Resumo
+- Migration `20261008000011_moderation_admin.sql` (aplicada). **Com ela, as
+  6 entregas do roadmap estão concluídas** (ver "Situação geral" abaixo).
+- Denunciar post, comentário, perfil, conversa e story.
+- Bloquear perfis: some do feed, não dá para seguir, comentar nem mandar
+  mensagem (vale nos dois sentidos, garantido no banco por trigger).
+- Suspensão temporária de contas (não publicam, comentam nem conversam).
+- Pedido de verificação com foto do documento em bucket **privado**.
+- **Painel da equipe** (admin/moderador): resumo, denúncias (arquivar,
+  remover, remover + suspender), verificações (abrir documento por link
+  temporário, aprovar/recusar), anúncios em análise (aprovar ou recusar com
+  reembolso e estorno do fundo) e repasses (pago/recusado).
+- **Página pública de transparência** (`/transparencia`, abre sem login):
+  saldo e movimentações do fundo, total doado, campanhas, ações, voluntários
+  e quanto veio de anúncios.
+- 33 testes automatizados (moderação + 4 rotas novas no overflow).
+
+### Banco (o que entrou)
+| Área | Tabelas | Regras principais |
+| --- | --- | --- |
+| Denúncias | `reports` | 1 denúncia aberta por pessoa e alvo; quem denunciou fica anônimo para o autor; resolver vale para todas as denúncias do mesmo alvo e notifica o autor |
+| Bloqueios | `blocks` | Desfaz o "seguir" dos dois lados; feed sem os bloqueados; triggers barram seguir, comentar e mensagem direta |
+| Suspensão | `profiles.suspended_until` | Só a equipe altera; triggers barram post, story, comentário, mensagem; posts do suspenso saem do feed |
+| Verificação | `verification_requests` + bucket `verification-docs` | Só contas não pessoais; documento visível só ao dono e à equipe; aprovar marca `verified` (anúncio imediato e repasses) |
+| Equipe | `profiles.role` (admin/moderator) | Todas as RPCs do painel checam a função no banco; o app só mostra o menu |
+
+### Funcionalidades e como validar
+
+| # | Funcionalidade | Status | Como validar |
+| --- | --- | :-: | --- |
+| 85 | Denunciar publicação | ✅ | Detalhe de post de outra pessoa → bandeira → motivo → Enviar |
+| 86 | Denunciar comentário / story / perfil / conversa | ✅ | "Denunciar" no comentário; bandeira no story; ⋮ no perfil e no chat |
+| 87 | Bloquear e desbloquear | ✅ | ⋮ no perfil ou no chat; Configurações → Perfis bloqueados |
+| 88 | Pedir verificação | ✅ | Conta comunidade/empresa/influenciador: Configurações → Verificação da conta |
+| 89 | Painel da equipe | ✅ | Configurações → Painel da equipe (só `role` admin/moderator) |
+| 90 | Resolver denúncia | ✅ | Painel → Denúncias → Arquivar / Remover / Remover e suspender |
+| 91 | Aprovar verificação, anúncio e repasse | ✅ | Abas Verificações, Anúncios e Repasses |
+| 92 | Transparência pública | ✅ | `/transparencia` (também em Configurações → Transparência) |
+| 93 | Recurso/contestação do autor | ⏳ | Hoje o autor recebe a notificação; o recurso é pelo suporte |
+| 94 | Filtro automático de palavrões/links | ⏳ | Fora desta rodada |
+
+### Validação feita
+No navegador: denúncia do post "Equipamentos para brigadistas" com motivo
+"Informação falsa" → conta de teste promovida a admin **só durante a
+validação** → painel mostrou a denúncia com prévia do conteúdo → arquivada →
+conta voltou para `user` (conferido: nenhum perfil com papel de equipe) →
+página de transparência. No SQL: denúncia duplicada ignorada, painel negado
+para usuário comum, bloqueio barrando seguir e mensagem e tirando a pessoa do
+feed, remoção + suspensão (post escondido, autor suspenso, notificado),
+verificação aprovada e transparência como `anon`.
+
+### Pendências de configuração (novas)
+10. **Definir a equipe**: no SQL Editor, `update profiles set role = 'admin'
+    where username = '...'` para quem vai moderar. Nunca dar papel de
+    equipe à conta de teste (a senha dela está no repositório).
+
+### Decisões tomadas nesta entrega (validar)
+- Suspensão padrão de 7 dias (a moderação pode mudar por denúncia).
+- Recusar anúncio reembolsa o pagamento e tira do fundo os 30% que tinham entrado.
+- Transparência mostra só números agregados e movimentações do fundo (sem nomes).
+
+---
+
+## Situação geral (fim do roadmap)
+
+| Fase do roadmap | Entrega | Situação |
+| --- | --- | --- |
+| 1 · Conta e perfil | 1, 6 | ✅ (login social depende da pendência 3) |
+| 2 · Publicações | 1, 3 | ✅ |
+| 3 · Participação e gamificação | 3 | ✅ (QR lido pela câmera ⏳) |
+| 4 · Stories, mensagens, notificações | 2 | ✅ (push depende da pendência 7) |
+| 5 · Dinheiro | 4 | ✅ em sandbox (dinheiro real depende da pendência 8) |
+| 6 · Monetização com empresas | 5 | ✅ (AdMob e relatório ESG ⏳) |
+| 7 · Loja | 4 | ✅ |
+| 8 · Plataforma (admin, moderação, transparência) | 6 | ✅ (publicação nas lojas ⏳) |
+
+**O que falta para lançar** (todas fora do código ou dependem de contas/credenciais):
+pendências 1–10 acima (e-mail com código, URLs, Google/Facebook, senhas
+vazadas, remover contas de teste/demo, SMTP, push/Firebase, gateway de
+pagamento + compras no app, AdMob, definir a equipe), mais publicar os apps
+nas lojas (Apple/Google) e um projeto Supabase separado para produção.
+
+---
+
 ## Entrega 5 · Anúncios (08/10/2026)
 
 ### Resumo

@@ -365,6 +365,28 @@ class _VisitorActions extends StatelessWidget {
               onPressed: () => context.push(AppRoutes.sendCoins(user.id)),
               icon: const Icon(Icons.monetization_on_outlined),
             ),
+            PopupMenuButton<String>(
+              tooltip: 'Mais opções',
+              onSelected: (action) async {
+                if (action == 'report') return showReportSheet(context, ReportTarget.profile, user.id);
+                try {
+                  final (blocked, me) = await context.read<ModerationRepository>().toggleBlock(user.id);
+                  if (!context.mounted) return;
+                  context.read<SessionCubit>().updateUser(me);
+                  context.showMessage(
+                    blocked
+                        ? 'Perfil bloqueado. Vocês não verão mais as publicações um do outro.'
+                        : 'Perfil desbloqueado.',
+                  );
+                } on AppException catch (e) {
+                  if (context.mounted) context.showMessage(e.message, error: true);
+                }
+              },
+              itemBuilder: (_) => const [
+                PopupMenuItem(value: 'block', child: Text('Bloquear / desbloquear')),
+                PopupMenuItem(value: 'report', child: Text('Denunciar perfil')),
+              ],
+            ),
           ],
         ),
         if (user.accountType == AccountType.community) ...[

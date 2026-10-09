@@ -92,18 +92,41 @@ class SettingsPage extends StatelessWidget {
             trailing: const Icon(Icons.chevron_right_rounded),
             onTap: () => context.push(AppRoutes.saved),
           ),
-          if (user.verificationStatus != null && user.accountType.name != 'personal')
+          if (user.accountType.name != 'personal')
             ListTile(
               leading: const Icon(Icons.verified_outlined),
               title: const Text('Verificação da conta'),
               subtitle: Text(switch (user.verificationStatus) {
                 'verified' => 'Verificada',
                 'pending' => 'Em análise',
-                'rejected' => 'Recusada. Fale com o suporte',
-                _ => 'Não verificada. Necessária para receber doações',
+                'rejected' => 'Recusada. Toque para enviar de novo',
+                _ => 'Não verificada. Necessária para repasses e anúncios imediatos',
               }),
+              trailing: const Icon(Icons.chevron_right_rounded),
+              onTap: () => context.push(AppRoutes.verification),
+            ),
+          ListTile(
+            leading: const Icon(Icons.block_rounded),
+            title: const Text('Perfis bloqueados'),
+            trailing: const Icon(Icons.chevron_right_rounded),
+            onTap: () => context.push(AppRoutes.blocked),
+          ),
+          if (user.isStaff)
+            ListTile(
+              leading: const Icon(Icons.admin_panel_settings_rounded, color: AppColors.primary),
+              title: const Text('Painel da equipe'),
+              subtitle: const Text('Moderação, verificações, anúncios e repasses'),
+              trailing: const Icon(Icons.chevron_right_rounded),
+              onTap: () => context.push(AppRoutes.admin),
             ),
           const _Section('Sobre'),
+          ListTile(
+            leading: const Icon(Icons.account_balance_rounded),
+            title: const Text('Transparência'),
+            subtitle: const Text('Fundo de doações e números da plataforma'),
+            trailing: const Icon(Icons.chevron_right_rounded),
+            onTap: () => context.push(AppRoutes.transparency),
+          ),
           ListTile(
             leading: const Icon(Icons.description_outlined),
             title: const Text('Termos de uso'),

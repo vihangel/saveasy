@@ -75,6 +75,10 @@ void main() {
     '/store/manage/new',
     '/ads',
     '/ads/new',
+    '/settings/verification',
+    '/settings/blocked',
+    '/admin',
+    '/transparencia',
   ];
 
   const publicRoutes = ['/welcome', '/login', '/forgot-password', '/signup', '/signup/verify'];

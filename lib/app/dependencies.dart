@@ -15,6 +15,7 @@ class AppDependencies {
   AppDependencies({
     required this.auth,
     required this.ads,
+    required this.moderation,
     required this.users,
     required this.posts,
     required this.wallet,
@@ -39,6 +40,7 @@ class AppDependencies {
   }) => AppDependencies(
     auth: MockAuthRepository(db, storage),
     ads: MockAdsRepository(),
+    moderation: MockModerationRepository(db),
     users: MockUserRepository(db),
     posts: MockPostRepository(db),
     wallet: MockWalletRepository(db),
@@ -56,6 +58,7 @@ class AppDependencies {
   factory AppDependencies.supabase(SupabaseClient client, MockDatabase db, LocalStorage storage) => AppDependencies(
     auth: SupabaseAuthRepository(client, storage),
     ads: SupabaseAdsRepository(client),
+    moderation: SupabaseModerationRepository(client),
     users: SupabaseUserRepository(client),
     posts: SupabasePostRepository(client),
     wallet: SupabaseWalletRepository(client),
@@ -73,6 +76,7 @@ class AppDependencies {
 
   final AuthRepository auth;
   final AdsRepository ads;
+  final ModerationRepository moderation;
   final UserRepository users;
   final PostRepository posts;
   final WalletRepository wallet;

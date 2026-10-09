@@ -29,6 +29,10 @@ import '../features/follows/follow_list_page.dart';
 import '../features/home/home_shell.dart';
 import '../features/messages/messages_page.dart';
 import '../features/invite/invite_page.dart';
+import '../features/moderation/admin_page.dart';
+import '../features/moderation/blocked_page.dart';
+import '../features/moderation/transparency_page.dart';
+import '../features/moderation/verification_page.dart';
 import '../features/notifications/notifications_page.dart';
 import '../features/onboarding/welcome_page.dart';
 import '../features/post_detail/item_requests_page.dart';
@@ -181,6 +185,10 @@ GoRouter createRouter(SessionCubit session) {
       GoRoute(path: AppRoutes.invite, builder: (_, _) => const InvitePage()),
       GoRoute(path: AppRoutes.orders, builder: (_, _) => const OrdersPage()),
       GoRoute(path: AppRoutes.finance, builder: (_, _) => const FinancePage()),
+      GoRoute(path: AppRoutes.verification, builder: (_, _) => const VerificationPage()),
+      GoRoute(path: AppRoutes.blocked, builder: (_, _) => const BlockedPage()),
+      GoRoute(path: AppRoutes.admin, builder: (_, _) => const AdminPage()),
+      GoRoute(path: AppRoutes.transparency, builder: (_, _) => const TransparencyPage()),
       GoRoute(
         path: AppRoutes.ads,
         builder: (_, _) => const AdsPage(),
@@ -279,8 +287,12 @@ GoRouter createRouter(SessionCubit session) {
 const _publicRoutes = {AppRoutes.welcome, AppRoutes.login};
 const _publicPrefixes = [AppRoutes.forgotPassword, AppRoutes.signUp];
 
+/// Abrem com ou sem login (ex.: transparência).
+const _openRoutes = {AppRoutes.transparency};
+
 String? _redirect(SessionState session, GoRouterState state) {
   final location = state.matchedLocation;
+  if (_openRoutes.contains(location) && session is! SessionUnknown) return null;
   final isPublic = _publicRoutes.contains(location) || _publicPrefixes.any(location.startsWith);
   // Link aberto antes da sessão ser restaurada: guarda para voltar depois da splash.
   final pending = state.uri.queryParameters['from'];
@@ -299,7 +311,9 @@ String? _redirect(SessionState session, GoRouterState state) {
       location.startsWith(AppRoutes.onboarding) ? null : AppRoutes.onboarding,
     SessionAuthenticated() when location.startsWith(AppRoutes.onboarding) => AppRoutes.home,
     SessionAuthenticated() when location == AppRoutes.splash =>
-      pending != null && !_isPublicPath(pending) ? pending : AppRoutes.home,
+      pending != null && (!_isPublicPath(pending) || _openRoutes.contains(Uri.parse(pending).path))
+          ? pending
+          : AppRoutes.home,
     SessionAuthenticated() when isPublic => AppRoutes.home,
     _ => null,
   };
@@ -307,7 +321,7 @@ String? _redirect(SessionState session, GoRouterState state) {
 
 bool _isPublicPath(String path) {
   final location = Uri.parse(path).path;
-  return _publicRoutes.contains(location) || _publicPrefixes.any(location.startsWith);
+  return _publicRoutes.contains(location) || _openRoutes.contains(location) || _publicPrefixes.any(location.startsWith);
 }
 
 /// Faz o go_router reavaliar o redirect quando a sessão muda.

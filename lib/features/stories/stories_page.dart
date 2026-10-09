@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../app/routes.dart';
 import '../../app/theme.dart';
 import '../../shared/data/datasources/image_storage.dart';
+import '../../shared/data/models/models.dart';
 import '../../shared/data/repositories/repositories.dart';
 import '../../shared/notifiers/session_cubit.dart';
 import '../../shared/utils/context_x.dart';
@@ -154,6 +155,15 @@ class _StoriesPageState extends State<StoriesPage> with SingleTickerProviderStat
                               ],
                             ),
                           ),
+                          if (story.authorId != context.currentUser.id)
+                            IconButton(
+                              tooltip: 'Denunciar',
+                              icon: const Icon(Icons.flag_outlined, color: Colors.white),
+                              onPressed: () {
+                                _progress.stop();
+                                showReportSheet(context, ReportTarget.story, story.id);
+                              },
+                            ),
                           if (story.authorId == context.currentUser.id)
                             IconButton(
                               tooltip: 'Excluir story',
