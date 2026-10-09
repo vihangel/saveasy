@@ -14,6 +14,7 @@ import '../shared/services/media_picker_service.dart';
 class AppDependencies {
   AppDependencies({
     required this.auth,
+    required this.ads,
     required this.users,
     required this.posts,
     required this.wallet,
@@ -37,6 +38,7 @@ class AppDependencies {
     MediaPickerService? mediaPicker,
   }) => AppDependencies(
     auth: MockAuthRepository(db, storage),
+    ads: MockAdsRepository(),
     users: MockUserRepository(db),
     posts: MockPostRepository(db),
     wallet: MockWalletRepository(db),
@@ -53,6 +55,7 @@ class AppDependencies {
 
   factory AppDependencies.supabase(SupabaseClient client, MockDatabase db, LocalStorage storage) => AppDependencies(
     auth: SupabaseAuthRepository(client, storage),
+    ads: SupabaseAdsRepository(client),
     users: SupabaseUserRepository(client),
     posts: SupabasePostRepository(client),
     wallet: SupabaseWalletRepository(client),
@@ -69,6 +72,7 @@ class AppDependencies {
   );
 
   final AuthRepository auth;
+  final AdsRepository ads;
   final UserRepository users;
   final PostRepository posts;
   final WalletRepository wallet;

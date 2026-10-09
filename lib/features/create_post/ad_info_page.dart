@@ -49,9 +49,11 @@ class AdInfoPage extends StatelessWidget {
               subtitle: Text(body),
             ),
           const SizedBox(height: 24),
-          PrimaryButton(
-            label: 'Criar propaganda',
+          PrimaryButton(label: 'Criar campanha de anúncio', onPressed: () => context.push(AppRoutes.newAd)),
+          const SizedBox(height: 8),
+          TextButton(
             onPressed: () => context.push(AppRoutes.createForm(PostType.ad.name)),
+            child: const Text('Só publicar uma propaganda no feed'),
           ),
         ],
       ),

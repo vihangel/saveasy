@@ -9,6 +9,9 @@ abstract class FeedState with _$FeedState {
     @Default('') String query,
     @Default(<Post>[]) List<Post> posts,
     @Default(<Story>[]) List<Story> stories,
+
+    /// Posts impulsionados (anúncios) misturados à lista.
+    @Default(<AdCampaign>[]) List<AdCampaign> sponsored,
     String? error,
   }) = _FeedState;
 }

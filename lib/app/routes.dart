@@ -62,4 +62,6 @@ abstract final class AppRoutes {
   static String editProduct(String id) => '/store/manage/$id';
   static const orders = '/orders';
   static const finance = '/finance';
+  static const ads = '/ads';
+  static const newAd = '/ads/new';
 }

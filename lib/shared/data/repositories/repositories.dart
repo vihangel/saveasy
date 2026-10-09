@@ -1,8 +1,10 @@
+export 'ads_repository.dart';
 export 'app_exception.dart';
 export 'auth_repository.dart';
 export 'chat_repository.dart';
 export 'engagement_repository.dart';
 export 'gamification_repository.dart';
+export 'mock/mock_ads_repository.dart';
 export 'mock/mock_auth_repository.dart';
 export 'mock/mock_chat_repository.dart';
 export 'mock/mock_engagement_repository.dart';
@@ -17,6 +19,7 @@ export 'notification_repository.dart';
 export 'post_repository.dart';
 export 'store_repository.dart';
 export 'story_repository.dart';
+export 'supabase/supabase_ads_repository.dart';
 export 'supabase/supabase_auth_repository.dart';
 export 'supabase/supabase_chat_repository.dart';
 export 'supabase/supabase_engagement_repository.dart';

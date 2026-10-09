@@ -127,12 +127,26 @@ class DonationProgress extends StatelessWidget {
 
 /// Card de publicação usado no feed e nos perfis.
 class PostCard extends StatelessWidget {
-  const PostCard({super.key, required this.post, this.commentsCount = 3, this.onLike, this.onShare});
+  const PostCard({
+    super.key,
+    required this.post,
+    this.commentsCount = 3,
+    this.onLike,
+    this.onShare,
+    this.sponsored = false,
+    this.onOpen,
+  });
 
   final Post post;
   final int commentsCount;
   final VoidCallback? onLike;
   final VoidCallback? onShare;
+
+  /// Post impulsionado (anúncio): mostra "Patrocinado".
+  final bool sponsored;
+
+  /// Chamado ao abrir a publicação (ex.: contar clique do anúncio).
+  final VoidCallback? onOpen;
 
   @override
   Widget build(BuildContext context) {
@@ -146,12 +160,23 @@ class PostCard extends StatelessWidget {
       ),
       clipBehavior: Clip.antiAlias,
       child: InkWell(
-        onTap: () => context.push(AppRoutes.post(post.id)),
+        onTap: () {
+          onOpen?.call();
+          context.push(AppRoutes.post(post.id));
+        },
         child: Padding(
           padding: const EdgeInsets.all(12),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              if (sponsored)
+                const Padding(
+                  padding: EdgeInsets.only(bottom: 6),
+                  child: Text(
+                    'Patrocinado',
+                    style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: AppColors.textMuted),
+                  ),
+                ),
               InkWell(
                 onTap: () => context.push(AppRoutes.user(post.authorId)),
                 child: Row(

@@ -73,6 +73,8 @@ void main() {
     '/finance',
     '/store/manage',
     '/store/manage/new',
+    '/ads',
+    '/ads/new',
   ];
 
   const publicRoutes = ['/welcome', '/login', '/forgot-password', '/signup', '/signup/verify'];

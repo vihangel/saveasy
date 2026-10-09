@@ -54,4 +54,16 @@ void main() {
     expect((await engagement.extras(postId)).mentions.single.id, friend.id);
     await cubit.close();
   });
+
+  test('orçamento de anúncio aplica desconto do plano e cidade extra', () async {
+    final ads = MockAdsRepository();
+    final week = await ads.quote(AdFormat.bar, AdPlan.weekly, ['Cuiabá']);
+    expect(week.days, 7);
+    expect(week.price, closeTo(9.90 * 7 * 0.85, 0.01));
+    final twoCities = await ads.quote(AdFormat.bar, AdPlan.weekly, ['Cuiabá', 'Várzea Grande']);
+    expect(twoCities.price, closeTo(week.price * 1.3, 0.02));
+    final campaign = await ads.create(format: AdFormat.bar, plan: AdPlan.daily, title: 'Ecoponto aberto');
+    expect(campaign.status, AdStatus.pendingPayment);
+    expect((await ads.myCampaigns()).single.id, campaign.id);
+  });
 }

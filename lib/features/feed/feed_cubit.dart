@@ -11,11 +11,14 @@ part 'feed_cubit.freezed.dart';
 part 'feed_state.dart';
 
 class FeedCubit extends Cubit<FeedState> {
-  FeedCubit(this._posts, this._stories, this._userId) : super(const FeedState());
+  FeedCubit(this._posts, this._stories, this._userId, {this.ads}) : super(const FeedState());
 
   final PostRepository _posts;
   final StoryRepository _stories;
   final String _userId;
+
+  /// Opcional: posts impulsionados.
+  final AdsRepository? ads;
   Timer? _debounce;
 
   Future<void> load() async {
@@ -27,7 +30,13 @@ class FeedCubit extends Cubit<FeedState> {
       ).wait;
       emit(state.copyWith(status: ViewStatus.success, posts: posts, stories: stories));
     } catch (_) {
-      emit(state.copyWith(status: ViewStatus.failure, error: 'Não foi possível carregar o feed.'));
+      return emit(state.copyWith(status: ViewStatus.failure, error: 'Não foi possível carregar o feed.'));
+    }
+    try {
+      final sponsored = await ads?.next(AdFormat.boostedPost, limit: 2) ?? const <AdCampaign>[];
+      if (!isClosed) emit(state.copyWith(sponsored: sponsored.where((c) => c.post != null).toList()));
+    } catch (_) {
+      // Anúncio não pode derrubar o feed.
     }
   }
 

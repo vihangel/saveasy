@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../app/routes.dart';
 import '../../app/theme.dart';
+import '../../shared/data/models/models.dart';
 import '../../shared/notifiers/session_cubit.dart';
 import '../../shared/widgets/widgets.dart';
 
@@ -98,6 +99,8 @@ class AppDrawer extends StatelessWidget {
             _Item(icon: Icons.storefront_rounded, label: 'Loja', onTap: () => open(AppRoutes.store)),
             _Item(icon: Icons.bookmark_rounded, label: 'Salvos', onTap: () => open(AppRoutes.saved)),
             _Item(icon: Icons.group_add_rounded, label: 'Convide amigos', onTap: () => open(AppRoutes.invite)),
+            if (user.accountType != AccountType.personal)
+              _Item(icon: Icons.campaign_rounded, label: 'Anúncios', onTap: () => open(AppRoutes.ads)),
             _Item(icon: Icons.settings_rounded, label: 'Configurações', onTap: () => open(AppRoutes.settings)),
             const Spacer(),
             _Item(

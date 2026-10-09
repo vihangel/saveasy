@@ -153,8 +153,14 @@ class FeedPage extends StatelessWidget {
       ],
       const SliverToBoxAdapter(child: SectionHeader(title: 'Publicações')),
       SliverList.builder(
-        itemCount: state.posts.length,
-        itemBuilder: (context, i) {
+        itemCount: state.posts.length + state.sponsored.length,
+        itemBuilder: (context, index) {
+          // Patrocinados entram depois do 2º e do 7º post.
+          final slots = [for (var k = 0; k < state.sponsored.length; k++) 2 + k * 6];
+          final slot = slots.indexOf(index);
+          if (slot >= 0) return _SponsoredPost(campaign: state.sponsored[slot]);
+          final i = index - slots.where((s) => s < index).length;
+          if (i >= state.posts.length) return const SizedBox.shrink();
           final post = state.posts[i];
           return PostCard(
             post: post,
@@ -168,6 +174,34 @@ class FeedPage extends StatelessWidget {
         },
       ),
     ];
+  }
+}
+
+class _SponsoredPost extends StatefulWidget {
+  const _SponsoredPost({required this.campaign});
+
+  final AdCampaign campaign;
+
+  @override
+  State<_SponsoredPost> createState() => _SponsoredPostState();
+}
+
+class _SponsoredPostState extends State<_SponsoredPost> {
+  @override
+  void initState() {
+    super.initState();
+    context.read<AdsRepository>().trackImpression(widget.campaign.id);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final post = widget.campaign.post!;
+    return PostCard(
+      post: post,
+      commentsCount: post.commentsCount,
+      sponsored: true,
+      onOpen: () => context.read<AdsRepository>().trackClick(widget.campaign.id),
+    );
   }
 }
 
@@ -299,5 +333,9 @@ class _HorizontalPosts extends StatelessWidget {
 }
 
 /// Cria o cubit do feed com as dependências do contexto.
-FeedCubit createFeedCubit(BuildContext context) =>
-    FeedCubit(context.read<PostRepository>(), context.read<StoryRepository>(), context.currentUser.id)..load();
+FeedCubit createFeedCubit(BuildContext context) => FeedCubit(
+  context.read<PostRepository>(),
+  context.read<StoryRepository>(),
+  context.currentUser.id,
+  ads: context.read<AdsRepository>(),
+)..load();

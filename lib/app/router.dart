@@ -5,6 +5,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
 import '../features/achievements/achievements_page.dart';
+import '../features/ads/ad_form_page.dart';
+import '../features/ads/ads_page.dart';
 import '../features/activity/activity_page.dart';
 import '../features/auth/forgot_password/forgot_password_cubit.dart';
 import '../features/auth/forgot_password/forgot_password_pages.dart';
@@ -179,6 +181,11 @@ GoRouter createRouter(SessionCubit session) {
       GoRoute(path: AppRoutes.invite, builder: (_, _) => const InvitePage()),
       GoRoute(path: AppRoutes.orders, builder: (_, _) => const OrdersPage()),
       GoRoute(path: AppRoutes.finance, builder: (_, _) => const FinancePage()),
+      GoRoute(
+        path: AppRoutes.ads,
+        builder: (_, _) => const AdsPage(),
+        routes: [GoRoute(path: 'new', builder: (_, _) => const AdFormPage())],
+      ),
       GoRoute(
         path: '/users/:id',
         builder: (context, state) => ProfilePage.route(context, state.pathParameters['id']!),

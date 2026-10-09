@@ -7,6 +7,66 @@ Legenda: ✅ no Supabase · 🟡 ainda no mock local · ⏳ pendente
 
 ---
 
+## Entrega 5 · Anúncios (08/10/2026)
+
+### Resumo
+- Migration `20261008000010_ads.sql` (aplicada).
+- Três formatos: **barra de anúncio** (fixa acima do menu inferior),
+  **post impulsionado** (no meio do feed, marcado "Patrocinado") e **story
+  patrocinado** (quem assiste ganha moedas, regra da Entrega 2).
+- **Gerenciador de anúncios** (menu → Anúncios, para empresa/influenciador/
+  comunidade): orçamento ao vivo, pagamento pelo checkout Pix, métricas
+  (impressões, cliques, CTR), pausar/retomar.
+- **30% de cada anúncio vai para o fundo de doações** (automático).
+- Campanhas de conta verificada entram no ar ao pagar; as demais vão para
+  análise (aprovação no painel admin da Entrega 6).
+- Webhook do gateway passa por `fulfill_payment_from_gateway` (só `service_role`).
+- 32 testes automatizados (orçamento/criação de campanha + 2 rotas no overflow).
+
+### Banco (o que entrou)
+| Área | Tabelas | Regras principais |
+| --- | --- | --- |
+| Preço | `private.settings` | Diária: barra R$ 9,90, post R$ 14,90, story R$ 7,90. Semanal −15%, mensal −30%. +30% por cidade extra |
+| Campanhas | `ad_campaigns` | Só empresa, influenciador e comunidade. Post impulsionado exige publicação própria. Status: aguardando pagamento → em análise/ativa → pausada/encerrada (cron a cada 30 min) |
+| Métricas | `ad_events` | Impressão conta 1× por pessoa/campanha por hora; clique sempre |
+| Veiculação | — | `next_ads`: ativa, da mesma UF e das cidades escolhidas, nunca o próprio anúncio, ordem aleatória |
+
+### Funcionalidades e como validar
+
+| # | Funcionalidade | Status | Como validar |
+| --- | --- | :-: | --- |
+| 74 | Barra de anúncio no app | ✅ | Início: "Ecoponto da Av. do CPA · Ver endereço" acima do menu. X fecha até reabrir o app |
+| 75 | "Anuncie aqui" quando não há anúncio | ✅ | Só para contas que podem anunciar |
+| 76 | Post impulsionado no feed | ✅ | Rolar o feed: card "Patrocinado" do Abrigo Patas do Coxipó |
+| 77 | Story patrocinado | ✅ | Ao ativar uma campanha "story", ela vira story de propaganda |
+| 78 | Criar campanha com orçamento ao vivo | ✅ | Conta empresa/comunidade: Menu → Anúncios → Nova campanha |
+| 79 | Pagar campanha (Pix sandbox) | ✅ | Ao final do formulário, ou "Pagar" na lista |
+| 80 | Métricas, pausar e retomar | ✅ | Lista de campanhas |
+| 81 | 30% para o fundo de doações | ✅ | `fund_ledger` com `ad_share` após o pagamento |
+| 82 | Aprovar/recusar campanhas em análise | ⏳ | Painel admin (Entrega 6) |
+| 83 | AdMob como reserva | ⏳ | Pendência 9 (precisa de conta AdMob e só vale no app mobile) |
+| 84 | Relatório de impacto (PDF) para empresas | ⏳ | Fora desta rodada |
+
+### Validação feita
+No navegador: barra com a campanha da EcoCuiabá acima do menu (sem conflito
+com o botão "+") e post patrocinado no feed; impressões registradas no banco
+uma única vez apesar de várias recargas. No SQL (conta EcoCuiabá): orçamento
+semanal com 2 cidades (R$ 76,58), criação, cobrança, pagamento sandbox →
+campanha ativa por 7 dias (conta verificada), fundo +30%, veiculação para a
+conta de teste, métricas de impressão (com limite) e clique, e recusa para
+conta pessoal.
+
+### Pendências de configuração (novas)
+9. **AdMob** (opcional, só Android/iOS): criar conta e unidades de anúncio;
+   usar como reserva quando não houver campanha local na barra.
+
+### Decisões tomadas nesta entrega (validar)
+- Preços iniciais e descontos acima (configuráveis no banco).
+- Comunidades e influenciadores também podem anunciar (não só empresas).
+- Anúncio da barra pode ser fechado pela pessoa (some até reabrir o app).
+
+---
+
 ## Entrega 4 · Pagamentos (sandbox), doações, inscrições e loja (08/10/2026)
 
 ### Resumo
@@ -21,7 +81,7 @@ Legenda: ✅ no Supabase · 🟡 ainda no mock local · ⏳ pendente
   pedido de repasse.
 - Edge Functions prontas no repositório (`supabase/functions/payment-pix`,
   `payment-webhook`) para Mercado Pago, **não publicadas** (precisam de credenciais).
-- 34 testes automatizados (carteira reescrita + 4 rotas novas no overflow).
+- 31 testes automatizados (carteira reescrita + 4 rotas novas no overflow).
 
 ### Banco (o que entrou)
 | Área | Tabelas | Regras principais |

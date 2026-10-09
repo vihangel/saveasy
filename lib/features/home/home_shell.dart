@@ -6,6 +6,7 @@ import '../../app/routes.dart';
 import '../../app/theme.dart';
 import '../../shared/data/repositories/repositories.dart';
 import '../../shared/notifiers/badges_cubit.dart';
+import '../../shared/widgets/widgets.dart';
 import 'app_drawer.dart';
 
 /// Estrutura principal com a barra inferior (Início, Mensagens, Criar,
@@ -34,7 +35,12 @@ class HomeShell extends StatelessWidget {
     return Scaffold(
       key: scaffoldKey,
       drawer: const AppDrawer(),
-      body: navigationShell,
+      body: Column(
+        children: [
+          Expanded(child: navigationShell),
+          const AdBar(),
+        ],
+      ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       floatingActionButton: FloatingActionButton(
         onPressed: () => context.push(AppRoutes.create),

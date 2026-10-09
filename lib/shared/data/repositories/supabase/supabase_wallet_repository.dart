@@ -35,10 +35,15 @@ class SupabaseWalletRepository implements WalletRepository {
 
   @override
   Future<Payment> createPayment(PaymentIntent intent) => supabaseGuard(() async {
-    final json = await _client.rpc<Map<String, dynamic>>(
-      'create_payment',
-      params: {'p_kind': _kind(intent.kind), 'p': _params(intent)},
-    );
+    final json = intent.kind == PaymentKind.adCampaign
+        ? await _client.rpc<Map<String, dynamic>>(
+            'ad_campaign_payment',
+            params: {'p_campaign_id': int.parse(intent.params['campaignId']! as String)},
+          )
+        : await _client.rpc<Map<String, dynamic>>(
+            'create_payment',
+            params: {'p_kind': _kind(intent.kind), 'p': _params(intent)},
+          );
     final payment = Payment.fromJson(json);
     if (payment.sandbox) return payment;
     // Produção: a Edge Function gera o Pix real no gateway.

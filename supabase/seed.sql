@@ -244,3 +244,21 @@ begin
     ('a1000000-0000-4000-8000-000000000004', 'Porta-copos de garrafa PET', 'Feito com material da coleta seletiva.', 19.90, 'recycle', null),
     ('a1000000-0000-4000-8000-000000000005', 'Cesta básica solidária', 'Você compra e a Mãos do Porto entrega a uma família.', 89.90, 'shopping_bag', null);
 end $$;
+
+-- Entrega 5: campanhas de anúncio ativas para a demonstração.
+do $$
+declare
+  v_story bigint;
+begin
+  if exists (select 1 from public.ad_campaigns) then return; end if;
+  insert into public.ad_campaigns (owner_id, format, plan, title, body, cta_label, link_url, cities, status, price,
+                                   starts_at, ends_at)
+  values ('a1000000-0000-4000-8000-000000000004', 'bar', 'monthly', 'Ecoponto da Av. do CPA',
+          'Leve seu reciclável e ganhe desconto em parceiros.', 'Ver endereço', 'https://www.google.com/maps/search/ecoponto+cuiaba',
+          array['Cuiabá', 'Várzea Grande'], 'active', 207.90, now(), now() + interval '30 days');
+  insert into public.ad_campaigns (owner_id, format, plan, title, body, post_id, cities, status, price, starts_at, ends_at)
+  select a1, 'boosted_post', 'monthly', p.title, '', p.id, array['Cuiabá'], 'active', 312.90, now(), now() + interval '30 days'
+    from (select 'a1000000-0000-4000-8000-000000000003'::uuid as a1) x
+    join public.posts p on p.author_id = x.a1 and p.type = 'donation'
+   limit 1;
+end $$;
