@@ -68,6 +68,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
         image: 'assets/images/header_forgot.png',
         child: Form(
           key: _form,
+          autovalidateMode: AutovalidateMode.onUserInteractionIfError,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
@@ -178,6 +179,7 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
         image: 'assets/images/header_reset.png',
         child: Form(
           key: _form,
+          autovalidateMode: AutovalidateMode.onUserInteractionIfError,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [

@@ -11,6 +11,7 @@ import '../../../shared/utils/context_x.dart';
 import '../../../shared/utils/validators.dart';
 import '../../../shared/widgets/widgets.dart';
 import 'sign_up_cubit.dart';
+import '../../../shared/utils/legal_texts.dart';
 
 /// "Sign Up Page": e-mail, senha, termos e login social.
 class SignUpPage extends StatefulWidget {
@@ -37,13 +38,20 @@ class _SignUpPageState extends State<SignUpPage> {
       context: context,
       showDragHandle: true,
       backgroundColor: Colors.white,
-      builder: (context) => const SafeArea(
-        child: Padding(
-          padding: EdgeInsets.fromLTRB(24, 0, 24, 24),
-          child: Text(
-            'Termos de uso (rascunho)\n\nAo criar uma conta você concorda em usar o Save Easy para compartilhar e '
-            'apoiar boas ações de forma honesta, respeitar as outras pessoas e não publicar conteúdo falso ou '
-            'ofensivo. O texto definitivo dos termos e da política de privacidade está em elaboração.',
+      isScrollControlled: true,
+      builder: (context) => SafeArea(
+        child: ConstrainedBox(
+          constraints: BoxConstraints(maxHeight: MediaQuery.sizeOf(context).height * 0.8),
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('Termos de uso', style: Theme.of(context).textTheme.titleLarge),
+                const SizedBox(height: 12),
+                const Text(LegalTexts.terms),
+              ],
+            ),
           ),
         ),
       ),
@@ -75,6 +83,7 @@ class _SignUpPageState extends State<SignUpPage> {
           onBack: () => AppBackButton.goBack(context, fallback: AppRoutes.login),
           child: Form(
             key: _form,
+            autovalidateMode: AutovalidateMode.onUserInteractionIfError,
             child: AutofillGroup(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,

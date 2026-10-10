@@ -10,6 +10,7 @@ import '../../shared/notifiers/session_cubit.dart';
 import '../../shared/utils/context_x.dart';
 import '../../shared/utils/formatters.dart';
 import '../../shared/widgets/widgets.dart';
+import '../../shared/utils/links.dart';
 
 /// Evento Confirmado 1/2. Só exibe dados, então usa um FutureBuilder
 /// em vez de um cubit próprio.
@@ -38,12 +39,19 @@ class EventConfirmedPage extends StatelessWidget {
             coins: post.rewardCoins,
             xp: post.rewardXp,
             actions: [
-              PrimaryButton(
-                label: 'Adicionar ao calendário',
-                icon: Icons.event_available_rounded,
-                onPressed: () => context.showMessage('Evento adicionado ao calendário (simulado).'),
-              ),
-              const SizedBox(height: 8),
+              if (post.startsAt != null) ...[
+                PrimaryButton(
+                  label: 'Adicionar ao calendário',
+                  icon: Icons.event_available_rounded,
+                  onPressed: () async {
+                    final opened = await openExternalLink(_calendarUrl(post));
+                    if (!opened && context.mounted) {
+                      context.showMessage('Não foi possível abrir o calendário.', error: true);
+                    }
+                  },
+                ),
+                const SizedBox(height: 8),
+              ],
               OutlinedButton(onPressed: () => context.go(AppRoutes.home), child: const Text('Voltar ao início')),
               const SizedBox(height: 8),
               Text(
@@ -58,5 +66,19 @@ class EventConfirmedPage extends StatelessWidget {
         },
       ),
     );
+  }
+
+  /// Link do Google Agenda já preenchido (funciona na web e no celular).
+  static String _calendarUrl(Post post) {
+    String stamp(DateTime d) => '${d.toUtc().toIso8601String().replaceAll(RegExp(r'[-:]'), '').split('.').first}Z';
+    final start = post.startsAt!;
+    final end = post.endsAt != null && post.endsAt!.isAfter(start) ? post.endsAt! : start.add(const Duration(hours: 2));
+    return Uri.https('calendar.google.com', '/calendar/render', {
+      'action': 'TEMPLATE',
+      'text': post.title,
+      'dates': '${stamp(start)}/${stamp(end)}',
+      'details': post.description,
+      if ((post.location ?? post.link) != null) 'location': post.location ?? post.link!,
+    }).toString();
   }
 }

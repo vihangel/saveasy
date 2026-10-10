@@ -7,6 +7,26 @@ Legenda: ✅ no Supabase · 🟡 ainda no mock local · ⏳ pendente
 
 ---
 
+## Ajustes pedidos após a revisão (10/10/2026)
+- **Erro que não sumia nos formulários:** depois de tocar em "Criar conta"
+  com as senhas diferentes, o aviso "As senhas não conferem" ficava na tela
+  mesmo depois de corrigir (parecia que o campo não aceitava a edição). Agora
+  todos os formulários **revalidam enquanto a pessoa digita** quando já há um
+  erro na tela, e o aviso some assim que fica certo.
+- **Painel lateral (web no computador):** removido o aviso "Versão de testes,
+  com foco em Cuiabá". O painel mostra só a marca e a descrição do app.
+- **Termos de uso:** saiu o texto "rascunho/em elaboração"; o app mostra
+  termos completos (cadastro e Configurações). ⚠️ Vale uma revisão jurídica
+  antes do lançamento.
+- **Adicionar ao calendário** (após confirmar presença): antes só mostrava
+  "(simulado)"; agora abre o Google Agenda com título, horário, local e
+  descrição do evento já preenchidos.
+- Continua visível no checkout, de propósito, o aviso "Ambiente de testes:
+  nenhum dinheiro real é cobrado" — ele some sozinho quando os pagamentos
+  forem para produção.
+
+---
+
 ## Revisão geral: teclado, validações e acessibilidade (09/10/2026)
 
 ### Teclado

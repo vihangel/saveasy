@@ -122,8 +122,9 @@ class _SidePanel extends StatelessWidget {
             'e troque por itens personalizados.',
             style: TextStyle(fontSize: 15, height: 1.6),
           ),
-          const SizedBox(height: 28),
+          // Só no modo de demonstração local (sem Supabase).
           if (!Env.useSupabase) ...[
+            const SizedBox(height: 28),
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
@@ -149,13 +150,6 @@ class _SidePanel extends StatelessWidget {
               ),
             ),
           ],
-          const SizedBox(height: 16),
-          Text(
-            Env.useSupabase
-                ? 'Versão de testes, com foco em Cuiabá - MT. Crie sua conta para participar.'
-                : 'Protótipo com dados simulados. O que você fizer fica salvo só neste navegador.',
-            style: TextStyle(fontSize: 12, color: AppColors.textMuted),
-          ),
         ],
       ),
     );

@@ -10,6 +10,7 @@ import '../../shared/utils/context_x.dart';
 import '../../shared/utils/links.dart';
 import '../../shared/utils/validators.dart';
 import '../../shared/widgets/widgets.dart';
+import '../../shared/utils/legal_texts.dart';
 
 /// Configurações: conta, senha, termos, sair e excluir conta (LGPD).
 class SettingsPage extends StatelessWidget {
@@ -139,17 +140,13 @@ class SettingsPage extends StatelessWidget {
           ListTile(
             leading: const Icon(Icons.description_outlined),
             title: const Text('Termos de uso'),
-            onTap: () => _showText(
-              context,
-              'Termos de uso',
-              'Rascunho. O texto definitivo está em elaboração com o jurídico e será publicado antes do lançamento.',
-            ),
+            onTap: () => _showText(context, 'Termos de uso', LegalTexts.terms),
           ),
           ListTile(
             leading: const Icon(Icons.privacy_tip_outlined),
             title: const Text('Política de privacidade'),
             trailing: const Icon(Icons.open_in_new_rounded, size: 18),
-            onTap: () => openExternalLink('https://vihangel.github.io/saveasy/privacidade.html'),
+            onTap: () => openExternalLink(LegalTexts.privacyUrl),
           ),
           const _Section(''),
           ListTile(
@@ -211,6 +208,7 @@ class _ChangePasswordDialogState extends State<_ChangePasswordDialog> {
       title: const Text('Alterar senha'),
       content: Form(
         key: _form,
+        autovalidateMode: AutovalidateMode.onUserInteractionIfError,
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [

@@ -54,6 +54,7 @@ class _LoginPageState extends State<LoginPage> {
           showBack: false,
           child: Form(
             key: _form,
+            autovalidateMode: AutovalidateMode.onUserInteractionIfError,
             child: AutofillGroup(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,

@@ -206,6 +206,7 @@ class _OnboardingProfilePageState extends State<OnboardingProfilePage> {
         ),
         child: Form(
           key: _form,
+          autovalidateMode: AutovalidateMode.onUserInteractionIfError,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
@@ -333,6 +334,7 @@ class _OnboardingAddressPageState extends State<OnboardingAddressPage> {
         image: 'assets/images/header_signup_address.png',
         child: Form(
           key: _form,
+          autovalidateMode: AutovalidateMode.onUserInteractionIfError,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
