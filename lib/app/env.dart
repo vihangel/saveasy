@@ -27,4 +27,8 @@ abstract final class Env {
   );
 
   static bool get useSupabase => backend == 'supabase';
+
+  /// Botões "Entrar com Google/Facebook". Desligados até os provedores serem
+  /// configurados no Supabase (pendência 3). Ligar com --dart-define=SOCIAL_LOGIN=true.
+  static const socialLogin = bool.fromEnvironment('SOCIAL_LOGIN');
 }

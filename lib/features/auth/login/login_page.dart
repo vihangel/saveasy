@@ -90,42 +90,45 @@ class _LoginPageState extends State<LoginPage> {
                   ),
                   const SizedBox(height: 8),
                   PrimaryButton(label: 'Login', loading: state.status.isLoading, onPressed: _submit),
-                  const SizedBox(height: 20),
-                  const Row(
-                    children: [
-                      Expanded(child: Divider(color: AppColors.border)),
-                      Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 12),
-                        child: Text('Ou entre com:', style: TextStyle(fontSize: 13, color: AppColors.textMuted)),
-                      ),
-                      Expanded(child: Divider(color: AppColors.border)),
-                    ],
-                  ),
-                  const SizedBox(height: 16),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      _SocialButton(
-                        label: 'Entrar com Facebook',
-                        color: const Color(0xFF1453C8),
-                        child: const Text(
-                          'f',
-                          style: TextStyle(color: Colors.white, fontSize: 26, fontWeight: FontWeight.w900),
+                  // Login social desligado até configurar Google/Facebook no Supabase.
+                  if (Env.socialLogin) ...[
+                    const SizedBox(height: 20),
+                    const Row(
+                      children: [
+                        Expanded(child: Divider(color: AppColors.border)),
+                        Padding(
+                          padding: EdgeInsets.symmetric(horizontal: 12),
+                          child: Text('Ou entre com:', style: TextStyle(fontSize: 13, color: AppColors.textMuted)),
                         ),
-                        onTap: () => context.read<LoginCubit>().loginWithProvider(SocialProvider.facebook),
-                      ),
-                      const SizedBox(width: 20),
-                      _SocialButton(
-                        label: 'Entrar com Google',
-                        color: Colors.white,
-                        child: const Text(
-                          'G',
-                          style: TextStyle(color: Color(0xFFEA4335), fontSize: 24, fontWeight: FontWeight.w900),
+                        Expanded(child: Divider(color: AppColors.border)),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        _SocialButton(
+                          label: 'Entrar com Facebook',
+                          color: const Color(0xFF1453C8),
+                          child: const Text(
+                            'f',
+                            style: TextStyle(color: Colors.white, fontSize: 26, fontWeight: FontWeight.w900),
+                          ),
+                          onTap: () => context.read<LoginCubit>().loginWithProvider(SocialProvider.facebook),
                         ),
-                        onTap: () => context.read<LoginCubit>().loginWithProvider(SocialProvider.google),
-                      ),
-                    ],
-                  ),
+                        const SizedBox(width: 20),
+                        _SocialButton(
+                          label: 'Entrar com Google',
+                          color: Colors.white,
+                          child: const Text(
+                            'G',
+                            style: TextStyle(color: Color(0xFFEA4335), fontSize: 24, fontWeight: FontWeight.w900),
+                          ),
+                          onTap: () => context.read<LoginCubit>().loginWithProvider(SocialProvider.google),
+                        ),
+                      ],
+                    ),
+                  ],
                   const SizedBox(height: 16),
                   TextButton(onPressed: () => context.push(AppRoutes.signUp), child: const Text('Criar conta')),
                   const SizedBox(height: 8),

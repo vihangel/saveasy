@@ -51,6 +51,19 @@ não implementadas. Não há alteração de schema, autenticação ou cobrança.
 
 ---
 
+## Cadastro simplificado (10/10/2026)
+- **Confirmação de e-mail desligada** no Supabase (Authentication → Sign In /
+  Providers → *Confirm email* = off). Quem cria a conta já entra direto no app
+  (vai para o onboarding), sem código nem link. O app já tratava esse caso; a
+  tela de código continua no código e volta a ser usada se a opção for religada.
+  ⚠️ Sem confirmação, dá para cadastrar e-mails de outras pessoas ou digitados
+  errado; religar antes do lançamento (junto com o SMTP, pendência 6).
+- **Botões "Entrar com Google/Facebook" escondidos** no login, porque os
+  provedores ainda não estão configurados (pendência 3). Para voltar a mostrar:
+  build com `--dart-define=SOCIAL_LOGIN=true` (`Env.socialLogin`).
+
+---
+
 ## Ajustes pedidos após a revisão (10/10/2026)
 - **Erro que não sumia nos formulários:** depois de tocar em "Criar conta"
   com as senhas diferentes, o aviso "As senhas não conferem" ficava na tela
