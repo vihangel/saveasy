@@ -56,7 +56,7 @@ class _ChatPageState extends State<ChatPage> {
     return BlocBuilder<ChatCubit, ChatState>(
       builder: (context, state) {
         final thread = state.thread;
-        return Scaffold(
+        return AppPage(
           appBar: AppBar(
             leading: const AppBackButton(fallback: AppRoutes.messages),
             actions: [

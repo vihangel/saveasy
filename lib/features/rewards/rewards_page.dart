@@ -1,3 +1,5 @@
+import '../../app/breakpoints.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -39,7 +41,8 @@ class RewardsPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final user = context.select((SessionCubit c) => c.state.userOrNull);
     return RewardsListener(
-      child: Scaffold(
+      child: AppPage(
+        maxWidth: context.isExpanded ? 960 : Breakpoints.content,
         appBar: AppBar(leading: const AppBackButton(), title: const Text('Recompensas')),
         body: BlocBuilder<RewardsCubit, RewardsState>(
           builder: (context, state) => AsyncBody(
@@ -52,16 +55,26 @@ class RewardsPage extends StatelessWidget {
                 const _InviteBanner(),
                 for (final kind in RewardKind.values) ...[
                   SectionHeader(title: '${kind.label} populares'),
-                  SizedBox(
-                    height: (kind == RewardKind.cover ? 150 : 120) + 40 * context.textScale,
-                    child: ListView.separated(
-                      scrollDirection: Axis.horizontal,
+                  if (!context.isCompact)
+                    Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 20),
-                      itemCount: context.read<RewardsCubit>().byKind(kind).length,
-                      separatorBuilder: (_, _) => const SizedBox(width: 12),
-                      itemBuilder: (context, i) => _RewardCard(reward: context.read<RewardsCubit>().byKind(kind)[i]),
+                      child: AdaptiveCards(
+                        children: [
+                          for (final reward in context.read<RewardsCubit>().byKind(kind)) _RewardCard(reward: reward),
+                        ],
+                      ),
+                    )
+                  else
+                    SizedBox(
+                      height: (kind == RewardKind.cover ? 150 : 120) + 40 * context.textScale,
+                      child: ListView.separated(
+                        scrollDirection: Axis.horizontal,
+                        padding: const EdgeInsets.symmetric(horizontal: 20),
+                        itemCount: context.read<RewardsCubit>().byKind(kind).length,
+                        separatorBuilder: (_, _) => const SizedBox(width: 12),
+                        itemBuilder: (context, i) => _RewardCard(reward: context.read<RewardsCubit>().byKind(kind)[i]),
+                      ),
                     ),
-                  ),
                 ],
               ],
             ),
@@ -181,7 +194,7 @@ class RewardDetailPage extends StatelessWidget {
       child: BlocBuilder<RewardsCubit, RewardsState>(
         builder: (context, state) {
           final reward = state.rewards.where((r) => r.id == rewardId).firstOrNull;
-          return Scaffold(
+          return AppPage(
             appBar: AppBar(
               leading: const AppBackButton(fallback: AppRoutes.rewards),
               title: Text(reward?.kind.label ?? ''),

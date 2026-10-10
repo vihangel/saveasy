@@ -1,3 +1,5 @@
+import 'adaptive_sheet.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -9,7 +11,7 @@ import 'user_avatar.dart';
 /// Escolher várias pessoas (marcar em publicação). Retorna a lista final ou
 /// `null` se fechar sem confirmar.
 Future<List<AppUser>?> showPeoplePicker(BuildContext context, {List<AppUser> selected = const []}) {
-  return showModalBottomSheet<List<AppUser>>(
+  return showAdaptiveSheet<List<AppUser>>(
     context: context,
     isScrollControlled: true,
     showDragHandle: true,

@@ -38,7 +38,7 @@ class SettingsPage extends StatelessWidget {
   }
 
   void _showText(BuildContext context, String title, String body) {
-    showModalBottomSheet<void>(
+    showAdaptiveSheet<void>(
       context: context,
       showDragHandle: true,
       isScrollControlled: true,
@@ -64,7 +64,7 @@ class SettingsPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final user = context.select((SessionCubit c) => c.state.userOrNull);
     if (user == null) return const SizedBox.shrink();
-    return Scaffold(
+    return AppPage(
       appBar: AppBar(leading: const AppBackButton(), title: const Text('Configurações')),
       body: ListView(
         padding: const EdgeInsets.only(bottom: 32),

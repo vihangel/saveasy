@@ -36,7 +36,7 @@ class _MyStorePageState extends State<MyStorePage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return AppPage(
       appBar: AppBar(
         leading: const AppBackButton(fallback: AppRoutes.store),
         title: const Text('Minha loja'),
@@ -193,7 +193,7 @@ class _ProductFormPageState extends State<ProductFormPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return AppPage(
       appBar: AppBar(
         leading: const AppBackButton(fallback: AppRoutes.myStore),
         title: Text(widget.productId == null ? 'Novo produto' : 'Editar produto'),

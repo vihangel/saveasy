@@ -1,3 +1,7 @@
+import 'package:flutter/services.dart';
+
+import '../../app/breakpoints.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -69,7 +73,7 @@ class _StoriesPageState extends State<StoriesPage> with SingleTickerProviderStat
 
   @override
   Widget build(BuildContext context) {
-    return BlocConsumer<StoriesCubit, StoriesState>(
+    final viewer = BlocConsumer<StoriesCubit, StoriesState>(
       listenWhen: (a, b) => a.index != b.index || a.finished != b.finished || a.status != b.status,
       listener: (context, state) {
         if (state.finished) return _close(context);
@@ -88,7 +92,7 @@ class _StoriesPageState extends State<StoriesPage> with SingleTickerProviderStat
           backgroundColor: Colors.black,
           body: GestureDetector(
             onTapUp: (details) {
-              final width = MediaQuery.sizeOf(context).width;
+              final width = (context.findRenderObject() as RenderBox?)?.size.width ?? 430;
               final cubit = context.read<StoriesCubit>();
               details.localPosition.dx < width / 3 ? cubit.previous() : cubit.next();
             },
@@ -210,6 +214,26 @@ class _StoriesPageState extends State<StoriesPage> with SingleTickerProviderStat
           ),
         );
       },
+    );
+    if (context.isCompact) return viewer;
+    return CallbackShortcuts(
+      bindings: {
+        const SingleActivator(LogicalKeyboardKey.arrowRight): () => context.read<StoriesCubit>().next(),
+        const SingleActivator(LogicalKeyboardKey.arrowLeft): () => context.read<StoriesCubit>().previous(),
+        const SingleActivator(LogicalKeyboardKey.escape): () => _close(context),
+      },
+      child: Focus(
+        autofocus: true,
+        child: ColoredBox(
+          color: Colors.black87,
+          child: Center(
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: AspectRatio(aspectRatio: 9 / 16, child: viewer),
+            ),
+          ),
+        ),
+      ),
     );
   }
 }

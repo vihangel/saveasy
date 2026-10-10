@@ -58,7 +58,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
       listenWhen: (a, b) => a.error != b.error || a.saved != b.saved,
       builder: (context, state) {
         final cubit = context.read<EditProfileCubit>();
-        return Scaffold(
+        return AppPage(
           appBar: AppBar(
             leading: const AppBackButton(fallback: AppRoutes.profile),
             title: const Text('Editar Perfil'),

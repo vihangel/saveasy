@@ -12,7 +12,7 @@ GIT_NAME="$(git config user.name)"
 GIT_EMAIL="$(git config user.email)"
 
 dart run build_runner build --delete-conflicting-outputs
-flutter build web --release --base-href "/$REPO_NAME/"
+flutter build web --release --base-href "/$REPO_NAME/" --build-number "$(date +%s)"
 
 cd build/web
 cp index.html 404.html   # fallback para URLs sem '#'

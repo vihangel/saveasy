@@ -27,7 +27,7 @@ class _FollowListPageState extends State<FollowListPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return AppPage(
       appBar: AppBar(
         leading: AppBackButton(fallback: AppRoutes.user(widget.profileId)),
         title: Text(widget.kind == FollowListKind.followers ? 'Seguidores' : 'Seguindo'),

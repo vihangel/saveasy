@@ -1,3 +1,5 @@
+import 'adaptive_sheet.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -7,7 +9,7 @@ import '../utils/context_x.dart';
 
 /// Denunciar conteúdo ou perfil. A equipe analisa no painel de moderação.
 Future<void> showReportSheet(BuildContext context, ReportTarget target, String targetId) async {
-  final sent = await showModalBottomSheet<bool>(
+  final sent = await showAdaptiveSheet<bool>(
     context: context,
     isScrollControlled: true,
     showDragHandle: true,

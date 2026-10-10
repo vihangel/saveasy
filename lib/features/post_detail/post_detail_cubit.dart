@@ -1,3 +1,5 @@
+import '../../shared/services/share_post.dart';
+
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 
@@ -37,7 +39,15 @@ class PostDetailCubit extends Cubit<PostDetailState> {
 
   Future<void> toggleSave() async => emit(state.copyWith(post: await _posts.toggleSave(postId)));
 
-  Future<void> share() async => emit(state.copyWith(post: await _posts.share(postId), message: 'Link copiado!'));
+  Future<void> share() async {
+    try {
+      await copyPostLink(postId);
+      final post = await _posts.share(postId);
+      if (!isClosed) emit(state.copyWith(post: post, message: 'Link copiado!'));
+    } catch (_) {
+      if (!isClosed) emit(state.copyWith(message: 'Não foi possível compartilhar.'));
+    }
+  }
 
   Future<void> addComment(String text) async {
     if (text.trim().isEmpty) return;

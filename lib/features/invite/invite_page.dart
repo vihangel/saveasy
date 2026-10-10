@@ -67,7 +67,7 @@ class _InvitePageState extends State<InvitePage> {
   @override
   Widget build(BuildContext context) {
     final info = _info;
-    return Scaffold(
+    return AppPage(
       appBar: AppBar(leading: const AppBackButton(), title: const Text('Convide amigos')),
       body: _error != null
           ? EmptyState(message: _error!, icon: Icons.cloud_off)

@@ -49,7 +49,7 @@ class _AdsPageState extends State<AdsPage> {
   @override
   Widget build(BuildContext context) {
     final canAdvertise = context.currentUser.accountType != AccountType.personal;
-    return Scaffold(
+    return AppPage(
       appBar: AppBar(leading: const AppBackButton(), title: const Text('Anúncios')),
       floatingActionButton: canAdvertise
           ? FloatingActionButton.extended(

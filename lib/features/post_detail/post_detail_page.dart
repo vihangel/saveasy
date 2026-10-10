@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../app/routes.dart';
+import '../../app/breakpoints.dart';
 import '../../app/theme.dart';
 import '../../shared/data/models/models.dart';
 import '../../shared/data/repositories/repositories.dart';
@@ -40,7 +41,8 @@ class PostDetailPage extends StatelessWidget {
         context.read<PostDetailCubit>().messageShown();
       },
       builder: (context, state) {
-        return Scaffold(
+        return AppPage(
+          maxWidth: context.isExpanded ? 1100 : Breakpoints.content,
           body: AsyncBody(
             status: state.status,
             error: state.error,
@@ -62,7 +64,7 @@ class _Content extends StatelessWidget {
   Widget build(BuildContext context) {
     final post = state.post!;
     final cubit = context.read<PostDetailCubit>();
-    return Column(
+    final content = Column(
       children: [
         Expanded(
           child: CustomScrollView(
@@ -112,7 +114,7 @@ class _Content extends StatelessWidget {
                     const SizedBox(height: 4),
                     Text('Por: ${post.authorName}', style: const TextStyle(color: AppColors.textMuted, fontSize: 13)),
                     const SizedBox(height: 16),
-                    Text(post.description, style: const TextStyle(height: 1.5)),
+                    SelectionArea(child: Text(post.description, style: const TextStyle(height: 1.5))),
                     const SizedBox(height: 20),
                     ..._typeSection(context, post),
                     const SizedBox(height: 20),
@@ -130,32 +132,58 @@ class _Content extends StatelessWidget {
                       onShare: cubit.share,
                     ),
                     const Divider(height: 24),
-                    Text('Comentários (${state.comments.length})', style: context.text.titleMedium),
-                    if (state.comments.isEmpty)
-                      const Padding(
-                        padding: EdgeInsets.symmetric(vertical: 16),
-                        child: Text('Seja o primeiro a comentar!', style: TextStyle(color: AppColors.textMuted)),
-                      ),
-                    for (final comment in state.comments)
-                      CommentTile(
-                        comment: comment,
-                        onLike: () => cubit.toggleCommentLike(comment.id),
-                        onDelete: comment.authorId != null && comment.authorId == context.currentUser.id
-                            ? () => cubit.deleteComment(comment.id)
-                            : null,
-                        onReport: comment.authorId != null && comment.authorId != context.currentUser.id
-                            ? () => showReportSheet(context, ReportTarget.comment, comment.id)
-                            : null,
-                      ),
+                    if (!context.isExpanded) ..._comments(context),
                   ],
                 ),
               ),
             ],
           ),
         ),
-        _CommentInput(sending: state.sendingComment, onSend: cubit.addComment),
+        if (!context.isExpanded) _CommentInput(sending: state.sendingComment, onSend: cubit.addComment),
       ],
     );
+    if (!context.isExpanded) return content;
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Expanded(flex: 3, child: content),
+        const VerticalDivider(width: 1),
+        Expanded(
+          flex: 2,
+          child: Column(
+            children: [
+              Expanded(
+                child: ListView(padding: const EdgeInsets.all(20), children: _comments(context)),
+              ),
+              _CommentInput(sending: state.sendingComment, onSend: cubit.addComment),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  List<Widget> _comments(BuildContext context) {
+    final cubit = context.read<PostDetailCubit>();
+    return [
+      Text('Comentários (${state.comments.length})', style: context.text.titleMedium),
+      if (state.comments.isEmpty)
+        const Padding(
+          padding: EdgeInsets.symmetric(vertical: 16),
+          child: Text('Seja o primeiro a comentar!', style: TextStyle(color: AppColors.textMuted)),
+        ),
+      for (final comment in state.comments)
+        CommentTile(
+          comment: comment,
+          onLike: () => cubit.toggleCommentLike(comment.id),
+          onDelete: comment.authorId != null && comment.authorId == context.currentUser.id
+              ? () => cubit.deleteComment(comment.id)
+              : null,
+          onReport: comment.authorId != null && comment.authorId != context.currentUser.id
+              ? () => showReportSheet(context, ReportTarget.comment, comment.id)
+              : null,
+        ),
+    ];
   }
 
   List<Widget> _typeSection(BuildContext context, Post post) {

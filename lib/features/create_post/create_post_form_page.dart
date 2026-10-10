@@ -1,3 +1,5 @@
+import '../../app/breakpoints.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -34,13 +36,14 @@ class CreatePostFormPage extends StatefulWidget {
     future: context.read<PostRepository>().getById(postId),
     builder: (context, snapshot) {
       if (snapshot.hasError) {
-        return Scaffold(
+        return AppPage(
+          maxWidth: context.isExpanded ? 760 : Breakpoints.content,
           appBar: AppBar(leading: const AppBackButton()),
           body: const EmptyState(message: 'Publicação não encontrada.', icon: Icons.search_off_rounded),
         );
       }
       final post = snapshot.data;
-      if (post == null) return const Scaffold(body: Center(child: CircularProgressIndicator()));
+      if (post == null) return const AppPage(body: Center(child: CircularProgressIndicator()));
       return route(context, post.type, editing: post);
     },
   );
@@ -116,7 +119,8 @@ class _CreatePostFormPageState extends State<CreatePostFormPage> {
       builder: (context, state) {
         final cubit = context.read<CreatePostCubit>();
         final type = state.type;
-        return Scaffold(
+        return AppPage(
+          maxWidth: context.isExpanded ? 760 : Breakpoints.content,
           appBar: AppBar(
             leading: const AppBackButton(fallback: AppRoutes.create),
             title: Text(
@@ -125,83 +129,90 @@ class _CreatePostFormPageState extends State<CreatePostFormPage> {
                   : (type == PostType.ad ? 'Criar propaganda' : type.label),
             ),
           ),
-          body: ListView(
+          body: SingleChildScrollView(
             keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
             padding: const EdgeInsets.fromLTRB(24, 8, 24, 32),
-            children: [
-              _CoverPicker(type: type, imageUrl: state.imageUrl, onChanged: cubit.setImage),
-              const SizedBox(height: 20),
-              if (type == PostType.ad) ...[
-                _AdPlans(selected: state.adPlan, onSelected: cubit.selectAdPlan),
-                const SizedBox(height: 20),
+            child: AdaptiveCards(
+              minWidth: 340,
+              children: [
+                _CoverPicker(type: type, imageUrl: state.imageUrl, onChanged: cubit.setImage),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    if (type == PostType.ad) ...[
+                      _AdPlans(selected: state.adPlan, onSelected: cubit.selectAdPlan),
+                      const SizedBox(height: 20),
+                    ],
+                    AppTextField(
+                      label: 'Título',
+                      controller: _title,
+                      maxLength: 80,
+                      textCapitalization: TextCapitalization.sentences,
+                    ),
+                    const SizedBox(height: 16),
+                    _Dropdown(
+                      label: type == PostType.ad ? 'O que deseja divulgar?' : 'Tipo de ${type.label.toLowerCase()}',
+                      value: state.subtype,
+                      options: CreatePostCubit.subtypesFor(type),
+                      onChanged: cubit.selectSubtype,
+                    ),
+                    const SizedBox(height: 16),
+                    AppTextField(
+                      label: 'Descrição',
+                      controller: _description,
+                      maxLines: 4,
+                      maxLength: 2000,
+                      textCapitalization: TextCapitalization.sentences,
+                    ),
+                    const SizedBox(height: 16),
+                    ..._specificFields(context, state),
+                    const Text('Categorias', style: TextStyle(fontSize: 13, color: AppColors.textMuted)),
+                    const SizedBox(height: 6),
+                    Wrap(
+                      spacing: 8,
+                      children: [
+                        for (final c in PostCategory.values)
+                          FilterChip(
+                            label: Text(c.label),
+                            selected: state.categories.contains(c),
+                            onSelected: (_) => cubit.toggleCategory(c),
+                          ),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
+                    TagInput(tags: state.tags, onChanged: cubit.setTags),
+                    const SizedBox(height: 16),
+                    Wrap(
+                      spacing: 6,
+                      runSpacing: 6,
+                      crossAxisAlignment: WrapCrossAlignment.center,
+                      children: [
+                        for (final u in state.mentions)
+                          InputChip(
+                            avatar: UserAvatar(name: u.name, imageUrl: u.avatarUrl, size: 20),
+                            label: Text('@${u.username}'),
+                            onDeleted: () => cubit.setMentions(state.mentions.where((m) => m.id != u.id).toList()),
+                          ),
+                        ActionChip(
+                          avatar: const Icon(Icons.person_add_alt_1_rounded, size: 18),
+                          label: const Text('Marcar pessoas'),
+                          onPressed: () async {
+                            final people = await showPeoplePicker(context, selected: state.mentions);
+                            if (people != null) cubit.setMentions(people);
+                          },
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 32),
+                    PrimaryButton(
+                      label: cubit.isEditing ? 'Salvar alterações' : 'Criar',
+                      loading: state.status.isLoading,
+                      onPressed: _submit,
+                    ),
+                  ],
+                ),
               ],
-              AppTextField(
-                label: 'Título',
-                controller: _title,
-                maxLength: 80,
-                textCapitalization: TextCapitalization.sentences,
-              ),
-              const SizedBox(height: 16),
-              _Dropdown(
-                label: type == PostType.ad ? 'O que deseja divulgar?' : 'Tipo de ${type.label.toLowerCase()}',
-                value: state.subtype,
-                options: CreatePostCubit.subtypesFor(type),
-                onChanged: cubit.selectSubtype,
-              ),
-              const SizedBox(height: 16),
-              AppTextField(
-                label: 'Descrição',
-                controller: _description,
-                maxLines: 4,
-                maxLength: 2000,
-                textCapitalization: TextCapitalization.sentences,
-              ),
-              const SizedBox(height: 16),
-              ..._specificFields(context, state),
-              const Text('Categorias', style: TextStyle(fontSize: 13, color: AppColors.textMuted)),
-              const SizedBox(height: 6),
-              Wrap(
-                spacing: 8,
-                children: [
-                  for (final c in PostCategory.values)
-                    FilterChip(
-                      label: Text(c.label),
-                      selected: state.categories.contains(c),
-                      onSelected: (_) => cubit.toggleCategory(c),
-                    ),
-                ],
-              ),
-              const SizedBox(height: 16),
-              TagInput(tags: state.tags, onChanged: cubit.setTags),
-              const SizedBox(height: 16),
-              Wrap(
-                spacing: 6,
-                runSpacing: 6,
-                crossAxisAlignment: WrapCrossAlignment.center,
-                children: [
-                  for (final u in state.mentions)
-                    InputChip(
-                      avatar: UserAvatar(name: u.name, imageUrl: u.avatarUrl, size: 20),
-                      label: Text('@${u.username}'),
-                      onDeleted: () => cubit.setMentions(state.mentions.where((m) => m.id != u.id).toList()),
-                    ),
-                  ActionChip(
-                    avatar: const Icon(Icons.person_add_alt_1_rounded, size: 18),
-                    label: const Text('Marcar pessoas'),
-                    onPressed: () async {
-                      final people = await showPeoplePicker(context, selected: state.mentions);
-                      if (people != null) cubit.setMentions(people);
-                    },
-                  ),
-                ],
-              ),
-              const SizedBox(height: 32),
-              PrimaryButton(
-                label: cubit.isEditing ? 'Salvar alterações' : 'Criar',
-                loading: state.status.isLoading,
-                onPressed: _submit,
-              ),
-            ],
+            ),
           ),
         );
       },

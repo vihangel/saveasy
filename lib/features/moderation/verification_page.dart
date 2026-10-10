@@ -64,7 +64,7 @@ class _VerificationPageState extends State<VerificationPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return AppPage(
       appBar: AppBar(leading: const AppBackButton(), title: const Text('Verificação da conta')),
       body: FutureBuilder(
         future: _current,

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../app/routes.dart';
+import '../../app/breakpoints.dart';
 import '../../app/theme.dart';
 import 'app_back_button.dart';
 
@@ -27,6 +28,72 @@ class IllustratedScaffold extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (!context.isCompact) {
+      return Scaffold(
+        backgroundColor: const Color(0xFFFFF3EA),
+        body: SafeArea(
+          child: Row(
+            children: [
+              if (context.isExpanded)
+                Expanded(
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.all(48),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Image.asset('assets/images/logo.png', width: 80),
+                        const SizedBox(height: 24),
+                        Text(
+                          'Ações que mudam o mundo',
+                          textAlign: TextAlign.center,
+                          style: Theme.of(context).textTheme.headlineLarge,
+                        ),
+                        const SizedBox(height: 24),
+                        if (image != null)
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(32),
+                            child: Image.asset(image!, height: 280, fit: BoxFit.contain),
+                          ),
+                        ?header,
+                      ],
+                    ),
+                  ),
+                ),
+              Expanded(
+                child: Center(
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.all(24),
+                    child: SizedBox(
+                      width: 420,
+                      child: Card(
+                        child: Padding(
+                          padding: const EdgeInsets.all(24),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              if (showBack)
+                                Align(
+                                  alignment: Alignment.centerLeft,
+                                  child: IconButton(
+                                    tooltip: 'Voltar',
+                                    icon: const Icon(Icons.arrow_back),
+                                    onPressed: onBack ?? () => AppBackButton.goBack(context, fallback: AppRoutes.login),
+                                  ),
+                                ),
+                              child,
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
     return Scaffold(
       backgroundColor: Colors.white,
       body: SingleChildScrollView(

@@ -1,3 +1,5 @@
+import '../../app/breakpoints.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -60,7 +62,8 @@ class _OrdersPageState extends State<OrdersPage> {
     ];
     return DefaultTabController(
       length: tabs.length,
-      child: Scaffold(
+      child: AppPage(
+        maxWidth: context.isExpanded ? 1100 : Breakpoints.content,
         appBar: AppBar(
           leading: const AppBackButton(),
           title: const Text('Pedidos'),
@@ -101,10 +104,18 @@ class _OrderList extends StatelessWidget {
             icon: Icons.receipt_long_outlined,
           );
         }
-        return ListView.separated(
+        return AdaptiveTable(
+          headers: const ['Produto', 'Data', 'Situação', 'Total'],
+          rows: [
+            for (final order in orders)
+              [
+                order.productName,
+                Formatters.date(order.createdAt),
+                order.status.label,
+                Formatters.currency(order.total),
+              ],
+          ],
           padding: const EdgeInsets.symmetric(vertical: 8),
-          itemCount: orders.length,
-          separatorBuilder: (_, _) => const Divider(height: 1),
           itemBuilder: (context, i) {
             final o = orders[i];
             final other = seller ? o.buyer : o.seller;

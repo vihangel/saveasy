@@ -42,7 +42,7 @@ class _PlansEditorPageState extends State<PlansEditorPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return AppPage(
       appBar: AppBar(leading: const AppBackButton(), title: const Text('Planos de inscrição')),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => _edit(),

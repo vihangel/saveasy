@@ -1,3 +1,5 @@
+import '../../app/breakpoints.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -76,7 +78,7 @@ class _NewStoryPageState extends State<NewStoryPage> {
   @override
   Widget build(BuildContext context) {
     final colors = PostCover.colorsFor(_type);
-    return Scaffold(
+    final editor = Scaffold(
       backgroundColor: colors.last,
       appBar: AppBar(
         leading: const AppBackButton(color: Colors.white),
@@ -160,6 +162,16 @@ class _NewStoryPageState extends State<NewStoryPage> {
             ),
           ),
         ],
+      ),
+    );
+    if (context.isCompact) return editor;
+    return ColoredBox(
+      color: Colors.black87,
+      child: Center(
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: AspectRatio(aspectRatio: 9 / 16, child: editor),
+        ),
       ),
     );
   }

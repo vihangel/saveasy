@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../app/routes.dart';
+import '../../app/breakpoints.dart';
 import '../../app/theme.dart';
 import '../../shared/data/models/models.dart';
 import '../../shared/data/repositories/repositories.dart';
@@ -26,7 +27,7 @@ class MessagesPage extends StatelessWidget {
         final cubit = context.read<MessagesCubit>();
         final q = state.query.toLowerCase();
         final threads = state.threads.where((t) => t.name.toLowerCase().contains(q)).toList();
-        return Scaffold(
+        return AppPage(
           appBar: AppBar(title: const Text('Mensagens')),
           body: Column(
             children: [
@@ -96,6 +97,10 @@ class _ThreadTile extends StatelessWidget {
     return ListTile(
       contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 4),
       onTap: () async {
+        if (context.isExpanded) {
+          context.go(AppRoutes.chat(thread.id));
+          return;
+        }
         await context.push(AppRoutes.chat(thread.id));
         if (!context.mounted) return;
         context.read<MessagesCubit>().load();

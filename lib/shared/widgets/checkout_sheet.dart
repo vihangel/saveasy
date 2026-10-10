@@ -1,3 +1,5 @@
+import 'adaptive_sheet.dart';
+
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -16,7 +18,7 @@ import 'primary_button.dart';
 /// e o "copia e cola" e espera a confirmação. No ambiente de testes (sandbox)
 /// dá para simular o pagamento. Retorna o usuário atualizado se pagou.
 Future<AppUser?> showCheckout(BuildContext context, PaymentIntent intent) {
-  return showModalBottomSheet<AppUser>(
+  return showAdaptiveSheet<AppUser>(
     context: context,
     isScrollControlled: true,
     showDragHandle: true,

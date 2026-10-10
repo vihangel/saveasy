@@ -32,7 +32,7 @@ class ActivityPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return DefaultTabController(
       length: 2,
-      child: Scaffold(
+      child: AppPage(
         appBar: AppBar(
           leading: const AppBackButton(),
           title: const Text('Atividades'),

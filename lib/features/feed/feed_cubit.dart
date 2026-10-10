@@ -1,3 +1,5 @@
+import '../../shared/services/share_post.dart';
+
 import 'dart:async';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -63,6 +65,7 @@ class FeedCubit extends Cubit<FeedState> {
   }
 
   Future<void> share(String postId) async {
+    await copyPostLink(postId);
     final updated = await _posts.share(postId);
     _replace(updated);
   }

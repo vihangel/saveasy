@@ -7,6 +7,50 @@ Legenda: ✅ no Supabase · 🟡 ainda no mock local · ⏳ pendente
 
 ---
 
+## Adaptação web · primeira entrega (10/10/2026)
+
+**Entrega parcial do planejamento web.** O acompanhamento completo está em
+[ADAPTACAO_WEB.md](ADAPTACAO_WEB.md#execução--10102026), incluindo as partes ainda
+não implementadas. Não há alteração de schema, autenticação ou cobrança.
+
+- Breakpoints compact/medium/expanded centralizados. A moldura de apresentação
+  só aparece com `--dart-define=PHONE_FRAME=true`.
+- Menu persistente de desktop/tablet envolvendo as abas e as rotas de detalhe;
+  selos de mensagens/notificações e entradas conforme perfil.
+- Conteúdo limitado com `AppPage`; diálogos adaptativos para checkout, denúncia,
+  imagem, pessoas, termos e textos de configurações.
+- Entrada em layout web; feed com sugestões, nível e anúncios na coluna lateral;
+  detalhe/comentários e lista/conversa em duas áreas.
+- Grades no perfil, loja, recompensas e conquistas; capa/formulário e produto/compra
+  em colunas; tabelas no extrato, pedidos e denúncias.
+- Stories e editor em proporção 9:16; visualizador com setas e Esc.
+- Cópia efetiva do link de publicação, seleção de arquivo na web e check-in por
+  código sem oferecer scanner de câmera na web.
+- Loading com logo, meta tags de compartilhamento e aviso de atualização pelo
+  `version.json`, com recarga escolhida pela pessoa.
+
+### Validação
+
+- Suíte de testes ampliada para 320×568, 360×640, 768×1024, 1280×800 e 1440×900,
+  fonte 1,0×/1,3×; fixture administrativo para visitar o painel real de widgets.
+- Testes dos três modos de seletor e retorno do valor escolhido; rascunho de
+  publicação preservado ao redimensionar a janela.
+- Build release JavaScript gerado; dry run Wasm compatível. Não foi medido ganho
+  de desempenho em Wasm.
+- Navegador local com backend mock: boas-vindas/login e feed em 1440 px, feed em
+  768 px e publicação/comentários em 1280 px. A validação não cria dados no Supabase.
+
+### Como validar manualmente
+
+1. Abrir a versão web e alternar entre janela estreita, tablet e desktop.
+2. Entrar, abrir publicação, carteira e configurações; conferir o menu persistente.
+3. Preencher um rascunho de publicação e redimensionar sem perder o texto.
+4. Abrir seletor de imagem/denúncia/termos; confirmar resultado e fechar por Esc.
+5. Copiar link de um post, abrir em outra aba e verificar o destino.
+6. Conferir a matriz de pendências no documento web antes de considerar o plano concluído.
+
+---
+
 ## Ajustes pedidos após a revisão (10/10/2026)
 - **Erro que não sumia nos formulários:** depois de tocar em "Criar conta"
   com as senhas diferentes, o aviso "As senhas não conferem" ficava na tela

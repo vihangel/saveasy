@@ -34,7 +34,7 @@ class _SignUpPageState extends State<SignUpPage> {
   }
 
   void _showTerms() {
-    showModalBottomSheet<void>(
+    showAdaptiveSheet<void>(
       context: context,
       showDragHandle: true,
       backgroundColor: Colors.white,

@@ -239,3 +239,32 @@ uma publicada separadamente.
    e equipe?** Se for o segundo caso, vale priorizar a Fase 5 (admin,
    financeiro, anúncios) antes do feed.
 3. **Domínio próprio** antes do lançamento (item 10)?
+
+---
+
+## Execução · 10/10/2026
+
+O inventário acima descreve a versão anterior à adaptação. A primeira entrega
+implementa a base e parte das melhorias por tela; **o planejamento completo ainda
+não está concluído**.
+
+| Área | Implementado nesta entrega | Ainda previsto |
+| --- | --- | --- |
+| Base | Breakpoints únicos; viewport real; `PHONE_FRAME=true` opcional; menu persistente inclusive em rotas de detalhe; `AppPage`; diálogos adaptativos nos seis fluxos | — |
+| Entrada | Boas-vindas com três destaques; autenticação e onboarding em card; apresentação lateral no desktop | Refinamento visual com o protótipo final |
+| Social | Feed com coluna de apoio a partir de 1280; detalhe e comentários em duas colunas; conversa ao lado da lista; posts do perfil em grade | Cabeçalho do perfil com ações à direita; resumo numérico do fundo no feed; participação/doação como painéis |
+| Criação e dinheiro | Formulário/capa e produto/compra em colunas; loja/recompensas/conquistas em grades; extrato e pedidos em tabelas | Parear campos relacionados; editor de anúncios em duas colunas; tabelas de minha loja e financeiro |
+| Equipe e público | Denúncias em tabela com detalhe em diálogo; transparência com largura ampliada; stories em 9:16 com setas e Esc | Filtros e demais tabelas do admin; painel lateral de detalhes; gráfico do fundo; versão HTML pública indexável |
+| Acabamento | Link de post realmente copiado; seletor de arquivo web; carregamento com marca; OG; aviso de nova versão, sem recarga automática | Compartilhamento nativo; push web/FCM; avaliação de leitor de tela; deferred imports; benchmark Wasm; domínio próprio |
+
+Decisões aplicadas: web para todos os perfis; moldura apenas para demonstração;
+URLs e regras de negócio preservadas. Nenhuma migration ou configuração de
+pagamento foi alterada nesta entrega. O build continua JavaScript; o dry run de
+compatibilidade Wasm passou, mas isso não comprova desempenho nem valida um build
+Wasm em navegadores reais.
+
+As grades de conteúdo usam alturas naturais para permitir títulos e fontes maiores.
+Os detalhes administrativos abrem em diálogo, não em painel lateral nesta etapa.
+O aviso de atualização consulta `version.json` a cada cinco minutos; o deploy
+manual agora identifica cada build por timestamp. A pessoa escolhe quando
+recarregar, preservando a oportunidade de salvar seu rascunho.

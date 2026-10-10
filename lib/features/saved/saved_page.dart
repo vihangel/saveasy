@@ -18,7 +18,7 @@ class _SavedPageState extends State<SavedPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return AppPage(
       appBar: AppBar(leading: const AppBackButton(), title: const Text('Salvos e interesses')),
       body: RefreshIndicator(
         onRefresh: () async {

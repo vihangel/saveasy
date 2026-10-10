@@ -24,7 +24,7 @@ class NotificationsPage extends StatelessWidget {
     return BlocBuilder<NotificationsCubit, NotificationsState>(
       builder: (context, state) {
         final cubit = context.read<NotificationsCubit>();
-        return Scaffold(
+        return AppPage(
           appBar: AppBar(
             title: const Text('Notificações'),
             actions: [

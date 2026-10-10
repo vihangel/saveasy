@@ -5,24 +5,18 @@ import 'package:flutter/material.dart';
 
 import '../shared/data/datasources/mock_seed.dart';
 import 'env.dart';
+import 'breakpoints.dart';
 import 'theme.dart';
 
-/// Adapta o app (desenhado para celular) a telas largas, como o navegador no
-/// desktop:
-///
-/// - até [mobileBreakpoint]: ocupa a tela inteira, como no celular;
-/// - acima disso: o app fica numa coluna central com largura de celular;
-/// - a partir de [wideBreakpoint]: mostra também um painel de apresentação.
-///
-/// O [MediaQuery] é reescrito com a largura da coluna, então telas, diálogos e
-/// bottom sheets se comportam como num celular.
+/// Moldura opcional para apresentação, ativada com PHONE_FRAME=true.
+/// No uso normal mantém o viewport real para os layouts adaptativos.
 class ResponsiveFrame extends StatelessWidget {
   const ResponsiveFrame({super.key, required this.child});
 
   final Widget child;
 
-  static const mobileBreakpoint = 600.0;
-  static const wideBreakpoint = 1000.0;
+  static const mobileBreakpoint = Breakpoints.medium;
+  static const wideBreakpoint = Breakpoints.expanded;
   static const appWidth = 430.0;
   static const _maxAppHeight = 932.0;
 
@@ -30,7 +24,7 @@ class ResponsiveFrame extends StatelessWidget {
   Widget build(BuildContext context) {
     final media = MediaQuery.of(context);
     final size = media.size;
-    if (size.width < mobileBreakpoint) return child;
+    if (!const bool.fromEnvironment('PHONE_FRAME') || context.isCompact) return child;
 
     // Com altura suficiente o app aparece como um "celular" com bordas
     // arredondadas; em janelas baixas usa a altura toda.

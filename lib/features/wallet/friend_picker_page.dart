@@ -29,7 +29,7 @@ class _FriendPickerPageState extends State<FriendPickerPage> {
   @override
   Widget build(BuildContext context) {
     final coins = context.select((SessionCubit c) => c.state.userOrNull?.coins ?? 0);
-    return Scaffold(
+    return AppPage(
       appBar: AppBar(
         leading: const AppBackButton(fallback: AppRoutes.wallet),
         title: const Text('Enviar moedas'),

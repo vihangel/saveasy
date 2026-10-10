@@ -1,3 +1,5 @@
+import '../../app/breakpoints.dart';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -34,7 +36,8 @@ class WalletPage extends StatelessWidget {
       builder: (context, state) {
         final cubit = context.read<WalletCubit>();
         if (user == null) return const SizedBox.shrink();
-        return Scaffold(
+        return AppPage(
+          maxWidth: context.isExpanded ? 960 : Breakpoints.content,
           appBar: AppBar(leading: const AppBackButton(), title: const Text('Carteira')),
           body: RefreshIndicator(
             onRefresh: cubit.load,
@@ -108,8 +111,39 @@ class WalletPage extends StatelessWidget {
                 const SectionHeader(title: 'Histórico'),
                 AsyncBody(
                   status: state.status,
-                  builder: (context) =>
-                      Column(children: [for (final t in state.history) _TransactionTile(transaction: t)]),
+                  builder: (context) => context.isExpanded
+                      ? SingleChildScrollView(
+                          scrollDirection: Axis.horizontal,
+                          child: DataTable(
+                            columns: const [
+                              DataColumn(label: Text('Data')),
+                              DataColumn(label: Text('Movimentação')),
+                              DataColumn(label: Text('Moedas'), numeric: true),
+                              DataColumn(label: Text('Valor'), numeric: true),
+                            ],
+                            rows: [
+                              for (final t in state.history)
+                                DataRow(
+                                  cells: [
+                                    DataCell(Text(Formatters.date(t.date))),
+                                    DataCell(
+                                      SizedBox(
+                                        width: 280,
+                                        child: Text(
+                                          '${t.kind.label} · ${t.description}',
+                                          maxLines: 2,
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                      ),
+                                    ),
+                                    DataCell(Text('${t.coins}')),
+                                    DataCell(Text(Formatters.currency(t.money))),
+                                  ],
+                                ),
+                            ],
+                          ),
+                        )
+                      : Column(children: [for (final t in state.history) _TransactionTile(transaction: t)]),
                 ),
               ],
             ),

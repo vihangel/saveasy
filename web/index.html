@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html lang="pt-BR">
 <head>
   <!--
     If you are serving your web app in a path other than the root, change the
@@ -18,7 +18,13 @@
 
   <meta charset="UTF-8">
   <meta content="IE=Edge" http-equiv="X-UA-Compatible">
-  <meta name="description" content="Save Easy - app de boas ações">
+  <meta name="description" content="Conecte-se a boas ações em Cuiabá. Participe de eventos, apoie comunidades e acompanhe seu impacto com o Save Easy.">
+  <meta name="theme-color" content="#FA7E2A">
+  <meta property="og:title" content="Save Easy — ações que mudam o mundo">
+  <meta property="og:description" content="Apoie comunidades, participe de ações sociais e faça a diferença em Cuiabá.">
+  <meta property="og:type" content="website">
+  <meta property="og:image" content="https://vihangel.github.io/saveasy/logo.png">
+  <meta name="twitter:card" content="summary">
 
   <!-- iOS meta tags & icons -->
   <meta name="mobile-web-app-capable" content="yes">
@@ -41,6 +47,18 @@
     For more details:
     * https://docs.flutter.dev/platform-integration/web/initialization
   -->
+  <style>
+    body { margin: 0; background: #fff8f2; font-family: system-ui, sans-serif; }
+    #loading { position: fixed; inset: 0; display: grid; place-content: center; text-align: center; color: #30334b; }
+    #loading img { margin: auto; width: 80px; height: 80px; }
+    #update { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); z-index: 10000; max-width: 90vw; border: 1px solid #6176ed; border-radius: 16px; background: white; padding: 16px; box-shadow: 0 4px 24px #0002; }
+    #update button { cursor: pointer; margin: 4px; padding: 8px 12px; border-radius: 8px; border: 0; background: #6176ed; color: white; }
+  </style>
+  <div id="loading" role="status"><img src="logo.png" alt=""><p>Preparando suas próximas boas ações…</p></div>
+  <div id="update" role="status" hidden>Nova versão disponível. Salve o que estiver editando antes de recarregar.
+    <button id="reload">Recarregar</button><button id="dismiss-update">Agora não</button>
+  </div>
+  <script src="web_status.js" defer></script>
   <script src="flutter_bootstrap.js" async></script>
 </body>
 </html>

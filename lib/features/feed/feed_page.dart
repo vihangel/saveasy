@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../app/routes.dart';
+import '../../app/breakpoints.dart';
 import '../../app/theme.dart';
 import '../../shared/data/models/models.dart';
 import '../../shared/data/repositories/repositories.dart';
@@ -20,13 +21,16 @@ class FeedPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final user = context.select((SessionCubit c) => c.state.userOrNull);
-    return Scaffold(
+    final feed = AppPage(
       appBar: AppBar(
-        leading: IconButton(
-          tooltip: 'Abrir menu',
-          icon: const Icon(Icons.menu_rounded),
-          onPressed: () => HomeShell.scaffoldKey.currentState?.openDrawer(),
-        ),
+        automaticallyImplyLeading: false,
+        leading: context.isCompact
+            ? IconButton(
+                tooltip: 'Abrir menu',
+                icon: const Icon(Icons.menu_rounded),
+                onPressed: () => HomeShell.scaffoldKey.currentState?.openDrawer(),
+              )
+            : null,
         title: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -109,6 +113,14 @@ class FeedPage extends StatelessWidget {
         },
       ),
     );
+    if (!context.hasSupportingColumn) return feed;
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Expanded(child: feed),
+        const SizedBox(width: 300, child: _FeedAside()),
+      ],
+    );
   }
 
   List<Widget> _content(BuildContext context, FeedState state) {
@@ -167,9 +179,13 @@ class FeedPage extends StatelessWidget {
             post: post,
             commentsCount: post.commentsCount,
             onLike: () => cubit.toggleLike(post.id),
-            onShare: () {
-              cubit.share(post.id);
-              context.showMessage('Link da publicação copiado!');
+            onShare: () async {
+              try {
+                await cubit.share(post.id);
+                if (context.mounted) context.showMessage('Link da publicação copiado!');
+              } catch (_) {
+                if (context.mounted) context.showMessage('Não foi possível compartilhar.', error: true);
+              }
             },
           );
         },
@@ -340,3 +356,65 @@ FeedCubit createFeedCubit(BuildContext context) => FeedCubit(
   context.currentUser.id,
   ads: context.read<AdsRepository>(),
 )..load();
+
+class _FeedAside extends StatefulWidget {
+  const _FeedAside();
+  @override
+  State<_FeedAside> createState() => _FeedAsideState();
+}
+
+class _FeedAsideState extends State<_FeedAside> {
+  late final _profiles = context.read<UserRepository>().search('', excludeId: context.currentUser.id);
+  @override
+  Widget build(BuildContext context) {
+    final user = context.watch<SessionCubit>().state.userOrNull;
+    return ListView(
+      padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 8),
+      children: [
+        if (user != null) LevelCard(user: user, compact: true),
+        const SizedBox(height: 24),
+        Card(
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('Conheça comunidades', style: Theme.of(context).textTheme.titleMedium),
+                FutureBuilder<List<AppUser>>(
+                  future: _profiles,
+                  builder: (context, snapshot) {
+                    if (snapshot.hasError) return const Text('Sugestões indisponíveis agora.');
+                    if (!snapshot.hasData) return const LinearProgressIndicator();
+                    final users = snapshot.data!.where((u) => u.accountType == AccountType.community).take(3);
+                    return Column(
+                      children: [
+                        for (final u in users)
+                          ListTile(
+                            contentPadding: EdgeInsets.zero,
+                            leading: UserAvatar(name: u.name, imageUrl: u.avatarUrl, size: 32),
+                            title: Text(u.name),
+                            subtitle: Text('@${u.username}'),
+                            onTap: () => context.push(AppRoutes.user(u.id)),
+                          ),
+                      ],
+                    );
+                  },
+                ),
+              ],
+            ),
+          ),
+        ),
+        const SizedBox(height: 16),
+        const AdBar(),
+        Card(
+          child: ListTile(
+            leading: const Icon(Icons.public),
+            title: const Text('Transparência'),
+            subtitle: const Text('Veja o destino dos recursos e o impacto das ações.'),
+            onTap: () => context.push(AppRoutes.transparency),
+          ),
+        ),
+      ],
+    );
+  }
+}

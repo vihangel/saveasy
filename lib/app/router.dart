@@ -16,7 +16,6 @@ import '../features/auth/onboarding/onboarding_cubit.dart';
 import '../features/auth/onboarding/onboarding_pages.dart';
 import '../features/auth/sign_up/sign_up_cubit.dart';
 import '../features/auth/sign_up/sign_up_pages.dart';
-import '../features/chat/chat_page.dart';
 import '../features/community_subscription/community_subscription_page.dart';
 import '../features/community_subscription/plans_editor_page.dart';
 import '../features/create_post/ad_info_page.dart';
@@ -28,7 +27,8 @@ import '../features/event_confirmed/event_confirmed_page.dart';
 import '../features/feed/feed_page.dart';
 import '../features/follows/follow_list_page.dart';
 import '../features/home/home_shell.dart';
-import '../features/messages/messages_page.dart';
+import '../features/home/desktop_shell.dart';
+import '../features/messages/messages_workspace.dart';
 import '../features/invite/invite_page.dart';
 import '../features/moderation/admin_page.dart';
 import '../features/moderation/blocked_page.dart';
@@ -112,171 +112,182 @@ GoRouter createRouter(SessionCubit session) {
         ],
       ),
 
-      // App logado com barra inferior.
-      StatefulShellRoute.indexedStack(
-        builder: (context, _, shell) => HomeShell.route(context, shell),
-        branches: [
-          StatefulShellBranch(
-            routes: [
-              GoRoute(
-                path: AppRoutes.home,
-                builder: (context, _) => BlocProvider(create: createFeedCubit, child: const FeedPage()),
-              ),
-            ],
-          ),
-          StatefulShellBranch(
-            routes: [GoRoute(path: AppRoutes.messages, builder: (context, _) => MessagesPage.route(context))],
-          ),
-          StatefulShellBranch(
-            routes: [GoRoute(path: AppRoutes.notifications, builder: (context, _) => NotificationsPage.route(context))],
-          ),
-          StatefulShellBranch(
-            routes: [
-              GoRoute(
-                path: AppRoutes.profile,
-                builder: (context, _) => ProfilePage.route(context, context.read<SessionCubit>().user.id, isTab: true),
-              ),
-            ],
-          ),
-        ],
-      ),
-
-      // Telas empilhadas por cima da barra inferior.
-      GoRoute(path: AppRoutes.create, builder: (_, _) => const CreatePostTypePage()),
-      GoRoute(path: AppRoutes.adInfo, builder: (_, _) => const AdInfoPage()),
-      GoRoute(
-        path: '/create/:type',
-        builder: (context, state) =>
-            CreatePostFormPage.route(context, PostType.values.byName(state.pathParameters['type']!)),
-      ),
-      GoRoute(
-        path: '/post/:id',
-        builder: (context, state) => PostDetailPage.route(context, state.pathParameters['id']!),
-        routes: [
-          GoRoute(path: 'donate', builder: (context, state) => DonatePage.route(context, state.pathParameters['id']!)),
-          GoRoute(
-            path: 'edit',
-            builder: (context, state) => CreatePostFormPage.editRoute(context, state.pathParameters['id']!),
-          ),
-          GoRoute(
-            path: 'confirmed',
-            builder: (_, state) => EventConfirmedPage(postId: state.pathParameters['id']!),
-          ),
-          GoRoute(
-            path: 'participants',
-            builder: (_, state) => ParticipantsPage(postId: state.pathParameters['id']!),
-          ),
-          GoRoute(
-            path: 'requests',
-            builder: (_, state) => ItemRequestsPage(postId: state.pathParameters['id']!),
-          ),
-        ],
-      ),
-      GoRoute(path: AppRoutes.newStory, builder: (_, _) => const NewStoryPage()),
-      GoRoute(
-        path: '/stories/:index',
-        pageBuilder: (context, state) => MaterialPage(
-          fullscreenDialog: true,
-          child: StoriesPage.route(context, int.parse(state.pathParameters['index']!)),
-        ),
-      ),
-      GoRoute(path: AppRoutes.editProfile, builder: (context, _) => EditProfilePage.route(context)),
-      GoRoute(path: AppRoutes.settings, builder: (_, _) => const SettingsPage()),
-      GoRoute(path: AppRoutes.saved, builder: (_, _) => const SavedPage()),
-      GoRoute(path: AppRoutes.invite, builder: (_, _) => const InvitePage()),
-      GoRoute(path: AppRoutes.orders, builder: (_, _) => const OrdersPage()),
-      GoRoute(path: AppRoutes.finance, builder: (_, _) => const FinancePage()),
-      GoRoute(path: AppRoutes.verification, builder: (_, _) => const VerificationPage()),
-      GoRoute(path: AppRoutes.blocked, builder: (_, _) => const BlockedPage()),
-      GoRoute(path: AppRoutes.plans, builder: (_, _) => const PlansEditorPage()),
-      GoRoute(path: AppRoutes.admin, builder: (_, _) => const AdminPage()),
-      GoRoute(path: AppRoutes.transparency, builder: (_, _) => const TransparencyPage()),
-      GoRoute(
-        path: AppRoutes.ads,
-        builder: (_, _) => const AdsPage(),
-        routes: [GoRoute(path: 'new', builder: (_, _) => const AdFormPage())],
-      ),
-      GoRoute(
-        path: '/users/:id',
-        builder: (context, state) => ProfilePage.route(context, state.pathParameters['id']!),
-        routes: [
-          GoRoute(
-            path: 'follows',
-            builder: (context, state) => FollowListPage(
-              profileId: state.pathParameters['id']!,
-              kind: state.uri.queryParameters['kind'] == 'following'
-                  ? FollowListKind.following
-                  : FollowListKind.followers,
-            ),
-          ),
-          GoRoute(
-            path: 'activity',
-            builder: (_, state) => ActivityPage(profileId: state.pathParameters['id']!),
-          ),
-          GoRoute(
-            path: 'subscribe',
-            builder: (context, state) => CommunitySubscriptionPage.route(context, state.pathParameters['id']!),
-          ),
-          GoRoute(
-            path: 'send-coins',
-            builder: (context, state) =>
-                SendCoinsPage.route(context, state.pathParameters['id']!, state.uri.queryParameters['post']),
-          ),
-        ],
-      ),
-      GoRoute(
-        path: '/messages/:threadId',
-        builder: (context, state) => ChatPage.route(context, state.pathParameters['threadId']!),
-      ),
-      GoRoute(
-        path: AppRoutes.wallet,
-        builder: (context, _) => WalletPage.route(context),
-        routes: [GoRoute(path: 'send', builder: (_, _) => const FriendPickerPage())],
-      ),
-      GoRoute(path: AppRoutes.achievements, builder: (context, _) => AchievementsPage.route(context)),
-
-      // Lista e detalhe compartilham o mesmo cubit.
       ShellRoute(
-        builder: (context, _, child) => BlocProvider(
-          create: (context) =>
-              RewardsCubit(context.read<GamificationRepository>(), context.read<SessionCubit>())..load(),
-          child: child,
-        ),
+        builder: (context, state, child) => DesktopShell.route(context, child),
         routes: [
-          GoRoute(
-            path: AppRoutes.rewards,
-            builder: (_, _) => const RewardsPage(),
-            routes: [
-              GoRoute(
-                path: ':id',
-                builder: (_, state) => RewardDetailPage(rewardId: state.pathParameters['id']!),
-              ),
-            ],
-          ),
-        ],
-      ),
-      ShellRoute(
-        builder: (context, _, child) =>
-            BlocProvider(create: (context) => StoreCubit(context.read<StoreRepository>())..load(), child: child),
-        routes: [
-          GoRoute(
-            path: AppRoutes.store,
-            builder: (_, _) => const StorePage(),
-            routes: [
-              GoRoute(
-                path: 'manage',
-                builder: (_, _) => const MyStorePage(),
+          // App logado com barra inferior.
+          StatefulShellRoute.indexedStack(
+            builder: (context, _, shell) => HomeShell.route(context, shell),
+            branches: [
+              StatefulShellBranch(
                 routes: [
-                  GoRoute(path: 'new', builder: (_, _) => const ProductFormPage()),
                   GoRoute(
-                    path: ':id',
-                    builder: (_, state) => ProductFormPage(productId: state.pathParameters['id']),
+                    path: AppRoutes.home,
+                    builder: (context, _) => BlocProvider(create: createFeedCubit, child: const FeedPage()),
                   ),
                 ],
               ),
+              StatefulShellBranch(
+                routes: [GoRoute(path: AppRoutes.messages, builder: (context, _) => const MessagesWorkspace())],
+              ),
+              StatefulShellBranch(
+                routes: [
+                  GoRoute(path: AppRoutes.notifications, builder: (context, _) => NotificationsPage.route(context)),
+                ],
+              ),
+              StatefulShellBranch(
+                routes: [
+                  GoRoute(
+                    path: AppRoutes.profile,
+                    builder: (context, _) =>
+                        ProfilePage.route(context, context.read<SessionCubit>().user.id, isTab: true),
+                  ),
+                ],
+              ),
+            ],
+          ),
+
+          // Telas empilhadas por cima da barra inferior.
+          GoRoute(path: AppRoutes.create, builder: (_, _) => const CreatePostTypePage()),
+          GoRoute(path: AppRoutes.adInfo, builder: (_, _) => const AdInfoPage()),
+          GoRoute(
+            path: '/create/:type',
+            builder: (context, state) =>
+                CreatePostFormPage.route(context, PostType.values.byName(state.pathParameters['type']!)),
+          ),
+          GoRoute(
+            path: '/post/:id',
+            builder: (context, state) => PostDetailPage.route(context, state.pathParameters['id']!),
+            routes: [
               GoRoute(
-                path: ':id',
-                builder: (_, state) => ProductPage(productId: state.pathParameters['id']!),
+                path: 'donate',
+                builder: (context, state) => DonatePage.route(context, state.pathParameters['id']!),
+              ),
+              GoRoute(
+                path: 'edit',
+                builder: (context, state) => CreatePostFormPage.editRoute(context, state.pathParameters['id']!),
+              ),
+              GoRoute(
+                path: 'confirmed',
+                builder: (_, state) => EventConfirmedPage(postId: state.pathParameters['id']!),
+              ),
+              GoRoute(
+                path: 'participants',
+                builder: (_, state) => ParticipantsPage(postId: state.pathParameters['id']!),
+              ),
+              GoRoute(
+                path: 'requests',
+                builder: (_, state) => ItemRequestsPage(postId: state.pathParameters['id']!),
+              ),
+            ],
+          ),
+          GoRoute(path: AppRoutes.newStory, builder: (_, _) => const NewStoryPage()),
+          GoRoute(
+            path: '/stories/:index',
+            pageBuilder: (context, state) => MaterialPage(
+              fullscreenDialog: true,
+              child: StoriesPage.route(context, int.parse(state.pathParameters['index']!)),
+            ),
+          ),
+          GoRoute(path: AppRoutes.editProfile, builder: (context, _) => EditProfilePage.route(context)),
+          GoRoute(path: AppRoutes.settings, builder: (_, _) => const SettingsPage()),
+          GoRoute(path: AppRoutes.saved, builder: (_, _) => const SavedPage()),
+          GoRoute(path: AppRoutes.invite, builder: (_, _) => const InvitePage()),
+          GoRoute(path: AppRoutes.orders, builder: (_, _) => const OrdersPage()),
+          GoRoute(path: AppRoutes.finance, builder: (_, _) => const FinancePage()),
+          GoRoute(path: AppRoutes.verification, builder: (_, _) => const VerificationPage()),
+          GoRoute(path: AppRoutes.blocked, builder: (_, _) => const BlockedPage()),
+          GoRoute(path: AppRoutes.plans, builder: (_, _) => const PlansEditorPage()),
+          GoRoute(path: AppRoutes.admin, builder: (_, _) => const AdminPage()),
+          GoRoute(path: AppRoutes.transparency, builder: (_, _) => const TransparencyPage()),
+          GoRoute(
+            path: AppRoutes.ads,
+            builder: (_, _) => const AdsPage(),
+            routes: [GoRoute(path: 'new', builder: (_, _) => const AdFormPage())],
+          ),
+          GoRoute(
+            path: '/users/:id',
+            builder: (context, state) => ProfilePage.route(context, state.pathParameters['id']!),
+            routes: [
+              GoRoute(
+                path: 'follows',
+                builder: (context, state) => FollowListPage(
+                  profileId: state.pathParameters['id']!,
+                  kind: state.uri.queryParameters['kind'] == 'following'
+                      ? FollowListKind.following
+                      : FollowListKind.followers,
+                ),
+              ),
+              GoRoute(
+                path: 'activity',
+                builder: (_, state) => ActivityPage(profileId: state.pathParameters['id']!),
+              ),
+              GoRoute(
+                path: 'subscribe',
+                builder: (context, state) => CommunitySubscriptionPage.route(context, state.pathParameters['id']!),
+              ),
+              GoRoute(
+                path: 'send-coins',
+                builder: (context, state) =>
+                    SendCoinsPage.route(context, state.pathParameters['id']!, state.uri.queryParameters['post']),
+              ),
+            ],
+          ),
+          GoRoute(
+            path: '/messages/:threadId',
+            builder: (context, state) => MessagesWorkspace(threadId: state.pathParameters['threadId']!),
+          ),
+          GoRoute(
+            path: AppRoutes.wallet,
+            builder: (context, _) => WalletPage.route(context),
+            routes: [GoRoute(path: 'send', builder: (_, _) => const FriendPickerPage())],
+          ),
+          GoRoute(path: AppRoutes.achievements, builder: (context, _) => AchievementsPage.route(context)),
+
+          // Lista e detalhe compartilham o mesmo cubit.
+          ShellRoute(
+            builder: (context, _, child) => BlocProvider(
+              create: (context) =>
+                  RewardsCubit(context.read<GamificationRepository>(), context.read<SessionCubit>())..load(),
+              child: child,
+            ),
+            routes: [
+              GoRoute(
+                path: AppRoutes.rewards,
+                builder: (_, _) => const RewardsPage(),
+                routes: [
+                  GoRoute(
+                    path: ':id',
+                    builder: (_, state) => RewardDetailPage(rewardId: state.pathParameters['id']!),
+                  ),
+                ],
+              ),
+            ],
+          ),
+          ShellRoute(
+            builder: (context, _, child) =>
+                BlocProvider(create: (context) => StoreCubit(context.read<StoreRepository>())..load(), child: child),
+            routes: [
+              GoRoute(
+                path: AppRoutes.store,
+                builder: (_, _) => const StorePage(),
+                routes: [
+                  GoRoute(
+                    path: 'manage',
+                    builder: (_, _) => const MyStorePage(),
+                    routes: [
+                      GoRoute(path: 'new', builder: (_, _) => const ProductFormPage()),
+                      GoRoute(
+                        path: ':id',
+                        builder: (_, state) => ProductFormPage(productId: state.pathParameters['id']),
+                      ),
+                    ],
+                  ),
+                  GoRoute(
+                    path: ':id',
+                    builder: (_, state) => ProductPage(productId: state.pathParameters['id']!),
+                  ),
+                ],
               ),
             ],
           ),

@@ -1,3 +1,7 @@
+import 'package:flutter/foundation.dart';
+
+import 'adaptive_sheet.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:image_picker/image_picker.dart';
@@ -32,7 +36,7 @@ Future<ImagePickResult?> showImagePickerSheet(
   bool canRemove = false,
   ImageBucket bucket = ImageBucket.postCovers,
 }) async {
-  final choice = await showModalBottomSheet<_Choice>(
+  final choice = await showAdaptiveSheet<_Choice>(
     context: context,
     showDragHandle: true,
     backgroundColor: Colors.white,
@@ -45,14 +49,15 @@ Future<ImagePickResult?> showImagePickerSheet(
             padding: const EdgeInsets.fromLTRB(24, 0, 24, 8),
             child: Text(title, style: Theme.of(context).textTheme.titleMedium),
           ),
-          ListTile(
-            leading: const Icon(Icons.photo_camera_outlined, color: AppColors.primary),
-            title: const Text('Tirar foto'),
-            onTap: () => Navigator.pop(context, _Choice.camera),
-          ),
+          if (!kIsWeb)
+            ListTile(
+              leading: const Icon(Icons.photo_camera_outlined, color: AppColors.primary),
+              title: const Text('Tirar foto'),
+              onTap: () => Navigator.pop(context, _Choice.camera),
+            ),
           ListTile(
             leading: const Icon(Icons.photo_library_outlined, color: AppColors.primary),
-            title: const Text('Escolher da galeria'),
+            title: Text(kIsWeb ? 'Escolher arquivo' : 'Escolher da galeria'),
             onTap: () => Navigator.pop(context, _Choice.gallery),
           ),
           if (canRemove)

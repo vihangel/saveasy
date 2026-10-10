@@ -82,7 +82,7 @@ class _FinancePageState extends State<FinancePage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return AppPage(
       appBar: AppBar(leading: const AppBackButton(), title: const Text('Painel financeiro')),
       body: FutureBuilder<FinanceSummary>(
         future: _summary,

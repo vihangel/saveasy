@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../app/routes.dart';
+import '../../app/breakpoints.dart';
 import '../../app/theme.dart';
 import '../../shared/data/repositories/repositories.dart';
 import '../../shared/notifiers/badges_cubit.dart';
@@ -31,6 +32,8 @@ class HomeShell extends StatelessWidget {
       navigationShell.goBranch(i, initialLocation: i == navigationShell.currentIndex);
       context.read<BadgesCubit>().refresh();
     }
+
+    if (!context.isCompact) return navigationShell;
 
     return Scaffold(
       key: scaffoldKey,

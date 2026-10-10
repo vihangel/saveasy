@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -78,7 +79,7 @@ class _ParticipantsPageState extends State<ParticipantsPage> {
   Widget build(BuildContext context) {
     final items = _items;
     final present = items?.where((p) => p.status == ParticipationStatus.attended).length ?? 0;
-    return Scaffold(
+    return AppPage(
       appBar: AppBar(leading: const AppBackButton(), title: const Text('Participantes')),
       body: _error != null
           ? EmptyState(message: _error!, icon: Icons.cloud_off)
@@ -115,17 +116,18 @@ class _ParticipantsPageState extends State<ParticipantsPage> {
                           onPressed: () => _checkIn(code: _code.text),
                           icon: const Icon(Icons.check_circle_rounded, color: AppColors.primary),
                         ),
-                        IconButton(
-                          tooltip: 'Ler QR com a câmera',
-                          onPressed: () async {
-                            final code = await Navigator.push<String>(
-                              context,
-                              MaterialPageRoute(builder: (_) => const QrScanPage()),
-                            );
-                            if (code != null) await _checkIn(code: code);
-                          },
-                          icon: const Icon(Icons.qr_code_scanner_rounded, color: AppColors.primary),
-                        ),
+                        if (!kIsWeb)
+                          IconButton(
+                            tooltip: 'Ler QR com a câmera',
+                            onPressed: () async {
+                              final code = await Navigator.push<String>(
+                                context,
+                                MaterialPageRoute(builder: (_) => const QrScanPage()),
+                              );
+                              if (code != null) await _checkIn(code: code);
+                            },
+                            icon: const Icon(Icons.qr_code_scanner_rounded, color: AppColors.primary),
+                          ),
                       ],
                     ),
                   ),

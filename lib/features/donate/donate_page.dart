@@ -34,7 +34,7 @@ class DonatePage extends StatelessWidget {
       builder: (context, state) {
         if (state.done) {
           final post = state.post!;
-          return Scaffold(
+          return AppPage(
             body: RewardSuccessView(
               icon: Icons.volunteer_activism_rounded,
               title: 'Obrigado pela doação!',
@@ -52,7 +52,7 @@ class DonatePage extends StatelessWidget {
             ),
           );
         }
-        return Scaffold(
+        return AppPage(
           appBar: AppBar(leading: const AppBackButton(), title: const Text('Doar')),
           body: AsyncBody(
             status: state.status,

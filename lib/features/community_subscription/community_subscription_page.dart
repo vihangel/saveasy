@@ -40,7 +40,7 @@ class CommunitySubscriptionPage extends StatelessWidget {
       builder: (context, state) {
         final cubit = context.read<CommunitySubscriptionCubit>();
         if (state.done) {
-          return Scaffold(
+          return AppPage(
             body: RewardSuccessView(
               icon: Icons.groups_rounded,
               title: 'Inscrição confirmada!',
@@ -52,7 +52,7 @@ class CommunitySubscriptionPage extends StatelessWidget {
             ),
           );
         }
-        return Scaffold(
+        return AppPage(
           appBar: AppBar(leading: const AppBackButton(), title: const Text('Inscrição')),
           body: AsyncBody(
             status: state.status,

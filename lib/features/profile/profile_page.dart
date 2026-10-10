@@ -1,3 +1,5 @@
+import '../../app/breakpoints.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -41,7 +43,8 @@ class ProfilePage extends StatelessWidget {
     return BlocListener<SessionCubit, SessionState>(
       listener: (context, _) => context.read<ProfileCubit>().load(),
       child: BlocBuilder<ProfileCubit, ProfileState>(
-        builder: (context, state) => Scaffold(
+        builder: (context, state) => AppPage(
+          maxWidth: context.isExpanded ? 960 : Breakpoints.content,
           body: AsyncBody(
             status: state.status,
             error: state.error,
@@ -83,6 +86,14 @@ class _Body extends StatelessWidget {
           children: [
             state.posts.isEmpty
                 ? const EmptyState(message: 'Nenhuma publicação ainda.')
+                : !context.isCompact
+                ? SingleChildScrollView(
+                    padding: const EdgeInsets.fromLTRB(16, 16, 16, 100),
+                    child: AdaptiveCards(
+                      minWidth: 300,
+                      children: [for (final post in state.posts) PostCard(post: post)],
+                    ),
+                  )
                 : ListView.builder(
                     padding: const EdgeInsets.only(top: 8, bottom: 100),
                     itemCount: state.posts.length,

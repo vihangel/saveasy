@@ -87,6 +87,8 @@ void main() {
   const sizes = {
     'iPhone SE (320x568)': Size(320, 568),
     'Android pequeno (360x640)': Size(360, 640),
+    'Tablet (768x1024)': Size(768, 1024),
+    'Desktop largo (1440x900)': Size(1440, 900),
     'Desktop (1280x800)': Size(1280, 800),
   };
   const textScales = [1.0, 1.3];
@@ -152,6 +154,9 @@ void main() {
         for (final route in ['/onboarding', '/onboarding/profile', '/onboarding/address']) {
           await visit(route);
         }
+
+        // O fixture administrativo permite exercitar também o conteúdo do painel.
+        db.users = [for (final u in db.users) u.id == MockSeed.demoUserId ? u.copyWith(role: 'admin') : u];
 
         // Logado com a conta demo.
         await storage.writeString('session_user_id', MockSeed.demoUserId);

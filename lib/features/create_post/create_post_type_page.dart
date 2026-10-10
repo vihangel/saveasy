@@ -1,3 +1,5 @@
+import '../../app/breakpoints.dart';
+
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
@@ -39,7 +41,8 @@ class _CreatePostTypePageState extends State<CreatePostTypePage> {
   @override
   Widget build(BuildContext context) {
     final types = _order.where((t) => t.label.toLowerCase().contains(_query.toLowerCase())).toList();
-    return Scaffold(
+    return AppPage(
+      maxWidth: context.isExpanded ? 760 : Breakpoints.content,
       appBar: AppBar(leading: const AppBackButton(), title: const Text('Criar uma publicação'), centerTitle: false),
       body: Column(
         children: [
@@ -50,7 +53,7 @@ class _CreatePostTypePageState extends State<CreatePostTypePage> {
           Expanded(
             child: GridView(
               gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2,
+                crossAxisCount: context.isExpanded ? 3 : 2,
                 mainAxisSpacing: 16,
                 crossAxisSpacing: 16,
                 mainAxisExtent: 112 + 24 * context.textScale,

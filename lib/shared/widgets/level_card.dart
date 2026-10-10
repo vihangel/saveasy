@@ -9,9 +9,10 @@ import 'user_avatar.dart';
 /// Bloco "Progresso" (nome, nível, moedas e barra de XP) das telas de
 /// Recompensas, Conquistas e do menu.
 class LevelCard extends StatelessWidget {
-  const LevelCard({super.key, required this.user});
+  const LevelCard({super.key, required this.user, this.compact = false});
 
   final AppUser user;
+  final bool compact;
 
   @override
   Widget build(BuildContext context) {
@@ -26,7 +27,7 @@ class LevelCard extends StatelessWidget {
         children: [
           Row(
             children: [
-              UserAvatar(name: user.name, imageUrl: user.avatarUrl, size: 48),
+              UserAvatar(name: user.name, imageUrl: user.avatarUrl, size: compact ? 36 : 48),
               const SizedBox(width: 12),
               Expanded(
                 child: Column(
@@ -34,15 +35,24 @@ class LevelCard extends StatelessWidget {
                   children: [
                     Text(
                       user.name,
+                      maxLines: compact ? 2 : null,
+                      overflow: compact ? TextOverflow.ellipsis : null,
                       style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w700, fontSize: 16),
                     ),
                     Text('Nível ${user.level}', style: const TextStyle(color: Colors.white70, fontSize: 13)),
                   ],
                 ),
               ),
-              CoinChip(coins: user.coins, light: true),
+              if (!compact) CoinChip(coins: user.coins, light: true),
             ],
           ),
+          if (compact) ...[
+            const SizedBox(height: 12),
+            Align(
+              alignment: Alignment.centerLeft,
+              child: CoinChip(coins: user.coins, light: true),
+            ),
+          ],
           const SizedBox(height: 14),
           ProgressBar(value: user.levelProgress, color: Colors.white),
           const SizedBox(height: 6),

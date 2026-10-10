@@ -53,7 +53,7 @@ class _ItemRequestsPageState extends State<ItemRequestsPage> {
   @override
   Widget build(BuildContext context) {
     final items = _items;
-    return Scaffold(
+    return AppPage(
       appBar: AppBar(leading: const AppBackButton(), title: const Text('Pedidos do item')),
       body: items == null
           ? const Center(child: CircularProgressIndicator())

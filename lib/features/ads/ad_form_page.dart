@@ -1,3 +1,5 @@
+import '../../app/breakpoints.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -106,7 +108,8 @@ class _AdFormPageState extends State<AdFormPage> {
   @override
   Widget build(BuildContext context) {
     final quote = _quote;
-    return Scaffold(
+    return AppPage(
+      maxWidth: context.isExpanded ? 760 : Breakpoints.content,
       appBar: AppBar(
         leading: const AppBackButton(fallback: AppRoutes.ads),
         title: const Text('Nova campanha'),

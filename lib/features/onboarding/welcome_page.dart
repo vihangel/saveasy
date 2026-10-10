@@ -1,3 +1,6 @@
+import '../../app/breakpoints.dart';
+import '../../shared/widgets/adaptive_cards.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -53,6 +56,62 @@ class _WelcomePageState extends State<WelcomePage> {
 
   @override
   Widget build(BuildContext context) {
+    if (!context.isCompact) {
+      return Scaffold(
+        backgroundColor: const Color(0xFFFFF3EA),
+        body: SafeArea(
+          child: Center(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.all(32),
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 1100),
+                child: Column(
+                  children: [
+                    Image.asset('assets/images/logo.png', width: 64),
+                    const SizedBox(height: 24),
+                    Text(
+                      'Faça o bem. Transforme sua comunidade.',
+                      textAlign: TextAlign.center,
+                      style: Theme.of(context).textTheme.headlineLarge,
+                    ),
+                    const SizedBox(height: 32),
+                    AdaptiveCards(
+                      minWidth: 280,
+                      children: [
+                        for (final slide in _slides)
+                          Card(
+                            child: Padding(
+                              padding: const EdgeInsets.all(24),
+                              child: Column(
+                                children: [
+                                  Image.asset(slide.$1, height: 180, fit: BoxFit.contain),
+                                  const SizedBox(height: 16),
+                                  Text(
+                                    slide.$2,
+                                    style: Theme.of(context).textTheme.titleLarge,
+                                    textAlign: TextAlign.center,
+                                  ),
+                                  const SizedBox(height: 12),
+                                  Text(slide.$3, textAlign: TextAlign.center),
+                                ],
+                              ),
+                            ),
+                          ),
+                      ],
+                    ),
+                    const SizedBox(height: 32),
+                    FilledButton(
+                      onPressed: () => context.read<SessionCubit>().completeOnboarding(),
+                      child: const Text('Começar'),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+    }
     return Scaffold(
       body: Column(
         children: [

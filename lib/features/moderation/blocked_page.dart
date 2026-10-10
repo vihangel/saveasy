@@ -30,7 +30,7 @@ class _BlockedPageState extends State<BlockedPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return AppPage(
       appBar: AppBar(leading: const AppBackButton(), title: const Text('Perfis bloqueados')),
       body: FutureBuilder<List<AppUser>>(
         future: _blocked,

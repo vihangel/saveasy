@@ -1,3 +1,5 @@
+import '../../app/breakpoints.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -69,14 +71,15 @@ class _AdminPageState extends State<AdminPage> {
   @override
   Widget build(BuildContext context) {
     if (!context.currentUser.isStaff) {
-      return Scaffold(
+      return AppPage(
         appBar: AppBar(leading: const AppBackButton()),
         body: const EmptyState(message: 'Acesso restrito à equipe do Save Easy.', icon: Icons.lock_outline),
       );
     }
     return DefaultTabController(
       length: 5,
-      child: Scaffold(
+      child: AppPage(
+        maxWidth: context.isExpanded ? 1100 : Breakpoints.content,
         appBar: AppBar(
           leading: const AppBackButton(),
           title: const Text('Painel da equipe'),
@@ -115,9 +118,17 @@ class _AdminPageState extends State<AdminPage> {
             _Async<List<AdminReport>>(
               future: _reports,
               empty: 'Nenhuma denúncia aberta.',
-              builder: (reports) => ListView.separated(
-                itemCount: reports.length,
-                separatorBuilder: (_, _) => const Divider(height: 1),
+              builder: (reports) => AdaptiveTable(
+                headers: const ['Motivo', 'Conteúdo', 'Data', 'Denunciante'],
+                rows: [
+                  for (final report in reports)
+                    [
+                      report.reason.label,
+                      report.preview?.title ?? 'Removido',
+                      Formatters.date(report.createdAt),
+                      report.reporterName ?? 'Conta excluída',
+                    ],
+                ],
                 itemBuilder: (context, i) {
                   final r = reports[i];
                   final p = r.preview;

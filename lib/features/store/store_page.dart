@@ -1,3 +1,5 @@
+import '../../app/breakpoints.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -22,7 +24,8 @@ class StorePage extends StatelessWidget {
     final seller =
         context.currentUser.accountType == AccountType.community ||
         context.currentUser.accountType == AccountType.business;
-    return Scaffold(
+    return AppPage(
+      maxWidth: context.isExpanded ? 960 : Breakpoints.content,
       appBar: AppBar(
         leading: const AppBackButton(),
         title: const Text('Lojas da Comunidade'),
@@ -74,20 +77,30 @@ class StorePage extends StatelessWidget {
                 for (final section in StoreSection.values)
                   if (state.products.any((p) => p.section == section)) ...[
                     SectionHeader(title: section.label),
-                    SizedBox(
-                      height: 210,
-                      child: ListView(
-                        scrollDirection: Axis.horizontal,
+                    if (!context.isCompact)
+                      Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 20),
-                        children: [
-                          for (final p in state.products.where((p) => p.section == section))
-                            Padding(
-                              padding: const EdgeInsets.only(right: 12),
-                              child: _ProductCard(product: p),
-                            ),
-                        ],
+                        child: AdaptiveCards(
+                          children: [
+                            for (final p in state.products.where((p) => p.section == section)) _ProductCard(product: p),
+                          ],
+                        ),
+                      )
+                    else
+                      SizedBox(
+                        height: 210,
+                        child: ListView(
+                          scrollDirection: Axis.horizontal,
+                          padding: const EdgeInsets.symmetric(horizontal: 20),
+                          children: [
+                            for (final p in state.products.where((p) => p.section == section))
+                              Padding(
+                                padding: const EdgeInsets.only(right: 12),
+                                child: _ProductCard(product: p),
+                              ),
+                          ],
+                        ),
                       ),
-                    ),
                   ],
               ],
             ),
@@ -109,7 +122,7 @@ class _ProductCard extends StatelessWidget {
       onTap: () => context.push(AppRoutes.product(product.id)),
       borderRadius: BorderRadius.circular(16),
       child: SizedBox(
-        width: 150,
+        width: context.isCompact ? 150 : double.infinity,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -201,7 +214,8 @@ class _ProductPageState extends State<ProductPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return AppPage(
+      maxWidth: context.isExpanded ? 960 : Breakpoints.content,
       appBar: AppBar(leading: const AppBackButton(fallback: AppRoutes.store)),
       body: FutureBuilder<ProductDetail>(
         future: _detail,
@@ -212,85 +226,92 @@ class _ProductPageState extends State<ProductPage> {
           final product = detail.product;
           final soldOut = product.stock == 0;
           final mine = product.communityId == context.currentUser.id;
-          return ListView(
+          return SingleChildScrollView(
             padding: const EdgeInsets.all(24),
-            children: [
-              ProductImage(product: product, height: 240),
-              const SizedBox(height: 24),
-              Text(product.name, style: context.text.headlineSmall),
-              const SizedBox(height: 8),
-              InkWell(
-                onTap: () => context.push(AppRoutes.user(product.communityId)),
-                child: Row(
+            child: AdaptiveCards(
+              minWidth: 340,
+              children: [
+                ProductImage(product: product, height: 280),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    UserAvatar(name: product.communityName, imageUrl: product.sellerAvatarUrl, size: 28),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Text(
-                        product.communityName,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(color: AppColors.textMuted),
+                    Text(product.name, style: context.text.headlineSmall),
+                    const SizedBox(height: 8),
+                    InkWell(
+                      onTap: () => context.push(AppRoutes.user(product.communityId)),
+                      child: Row(
+                        children: [
+                          UserAvatar(name: product.communityName, imageUrl: product.sellerAvatarUrl, size: 28),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              product.communityName,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(color: AppColors.textMuted),
+                            ),
+                          ),
+                          if (product.ratingCount > 0) ...[
+                            const Icon(Icons.star_rounded, color: AppColors.gold, size: 18),
+                            Text('${product.rating.toStringAsFixed(1)} (${product.ratingCount})'),
+                          ],
+                        ],
                       ),
                     ),
-                    if (product.ratingCount > 0) ...[
-                      const Icon(Icons.star_rounded, color: AppColors.gold, size: 18),
-                      Text('${product.rating.toStringAsFixed(1)} (${product.ratingCount})'),
+                    const SizedBox(height: 16),
+                    Text(product.description, style: const TextStyle(height: 1.5)),
+                    const SizedBox(height: 24),
+                    Text(
+                      Formatters.currency(product.price),
+                      style: context.text.headlineMedium?.copyWith(color: AppColors.primary),
+                    ),
+                    if (product.stock != null)
+                      Text(
+                        soldOut ? 'Esgotado' : '${product.stock} em estoque',
+                        style: TextStyle(color: soldOut ? AppColors.danger : AppColors.textMuted, fontSize: 12),
+                      ),
+                    const SizedBox(height: 4),
+                    const Text(
+                      'Comprando você ganha +20 moedas e +30 XP',
+                      style: TextStyle(fontSize: 12, color: AppColors.textMuted),
+                    ),
+                    const SizedBox(height: 24),
+                    if (mine)
+                      OutlinedButton.icon(
+                        onPressed: () => context.push(AppRoutes.editProduct(product.id)),
+                        icon: const Icon(Icons.edit_rounded),
+                        label: const Text('Editar produto'),
+                      )
+                    else
+                      PrimaryButton(
+                        label: soldOut ? 'Esgotado' : 'Comprar',
+                        icon: Icons.shopping_bag_outlined,
+                        onPressed: soldOut ? null : () => _buy(product),
+                      ),
+                    if (detail.reviews.isNotEmpty) ...[
+                      const SizedBox(height: 28),
+                      Text('Avaliações', style: context.text.titleMedium),
+                      for (final r in detail.reviews)
+                        ListTile(
+                          contentPadding: EdgeInsets.zero,
+                          leading: UserAvatar(name: r.authorName, imageUrl: r.authorAvatarUrl, size: 36),
+                          title: Row(
+                            children: [
+                              for (var i = 0; i < 5; i++)
+                                Icon(
+                                  i < r.rating ? Icons.star_rounded : Icons.star_border_rounded,
+                                  size: 16,
+                                  color: AppColors.gold,
+                                ),
+                            ],
+                          ),
+                          subtitle: Text(r.comment.isEmpty ? r.authorName : '${r.authorName}: ${r.comment}'),
+                        ),
                     ],
                   ],
                 ),
-              ),
-              const SizedBox(height: 16),
-              Text(product.description, style: const TextStyle(height: 1.5)),
-              const SizedBox(height: 24),
-              Text(
-                Formatters.currency(product.price),
-                style: context.text.headlineMedium?.copyWith(color: AppColors.primary),
-              ),
-              if (product.stock != null)
-                Text(
-                  soldOut ? 'Esgotado' : '${product.stock} em estoque',
-                  style: TextStyle(color: soldOut ? AppColors.danger : AppColors.textMuted, fontSize: 12),
-                ),
-              const SizedBox(height: 4),
-              const Text(
-                'Comprando você ganha +20 moedas e +30 XP',
-                style: TextStyle(fontSize: 12, color: AppColors.textMuted),
-              ),
-              const SizedBox(height: 24),
-              if (mine)
-                OutlinedButton.icon(
-                  onPressed: () => context.push(AppRoutes.editProduct(product.id)),
-                  icon: const Icon(Icons.edit_rounded),
-                  label: const Text('Editar produto'),
-                )
-              else
-                PrimaryButton(
-                  label: soldOut ? 'Esgotado' : 'Comprar',
-                  icon: Icons.shopping_bag_outlined,
-                  onPressed: soldOut ? null : () => _buy(product),
-                ),
-              if (detail.reviews.isNotEmpty) ...[
-                const SizedBox(height: 28),
-                Text('Avaliações', style: context.text.titleMedium),
-                for (final r in detail.reviews)
-                  ListTile(
-                    contentPadding: EdgeInsets.zero,
-                    leading: UserAvatar(name: r.authorName, imageUrl: r.authorAvatarUrl, size: 36),
-                    title: Row(
-                      children: [
-                        for (var i = 0; i < 5; i++)
-                          Icon(
-                            i < r.rating ? Icons.star_rounded : Icons.star_border_rounded,
-                            size: 16,
-                            color: AppColors.gold,
-                          ),
-                      ],
-                    ),
-                    subtitle: Text(r.comment.isEmpty ? r.authorName : '${r.authorName}: ${r.comment}'),
-                  ),
               ],
-            ],
+            ),
           );
         },
       ),

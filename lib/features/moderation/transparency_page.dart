@@ -1,3 +1,5 @@
+import '../../app/breakpoints.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -28,7 +30,8 @@ class _TransparencyPageState extends State<TransparencyPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return AppPage(
+      maxWidth: context.isExpanded ? 960 : Breakpoints.content,
       appBar: AppBar(
         leading: const AppBackButton(fallback: AppRoutes.home),
         title: const Text('Transparência'),

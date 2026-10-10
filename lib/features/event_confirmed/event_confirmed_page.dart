@@ -22,7 +22,7 @@ class EventConfirmedPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final user = context.select((SessionCubit c) => c.state.userOrNull);
-    return Scaffold(
+    return AppPage(
       body: FutureBuilder<Post>(
         future: context.read<PostRepository>().getById(postId),
         builder: (context, snapshot) {

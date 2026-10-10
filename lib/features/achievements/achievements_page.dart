@@ -1,3 +1,5 @@
+import '../../app/breakpoints.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -29,7 +31,8 @@ class AchievementsPage extends StatelessWidget {
         final daily = state.items.where((a) => a.daily).toList();
         final weekly = state.items.where((a) => a.period == 'weekly').toList();
         final general = state.items.where((a) => !a.daily && a.period != 'weekly').toList();
-        return Scaffold(
+        return AppPage(
+          maxWidth: context.isExpanded ? 960 : Breakpoints.content,
           appBar: AppBar(leading: const AppBackButton(), title: const Text('Conquistas')),
           body: AsyncBody(
             status: state.status,
@@ -38,9 +41,9 @@ class AchievementsPage extends StatelessWidget {
               children: [
                 if (user != null) LevelCard(user: user),
                 const SectionHeader(title: 'Faça objetivos diários'),
-                for (final a in daily) _AchievementTile(achievement: a),
+                AdaptiveCards(minWidth: 360, children: [for (final a in daily) _AchievementTile(achievement: a)]),
                 if (weekly.isNotEmpty) const SectionHeader(title: 'Objetivos da semana'),
-                for (final a in weekly) _AchievementTile(achievement: a),
+                AdaptiveCards(minWidth: 360, children: [for (final a in weekly) _AchievementTile(achievement: a)]),
                 const SectionHeader(title: 'Conquistas populares'),
                 for (final a in general.where((a) => !a.completed)) _AchievementTile(achievement: a),
                 const SectionHeader(title: 'Concluídas'),

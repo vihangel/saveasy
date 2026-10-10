@@ -29,7 +29,7 @@ class _QrScanPageState extends State<QrScanPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return AppPage(
       backgroundColor: Colors.black,
       appBar: AppBar(
         leading: const AppBackButton(color: Colors.white),

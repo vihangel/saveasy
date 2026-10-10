@@ -32,7 +32,7 @@ class SendCoinsPage extends StatelessWidget {
       listener: (context, state) => context.showMessage(state.error!, error: true),
       builder: (context, state) {
         if (state.done) {
-          return Scaffold(
+          return AppPage(
             body: RewardSuccessView(
               icon: Icons.monetization_on_rounded,
               title: 'Moedas enviadas!',
@@ -46,7 +46,7 @@ class SendCoinsPage extends StatelessWidget {
             ),
           );
         }
-        return Scaffold(
+        return AppPage(
           appBar: AppBar(leading: const AppBackButton(), title: const Text('Enviar moedas')),
           body: AsyncBody(
             status: state.status,
