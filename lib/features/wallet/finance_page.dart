@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../app/theme.dart';
@@ -7,6 +8,7 @@ import '../../shared/data/repositories/repositories.dart';
 import '../../shared/utils/context_x.dart';
 import '../../shared/utils/formatters.dart';
 import '../../shared/widgets/widgets.dart';
+import '../../shared/utils/validators.dart';
 
 /// Painel financeiro: doações recebidas, inscrições, vendas e repasses.
 class FinancePage extends StatefulWidget {
@@ -24,33 +26,50 @@ class _FinancePageState extends State<FinancePage> {
     final pix = TextEditingController();
     final ok = await showDialog<bool>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Pedir repasse'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextField(
-              controller: amount,
-              keyboardType: const TextInputType.numberWithOptions(decimal: true),
-              decoration: const InputDecoration(labelText: r'Valor (R$)'),
+      builder: (context) => StatefulBuilder(
+        builder: (context, setDialogState) {
+          final value = Validators.parseMoney(amount.text) ?? 0;
+          final amountError = amount.text.isEmpty || value > 0
+              ? (value > summary.available ? 'Acima do disponível' : null)
+              : 'Valor inválido';
+          final valid = value > 0 && amountError == null && pix.text.trim().length >= 3;
+          return AlertDialog(
+            title: const Text('Pedir repasse'),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextField(
+                  controller: amount,
+                  keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                  inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'[0-9,.]'))],
+                  onChanged: (_) => setDialogState(() {}),
+                  decoration: InputDecoration(
+                    labelText: r'Valor (R$)',
+                    helperText: 'Disponível: ${Formatters.currency(summary.available)}',
+                    errorText: amountError,
+                  ),
+                ),
+                TextField(
+                  controller: pix,
+                  autocorrect: false,
+                  onChanged: (_) => setDialogState(() {}),
+                  decoration: const InputDecoration(labelText: 'Chave Pix'),
+                ),
+              ],
             ),
-            TextField(
-              controller: pix,
-              decoration: const InputDecoration(labelText: 'Chave Pix'),
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('Cancelar')),
-          FilledButton(onPressed: () => Navigator.pop(context, true), child: const Text('Pedir')),
-        ],
+            actions: [
+              TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('Cancelar')),
+              FilledButton(onPressed: valid ? () => Navigator.pop(context, true) : null, child: const Text('Pedir')),
+            ],
+          );
+        },
       ),
     );
     if (!(ok ?? false) || !mounted) return;
     try {
       final updated = context.read<WalletRepository>().requestPayout(
-        amount: double.tryParse(amount.text.replaceAll(',', '.')) ?? 0,
-        pixKey: pix.text,
+        amount: Validators.parseMoney(amount.text) ?? 0,
+        pixKey: pix.text.trim(),
       );
       await updated;
       if (!mounted) return;
@@ -72,6 +91,7 @@ class _FinancePageState extends State<FinancePage> {
           final s = snapshot.data;
           if (s == null) return const Center(child: CircularProgressIndicator());
           return ListView(
+            keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
             padding: const EdgeInsets.all(20),
             children: [
               Container(

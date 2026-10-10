@@ -7,6 +7,46 @@ Legenda: ✅ no Supabase · 🟡 ainda no mock local · ⏳ pendente
 
 ---
 
+## Revisão geral: teclado, validações e acessibilidade (09/10/2026)
+
+### Teclado
+- Tocar fora de um campo de texto **fecha o teclado** em todo o app
+  (`DismissKeyboard`, no `builder` do `MaterialApp`). Tocar em outro campo ou
+  em um botão continua funcionando normalmente.
+- Arrastar a tela nos formulários também fecha o teclado.
+- Senhas e e-mails sem corretor automático; campos longos com quebra de linha;
+  "próximo"/"concluir" no teclado nas telas de login, cadastro e senha.
+- **Preenchimento automático** (gerenciador de senhas do celular/navegador)
+  em login, cadastro, nova senha, nome e endereço.
+
+### Validações
+| Onde | Antes | Agora |
+| --- | --- | --- |
+| Senha nova (cadastro, recuperar, alterar) | 8+ caracteres | 8+ caracteres **com letras e números**, sem espaço nas pontas; confirmação obrigatória |
+| Login / cadastro | dava para tocar duas vezes em "Entrar" | ignora o segundo toque enquanto carrega |
+| Editar perfil | @usuário aceitava espaço e símbolos | só letras, números, ponto e _ (3 a 30); nome até 60, bio até 160 |
+| Valores em R$ (meta, doação, preço, planos, repasse) | "1.234,56" virava inválido | lê o formato brasileiro corretamente |
+| Criar publicação | sem limite de tamanho | título 3–80, descrição até 2000, link do site validado (completa `https://`), vagas > 0 |
+| Anúncio | erro do banco com título vazio | título 3–60, texto até 140, botão até 20, link validado |
+| Verificação da conta | CPF/CNPJ livre | confere os **dígitos verificadores** do CPF/CNPJ e exige o nome |
+| Pedir repasse | enviava sem chave Pix ou acima do saldo | botão só libera com valor válido (≤ disponível) e chave Pix |
+| Planos de inscrição | salvava sem nome e com preço 0 | exige nome e preço |
+
+### Acessibilidade
+- O rótulo de cada campo agora é lido pelo leitor de tela **junto do campo**
+  (antes o campo era anunciado sem nome).
+- Descrição em todos os botões de ícone (enviar, salvar, compartilhar,
+  fechar, voltar, menu, estrelas da avaliação, quantidade, trocar foto,
+  mostrar/ocultar senha) e nos botões "Entrar com Google/Facebook".
+- Curtir, comentar e compartilhar anunciam a ação e a contagem
+  ("Curtir, 12 curtidas").
+- "Termos de uso" é anunciado como link.
+
+### Testes
+- 41 testes passando (novos: validadores e fechamento do teclado).
+
+---
+
 ## Ajustes e configuração dos painéis (09/10/2026)
 
 ### Feito no painel do Supabase (pelo navegador)

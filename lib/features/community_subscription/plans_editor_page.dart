@@ -8,6 +8,7 @@ import '../../shared/data/repositories/repositories.dart';
 import '../../shared/utils/context_x.dart';
 import '../../shared/utils/formatters.dart';
 import '../../shared/widgets/widgets.dart';
+import '../../shared/utils/validators.dart';
 
 /// Comunidade gerencia os planos de inscrição (apoiadores).
 class PlansEditorPage extends StatefulWidget {
@@ -55,6 +56,7 @@ class _PlansEditorPageState extends State<PlansEditorPage> {
           final data = snapshot.data;
           if (data == null) return const Center(child: CircularProgressIndicator());
           return ListView(
+            keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
             padding: const EdgeInsets.only(bottom: 100),
             children: [
               Padding(
@@ -98,6 +100,7 @@ class _PlanDialogState extends State<_PlanDialog> {
   late final _price = TextEditingController(text: widget.plan?.price.toStringAsFixed(2).replaceAll('.', ',') ?? '');
   late final _benefits = TextEditingController(text: widget.plan?.benefits ?? '');
   late int _months = widget.plan?.months ?? 1;
+  String? _error;
 
   @override
   void dispose() {
@@ -110,7 +113,7 @@ class _PlanDialogState extends State<_PlanDialog> {
   SubscriptionPlan get _plan => SubscriptionPlan(
     id: widget.plan?.id ?? '',
     name: _name.text,
-    price: double.tryParse(_price.text.replaceAll(',', '.')) ?? 0,
+    price: Validators.parseMoney(_price.text) ?? 0,
     months: _months,
     benefits: _benefits.text,
   );
@@ -120,6 +123,7 @@ class _PlanDialogState extends State<_PlanDialog> {
     return AlertDialog(
       title: Text(widget.plan == null ? 'Novo plano' : 'Editar plano'),
       content: SingleChildScrollView(
+        keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -150,6 +154,11 @@ class _PlanDialogState extends State<_PlanDialog> {
               maxLines: 3,
               decoration: const InputDecoration(labelText: 'Benefícios para quem apoia'),
             ),
+            if (_error != null)
+              Padding(
+                padding: const EdgeInsets.only(top: 12),
+                child: Text(_error!, style: const TextStyle(color: AppColors.danger)),
+              ),
           ],
         ),
       ),
@@ -161,7 +170,16 @@ class _PlanDialogState extends State<_PlanDialog> {
             child: const Text('Desativar'),
           ),
         TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancelar')),
-        FilledButton(onPressed: () => Navigator.pop(context, (_plan, true)), child: const Text('Salvar')),
+        FilledButton(
+          onPressed: () {
+            final error = _name.text.trim().isEmpty
+                ? 'Dê um nome ao plano.'
+                : (_plan.price <= 0 ? 'Informe o preço.' : null);
+            if (error != null) return setState(() => _error = error);
+            Navigator.pop(context, (_plan, true));
+          },
+          child: const Text('Salvar'),
+        ),
       ],
     );
   }

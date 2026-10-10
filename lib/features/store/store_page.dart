@@ -332,11 +332,13 @@ class _OrderDialogState extends State<_OrderDialog> {
               children: [
                 const Expanded(child: Text('Quantidade')),
                 IconButton(
+                  tooltip: 'Diminuir quantidade',
                   onPressed: _quantity > 1 ? () => setState(() => _quantity--) : null,
                   icon: const Icon(Icons.remove_circle_outline),
                 ),
                 Text('$_quantity', style: Theme.of(context).textTheme.titleMedium),
                 IconButton(
+                  tooltip: 'Aumentar quantidade',
                   onPressed: _quantity < max ? () => setState(() => _quantity++) : null,
                   icon: const Icon(Icons.add_circle_outline),
                 ),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
@@ -32,8 +33,11 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   void _submit() {
+    final cubit = context.read<LoginCubit>();
+    if (cubit.state.status.isLoading) return;
     if (_form.currentState!.validate()) {
-      context.read<LoginCubit>().login(_email.text, _password.text);
+      TextInput.finishAutofillContext();
+      cubit.login(_email.text, _password.text);
     }
   }
 
@@ -50,81 +54,88 @@ class _LoginPageState extends State<LoginPage> {
           showBack: false,
           child: Form(
             key: _form,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                AppTextField(
-                  label: 'E-mail',
-                  controller: _email,
-                  keyboardType: TextInputType.emailAddress,
-                  validator: Validators.email,
-                  textInputAction: TextInputAction.next,
-                ),
-                const SizedBox(height: 16),
-                AppTextField(
-                  label: 'Senha',
-                  controller: _password,
-                  obscure: true,
-                  validator: (v) => Validators.required(v, 'Informe a senha'),
-                  onSubmitted: (_) => _submit(),
-                ),
-                Align(
-                  alignment: Alignment.centerRight,
-                  child: TextButton(
-                    onPressed: () => context.push(AppRoutes.forgotPassword),
-                    style: TextButton.styleFrom(
-                      foregroundColor: AppColors.link,
-                      textStyle: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500),
-                    ),
-                    child: const Text('esqueceu a senha?'),
+            child: AutofillGroup(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  AppTextField(
+                    label: 'E-mail',
+                    controller: _email,
+                    keyboardType: TextInputType.emailAddress,
+                    validator: Validators.email,
+                    textInputAction: TextInputAction.next,
+                    autofillHints: const [AutofillHints.email, AutofillHints.username],
                   ),
-                ),
-                const SizedBox(height: 8),
-                PrimaryButton(label: 'Login', loading: state.status.isLoading, onPressed: _submit),
-                const SizedBox(height: 20),
-                const Row(
-                  children: [
-                    Expanded(child: Divider(color: AppColors.border)),
-                    Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 12),
-                      child: Text('Ou entre com:', style: TextStyle(fontSize: 13, color: AppColors.textMuted)),
-                    ),
-                    Expanded(child: Divider(color: AppColors.border)),
-                  ],
-                ),
-                const SizedBox(height: 16),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    _SocialButton(
-                      color: const Color(0xFF1453C8),
-                      child: const Text(
-                        'f',
-                        style: TextStyle(color: Colors.white, fontSize: 26, fontWeight: FontWeight.w900),
-                      ),
-                      onTap: () => context.read<LoginCubit>().loginWithProvider(SocialProvider.facebook),
-                    ),
-                    const SizedBox(width: 20),
-                    _SocialButton(
-                      color: Colors.white,
-                      child: const Text(
-                        'G',
-                        style: TextStyle(color: Color(0xFFEA4335), fontSize: 24, fontWeight: FontWeight.w900),
-                      ),
-                      onTap: () => context.read<LoginCubit>().loginWithProvider(SocialProvider.google),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 16),
-                TextButton(onPressed: () => context.push(AppRoutes.signUp), child: const Text('Criar conta')),
-                const SizedBox(height: 8),
-                if (!Env.useSupabase)
-                  const Text(
-                    'Conta de teste: ${MockSeed.demoEmail} / ${MockSeed.demoPassword}',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(fontSize: 11, color: AppColors.textMuted),
+                  const SizedBox(height: 16),
+                  AppTextField(
+                    label: 'Senha',
+                    controller: _password,
+                    obscure: true,
+                    validator: (v) => Validators.required(v, 'Informe a senha'),
+                    textInputAction: TextInputAction.done,
+                    autofillHints: const [AutofillHints.password],
+                    onSubmitted: (_) => _submit(),
                   ),
-              ],
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: TextButton(
+                      onPressed: () => context.push(AppRoutes.forgotPassword),
+                      style: TextButton.styleFrom(
+                        foregroundColor: AppColors.link,
+                        textStyle: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500),
+                      ),
+                      child: const Text('esqueceu a senha?'),
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  PrimaryButton(label: 'Login', loading: state.status.isLoading, onPressed: _submit),
+                  const SizedBox(height: 20),
+                  const Row(
+                    children: [
+                      Expanded(child: Divider(color: AppColors.border)),
+                      Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 12),
+                        child: Text('Ou entre com:', style: TextStyle(fontSize: 13, color: AppColors.textMuted)),
+                      ),
+                      Expanded(child: Divider(color: AppColors.border)),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      _SocialButton(
+                        label: 'Entrar com Facebook',
+                        color: const Color(0xFF1453C8),
+                        child: const Text(
+                          'f',
+                          style: TextStyle(color: Colors.white, fontSize: 26, fontWeight: FontWeight.w900),
+                        ),
+                        onTap: () => context.read<LoginCubit>().loginWithProvider(SocialProvider.facebook),
+                      ),
+                      const SizedBox(width: 20),
+                      _SocialButton(
+                        label: 'Entrar com Google',
+                        color: Colors.white,
+                        child: const Text(
+                          'G',
+                          style: TextStyle(color: Color(0xFFEA4335), fontSize: 24, fontWeight: FontWeight.w900),
+                        ),
+                        onTap: () => context.read<LoginCubit>().loginWithProvider(SocialProvider.google),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                  TextButton(onPressed: () => context.push(AppRoutes.signUp), child: const Text('Criar conta')),
+                  const SizedBox(height: 8),
+                  if (!Env.useSupabase)
+                    const Text(
+                      'Conta de teste: ${MockSeed.demoEmail} / ${MockSeed.demoPassword}',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(fontSize: 11, color: AppColors.textMuted),
+                    ),
+                ],
+              ),
             ),
           ),
         );
@@ -134,27 +145,31 @@ class _LoginPageState extends State<LoginPage> {
 }
 
 class _SocialButton extends StatelessWidget {
-  const _SocialButton({required this.color, required this.child, required this.onTap});
+  const _SocialButton({required this.label, required this.color, required this.child, required this.onTap});
 
+  final String label;
   final Color color;
   final Widget child;
   final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
-    return InkWell(
-      onTap: onTap,
-      customBorder: const CircleBorder(),
-      child: Container(
-        width: 50,
-        height: 50,
-        alignment: Alignment.center,
-        decoration: BoxDecoration(
-          color: color,
-          shape: BoxShape.circle,
-          boxShadow: const [BoxShadow(color: Color(0x14000000), blurRadius: 8, offset: Offset(0, 2))],
+    return Tooltip(
+      message: label,
+      child: InkWell(
+        onTap: onTap,
+        customBorder: const CircleBorder(),
+        child: Container(
+          width: 50,
+          height: 50,
+          alignment: Alignment.center,
+          decoration: BoxDecoration(
+            color: color,
+            shape: BoxShape.circle,
+            boxShadow: const [BoxShadow(color: Color(0x14000000), blurRadius: 8, offset: Offset(0, 2))],
+          ),
+          child: ExcludeSemantics(child: child),
         ),
-        child: child,
       ),
     );
   }

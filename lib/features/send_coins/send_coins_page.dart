@@ -69,6 +69,7 @@ class _Form extends StatelessWidget {
     final myCoins = context.select((SessionCubit c) => c.state.userOrNull?.coins ?? 0);
     final target = state.target!;
     return ListView(
+      keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
       padding: const EdgeInsets.all(20),
       children: [
         Center(

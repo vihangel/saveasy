@@ -11,6 +11,7 @@ import '../../shared/utils/context_x.dart';
 import '../../shared/utils/formatters.dart';
 import '../../shared/widgets/widgets.dart';
 import 'donate_cubit.dart';
+import '../../shared/utils/validators.dart';
 
 class DonatePage extends StatelessWidget {
   const DonatePage({super.key});
@@ -94,6 +95,7 @@ class _AmountFormState extends State<_AmountForm> {
     final coins = context.select((SessionCubit c) => c.state.userOrNull?.coins ?? 0);
     final rate = state.fund?.coinsPerReal ?? 100;
     return ListView(
+      keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
       padding: const EdgeInsets.all(20),
       children: [
         Row(
@@ -130,23 +132,26 @@ class _AmountFormState extends State<_AmountForm> {
         if (state.mode == DonateMode.money) ...[
           Text('Quanto você quer doar?', style: context.text.titleMedium),
           const SizedBox(height: 12),
-          TextField(
-            controller: _controller,
-            keyboardType: const TextInputType.numberWithOptions(decimal: true),
-            inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'[0-9,.]'))],
-            style: const TextStyle(fontSize: 28, fontWeight: FontWeight.w700, color: AppColors.textDark),
-            decoration: const InputDecoration(
-              hintText: '0,00',
-              prefixIcon: Padding(
-                padding: EdgeInsets.only(left: 16, right: 8),
-                child: Text(
-                  r'R$',
-                  style: TextStyle(fontSize: 28, fontWeight: FontWeight.w700, color: AppColors.textMuted),
+          Semantics(
+            label: 'Valor da doação em reais',
+            child: TextField(
+              controller: _controller,
+              keyboardType: const TextInputType.numberWithOptions(decimal: true),
+              inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'[0-9,.]'))],
+              style: const TextStyle(fontSize: 28, fontWeight: FontWeight.w700, color: AppColors.textDark),
+              decoration: const InputDecoration(
+                hintText: '0,00',
+                prefixIcon: Padding(
+                  padding: EdgeInsets.only(left: 16, right: 8),
+                  child: Text(
+                    r'R$',
+                    style: TextStyle(fontSize: 28, fontWeight: FontWeight.w700, color: AppColors.textMuted),
+                  ),
                 ),
+                prefixIconConstraints: BoxConstraints(),
               ),
-              prefixIconConstraints: BoxConstraints(),
+              onChanged: (v) => cubit.setAmount(Validators.parseMoney(v) ?? 0),
             ),
-            onChanged: (v) => cubit.setAmount(double.tryParse(v.replaceAll(',', '.')) ?? 0),
           ),
           const SizedBox(height: 12),
           Wrap(

@@ -50,6 +50,7 @@ class AvatarPicker extends StatelessWidget {
               right: size * 0.02,
               bottom: size * 0.02,
               child: IconButton.filled(
+                tooltip: 'Trocar foto',
                 style: IconButton.styleFrom(backgroundColor: AppColors.primary),
                 icon: const Icon(Icons.photo_camera_outlined, color: Colors.white),
                 onPressed: () => _pick(context),

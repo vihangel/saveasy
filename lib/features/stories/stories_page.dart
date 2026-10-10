@@ -171,6 +171,7 @@ class _StoriesPageState extends State<StoriesPage> with SingleTickerProviderStat
                               onPressed: () => _delete(context),
                             ),
                           IconButton(
+                            tooltip: 'Fechar',
                             icon: const Icon(Icons.close_rounded, color: Colors.white),
                             onPressed: () => _close(context),
                           ),

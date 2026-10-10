@@ -5,6 +5,7 @@ import '../../shared/data/models/models.dart';
 import '../../shared/data/repositories/repositories.dart';
 import '../../shared/notifiers/session_cubit.dart';
 import '../../shared/utils/view_status.dart';
+import '../../shared/utils/validators.dart';
 
 part 'create_post_cubit.freezed.dart';
 part 'create_post_state.dart';
@@ -164,8 +165,12 @@ class CreatePostCubit extends Cubit<CreatePostState> {
     startsAt: state.startsAt,
     endsAt: state.endsAt,
     location: input.location.trim().isEmpty ? null : input.location.trim(),
-    link: input.link.trim().isEmpty ? null : input.link.trim(),
-    targetAmount: double.tryParse(input.target.replaceAll(',', '.')),
+    link: switch (input.link.trim()) {
+      '' => null,
+      final l when l.startsWith('http') => l,
+      final l => 'https://$l',
+    },
+    targetAmount: Validators.parseMoney(input.target),
     recurring: state.subtype == 'Doação recorrente',
     capacity: int.tryParse(input.capacity),
     durationMinutes: int.tryParse(input.duration),
@@ -175,10 +180,15 @@ class CreatePostCubit extends Cubit<CreatePostState> {
 
   String? _validate(CreatePostInput input) {
     if (input.title.trim().isEmpty) return 'Informe o título.';
+    if (input.title.trim().length < 3) return 'O título está muito curto.';
     if (input.description.trim().isEmpty) return 'Escreva uma descrição.';
+    if (Validators.optionalUrl(input.link) != null) return 'O link do site é inválido.';
+    if (input.capacity.isNotEmpty && (int.tryParse(input.capacity) ?? 0) <= 0) {
+      return 'Informe um número de vagas válido.';
+    }
     switch (state.type) {
       case PostType.donation:
-        if ((double.tryParse(input.target.replaceAll(',', '.')) ?? 0) <= 0) return 'Informe o valor da meta.';
+        if ((Validators.parseMoney(input.target) ?? 0) <= 0) return 'Informe o valor da meta.';
         if (state.endsAt == null && state.subtype != 'Doação recorrente') return 'Informe a data de encerramento.';
       case PostType.event:
         if (state.startsAt == null) return 'Informe a data e hora inicial.';

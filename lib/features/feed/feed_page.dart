@@ -23,6 +23,7 @@ class FeedPage extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
+          tooltip: 'Abrir menu',
           icon: const Icon(Icons.menu_rounded),
           onPressed: () => HomeShell.scaffoldKey.currentState?.openDrawer(),
         ),

@@ -76,10 +76,11 @@ class _Content extends StatelessWidget {
                 title: Text(post.type.label, style: const TextStyle(color: Colors.white)),
                 actions: [
                   IconButton(
+                    tooltip: post.saved ? 'Remover dos salvos' : 'Salvar',
                     icon: Icon(post.saved ? Icons.bookmark_rounded : Icons.bookmark_border_rounded),
                     onPressed: cubit.toggleSave,
                   ),
-                  IconButton(icon: const Icon(Icons.share_outlined), onPressed: cubit.share),
+                  IconButton(tooltip: 'Compartilhar', icon: const Icon(Icons.share_outlined), onPressed: cubit.share),
                   if (cubit.isAuthor)
                     _AuthorMenu(post: post)
                   else
@@ -570,6 +571,7 @@ class _CommentInputState extends State<_CommentInput> {
                 ),
               ),
               IconButton(
+                tooltip: 'Enviar comentário',
                 onPressed: widget.sending ? null : _send,
                 icon: const Icon(Icons.send_rounded, color: AppColors.primary),
               ),

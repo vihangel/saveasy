@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
@@ -8,6 +9,7 @@ import '../../shared/data/repositories/repositories.dart';
 import '../../shared/notifiers/session_cubit.dart';
 import '../../shared/utils/context_x.dart';
 import '../../shared/widgets/widgets.dart';
+import '../../shared/utils/validators.dart';
 
 /// Pedido de verificação (comunidade, empresa, influenciador): nome, CPF/CNPJ
 /// e foto do documento (bucket privado).
@@ -37,6 +39,9 @@ class _VerificationPageState extends State<VerificationPage> {
   }
 
   Future<void> _send() async {
+    if (_name.text.trim().length < 3) return context.showMessage('Informe o nome ou a razão social.', error: true);
+    final docError = Validators.cpfCnpj(_doc.text);
+    if (docError != null) return context.showMessage(docError, error: true);
     if (_documentPath == null) return context.showMessage('Envie a foto do documento.', error: true);
     setState(() => _sending = true);
     try {
@@ -76,6 +81,7 @@ class _VerificationPageState extends State<VerificationPage> {
             );
           }
           return ListView(
+            keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
             padding: const EdgeInsets.all(20),
             children: [
               const Text(
@@ -90,9 +96,23 @@ class _VerificationPageState extends State<VerificationPage> {
                 ),
               ],
               const SizedBox(height: 16),
-              AppTextField(label: 'Nome ou razão social', controller: _name),
-              AppTextField(label: 'CPF ou CNPJ', controller: _doc, keyboardType: TextInputType.number),
-              AppTextField(label: 'Observações (opcional)', controller: _notes, maxLines: 3),
+              AppTextField(
+                label: 'Nome ou razão social',
+                controller: _name,
+                maxLength: 120,
+                textCapitalization: TextCapitalization.words,
+              ),
+              const SizedBox(height: 12),
+              AppTextField(
+                label: 'CPF ou CNPJ',
+                controller: _doc,
+                hint: 'Só números',
+                keyboardType: TextInputType.number,
+                inputFormatters: [FilteringTextInputFormatter.digitsOnly, LengthLimitingTextInputFormatter(14)],
+              ),
+              const SizedBox(height: 12),
+              AppTextField(label: 'Observações (opcional)', controller: _notes, maxLines: 3, maxLength: 500),
+              const SizedBox(height: 12),
               OutlinedButton.icon(
                 onPressed: () async {
                   final result = await showImagePickerSheet(

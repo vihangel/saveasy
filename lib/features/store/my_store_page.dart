@@ -12,6 +12,7 @@ import '../../shared/utils/formatters.dart';
 import '../../shared/widgets/widgets.dart';
 import 'store_cubit.dart';
 import 'store_page.dart';
+import '../../shared/utils/validators.dart';
 
 /// Gestão da loja (comunidade/empresa): produtos ativos e inativos.
 class MyStorePage extends StatefulWidget {
@@ -143,7 +144,7 @@ class _ProductFormPageState extends State<ProductFormPage> {
   }
 
   Future<void> _save() async {
-    final price = double.tryParse(_price.text.replaceAll(',', '.'));
+    final price = Validators.parseMoney(_price.text);
     if (_name.text.trim().length < 2 || price == null || price <= 0) {
       return context.showMessage('Informe nome e preço.', error: true);
     }
@@ -204,6 +205,7 @@ class _ProductFormPageState extends State<ProductFormPage> {
       body: _loading
           ? const Center(child: CircularProgressIndicator())
           : ListView(
+              keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
               padding: const EdgeInsets.all(20),
               children: [
                 InkWell(

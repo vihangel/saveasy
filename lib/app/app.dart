@@ -6,6 +6,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:go_router/go_router.dart';
 
 import '../shared/notifiers/session_cubit.dart';
+import '../shared/widgets/dismiss_keyboard.dart';
 import 'dependencies.dart';
 import 'responsive_frame.dart';
 import 'router.dart';
@@ -72,7 +73,7 @@ class _SaveEasyAppState extends State<SaveEasyApp> {
           theme: AppTheme.light,
           routerConfig: _router,
           scrollBehavior: const AppScrollBehavior(),
-          builder: (context, child) => ResponsiveFrame(child: child!),
+          builder: (context, child) => DismissKeyboard(child: ResponsiveFrame(child: child!)),
           locale: const Locale('pt', 'BR'),
           supportedLocales: const [Locale('pt', 'BR')],
           localizationsDelegates: GlobalMaterialLocalizations.delegates,

@@ -77,6 +77,8 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                 controller: _email,
                 keyboardType: TextInputType.emailAddress,
                 validator: Validators.email,
+                autofillHints: const [AutofillHints.email],
+                textInputAction: TextInputAction.done,
               ),
               const SizedBox(height: 40),
               PrimaryButton(
@@ -180,12 +182,22 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               const SizedBox(height: 16),
-              AppTextField(label: 'Nova senha', controller: _password, obscure: true, validator: Validators.password),
+              AppTextField(
+                label: 'Nova senha',
+                controller: _password,
+                obscure: true,
+                hint: 'Mínimo 8 caracteres, com letras e números',
+                validator: Validators.password,
+                textInputAction: TextInputAction.next,
+                autofillHints: const [AutofillHints.newPassword],
+              ),
               const SizedBox(height: 16),
               AppTextField(
                 label: 'Confirmar senha',
                 obscure: true,
-                validator: (v) => v == _password.text ? null : 'As senhas não conferem',
+                validator: Validators.confirmPassword(() => _password.text),
+                textInputAction: TextInputAction.done,
+                autofillHints: const [AutofillHints.newPassword],
               ),
               const SizedBox(height: 40),
               PrimaryButton(

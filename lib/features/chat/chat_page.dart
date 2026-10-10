@@ -153,6 +153,7 @@ class _ChatPageState extends State<ChatPage> {
                         ),
                       ),
                       IconButton(
+                        tooltip: 'Enviar mensagem',
                         onPressed: _send,
                         icon: const Icon(Icons.send_rounded, color: AppColors.primary),
                       ),

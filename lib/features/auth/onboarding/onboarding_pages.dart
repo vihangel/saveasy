@@ -213,6 +213,10 @@ class _OnboardingProfilePageState extends State<OnboardingProfilePage> {
                 label: isPerson ? 'Nome completo' : 'Nome da ${state.accountType.label.toLowerCase()}',
                 controller: _name,
                 validator: Validators.required,
+                maxLength: 60,
+                textCapitalization: TextCapitalization.words,
+                textInputAction: TextInputAction.next,
+                autofillHints: const [AutofillHints.name],
               ),
               const SizedBox(height: 16),
               AppTextField(
@@ -224,7 +228,7 @@ class _OnboardingProfilePageState extends State<OnboardingProfilePage> {
                   FilteringTextInputFormatter.allow(RegExp(r'[a-zA-Z0-9._]')),
                   LengthLimitingTextInputFormatter(30),
                 ],
-                validator: (v) => (v ?? '').trim().length < 3 ? 'Use ao menos 3 caracteres' : null,
+                validator: Validators.username,
               ),
               if (isPerson) ...[
                 const SizedBox(height: 16),
@@ -350,22 +354,35 @@ class _OnboardingAddressPageState extends State<OnboardingAddressPage> {
                       )
                     : null,
                 validator: Validators.cep,
+                autofillHints: const [AutofillHints.postalCode],
               ),
               const SizedBox(height: 16),
               AppTextField(
                 label: 'Endereço (rua, número e bairro)',
                 controller: _street,
                 validator: Validators.required,
+                textInputAction: TextInputAction.next,
+                autofillHints: const [AutofillHints.streetAddressLine1],
               ),
               const SizedBox(height: 16),
-              AppTextField(label: 'Complemento', controller: _complement),
+              AppTextField(
+                label: 'Complemento',
+                controller: _complement,
+                textInputAction: TextInputAction.next,
+                autofillHints: const [AutofillHints.streetAddressLine2],
+              ),
               const SizedBox(height: 16),
               Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Expanded(
                     flex: 3,
-                    child: AppTextField(label: 'Cidade', controller: _city, validator: Validators.required),
+                    child: AppTextField(
+                      label: 'Cidade',
+                      controller: _city,
+                      validator: Validators.required,
+                      autofillHints: const [AutofillHints.addressCity],
+                    ),
                   ),
                   const SizedBox(width: 12),
                   Expanded(
@@ -381,7 +398,8 @@ class _OnboardingAddressPageState extends State<OnboardingAddressPage> {
                           initialValue: _state,
                           items: [for (final s in _states) DropdownMenuItem(value: s, child: Text(s))],
                           onChanged: (v) => setState(() => _state = v),
-                          validator: (v) => v == null ? 'UF' : null,
+                          hint: const Text('UF'),
+                          validator: (v) => v == null ? 'Escolha' : null,
                         ),
                       ],
                     ),

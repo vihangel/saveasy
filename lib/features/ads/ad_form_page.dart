@@ -9,6 +9,7 @@ import '../../shared/data/repositories/repositories.dart';
 import '../../shared/utils/context_x.dart';
 import '../../shared/utils/formatters.dart';
 import '../../shared/widgets/widgets.dart';
+import '../../shared/utils/validators.dart';
 
 /// Nova campanha: formato, conteúdo, plano, cidades, orçamento e pagamento.
 class AdFormPage extends StatefulWidget {
@@ -64,6 +65,8 @@ class _AdFormPageState extends State<AdFormPage> {
     if (_format == AdFormat.boostedPost && _postId == null) {
       return context.showMessage('Escolha a publicação para impulsionar.', error: true);
     }
+    if (_title.text.trim().length < 3) return context.showMessage('Escreva um título (3 a 60 letras).', error: true);
+    if (Validators.optionalUrl(_link.text) != null) return context.showMessage('O link é inválido.', error: true);
     setState(() => _saving = true);
     try {
       final campaign = await _ads.create(
@@ -73,7 +76,11 @@ class _AdFormPageState extends State<AdFormPage> {
         body: _body.text,
         imageUrl: _image,
         ctaLabel: _cta.text,
-        linkUrl: _link.text.trim().isEmpty ? null : _link.text,
+        linkUrl: switch (_link.text.trim()) {
+          '' => null,
+          final l when l.startsWith('http') => l,
+          final l => 'https://$l',
+        },
         postId: _postId,
         cities: _cities.toList(),
       );
@@ -105,6 +112,7 @@ class _AdFormPageState extends State<AdFormPage> {
         title: const Text('Nova campanha'),
       ),
       body: ListView(
+        keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
         padding: const EdgeInsets.all(20),
         children: [
           Text('Formato', style: context.text.titleMedium),
@@ -147,10 +155,13 @@ class _AdFormPageState extends State<AdFormPage> {
               },
             ),
           const SizedBox(height: 12),
-          AppTextField(label: 'Título (até 60)', controller: _title),
-          AppTextField(label: 'Texto (até 140)', controller: _body, maxLines: 2),
+          AppTextField(label: 'Título', controller: _title, maxLength: 60),
+          const SizedBox(height: 12),
+          AppTextField(label: 'Texto', controller: _body, maxLines: 2, maxLength: 140),
           if (_format != AdFormat.boostedPost) ...[
-            AppTextField(label: 'Botão', controller: _cta),
+            const SizedBox(height: 12),
+            AppTextField(label: 'Botão', controller: _cta, maxLength: 20),
+            const SizedBox(height: 12),
             AppTextField(label: 'Link (opcional)', controller: _link, keyboardType: TextInputType.url),
             OutlinedButton.icon(
               onPressed: () async {

@@ -115,6 +115,7 @@ class _NewStoryPageState extends State<NewStoryPage> {
                   SizedBox(
                     height: 40,
                     child: ListView(
+                      keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
                       scrollDirection: Axis.horizontal,
                       children: [
                         for (final type in PostType.values.where((t) => t != PostType.ad))

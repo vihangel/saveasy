@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
@@ -63,6 +64,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
             title: const Text('Editar Perfil'),
           ),
           body: ListView(
+            keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
             padding: const EdgeInsets.fromLTRB(24, 8, 24, 32),
             children: [
               _CoverPicker(coverUrl: state.user.coverUrl, onChanged: cubit.setCover),
@@ -76,12 +78,23 @@ class _EditProfilePageState extends State<EditProfilePage> {
                 ),
               ),
               const SizedBox(height: 24),
-              AppTextField(label: 'Nome', controller: _name, onChanged: (_) => setState(() {})),
+              AppTextField(
+                label: 'Nome',
+                controller: _name,
+                maxLength: 60,
+                textCapitalization: TextCapitalization.words,
+                autofillHints: const [AutofillHints.name],
+                onChanged: (_) => setState(() {}),
+              ),
               const SizedBox(height: 16),
               AppTextField(
                 label: 'Nome de usuário @',
                 controller: _username,
                 prefixIcon: const Icon(Icons.alternate_email_rounded, size: 18),
+                inputFormatters: [
+                  FilteringTextInputFormatter.allow(RegExp(r'[a-zA-Z0-9._]')),
+                  LengthLimitingTextInputFormatter(30),
+                ],
               ),
               const SizedBox(height: 16),
               const Text('Pronomes', style: TextStyle(fontSize: 13, color: AppColors.textMuted)),
@@ -98,7 +111,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
                 ],
               ),
               const SizedBox(height: 16),
-              AppTextField(label: 'Bio', controller: _bio, maxLines: 3),
+              AppTextField(label: 'Bio', controller: _bio, maxLines: 3, maxLength: 160),
               if (state.ownedCovers.isNotEmpty) ...[
                 const SizedBox(height: 24),
                 Text('Capa de recompensa', style: context.text.titleMedium),

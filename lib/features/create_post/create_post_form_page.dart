@@ -126,6 +126,7 @@ class _CreatePostFormPageState extends State<CreatePostFormPage> {
             ),
           ),
           body: ListView(
+            keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
             padding: const EdgeInsets.fromLTRB(24, 8, 24, 32),
             children: [
               _CoverPicker(type: type, imageUrl: state.imageUrl, onChanged: cubit.setImage),
@@ -134,7 +135,12 @@ class _CreatePostFormPageState extends State<CreatePostFormPage> {
                 _AdPlans(selected: state.adPlan, onSelected: cubit.selectAdPlan),
                 const SizedBox(height: 20),
               ],
-              AppTextField(label: 'Título', controller: _title),
+              AppTextField(
+                label: 'Título',
+                controller: _title,
+                maxLength: 80,
+                textCapitalization: TextCapitalization.sentences,
+              ),
               const SizedBox(height: 16),
               _Dropdown(
                 label: type == PostType.ad ? 'O que deseja divulgar?' : 'Tipo de ${type.label.toLowerCase()}',
@@ -143,7 +149,13 @@ class _CreatePostFormPageState extends State<CreatePostFormPage> {
                 onChanged: cubit.selectSubtype,
               ),
               const SizedBox(height: 16),
-              AppTextField(label: 'Descrição', controller: _description, maxLines: 4),
+              AppTextField(
+                label: 'Descrição',
+                controller: _description,
+                maxLines: 4,
+                maxLength: 2000,
+                textCapitalization: TextCapitalization.sentences,
+              ),
               const SizedBox(height: 16),
               ..._specificFields(context, state),
               const Text('Categorias', style: TextStyle(fontSize: 13, color: AppColors.textMuted)),
@@ -235,6 +247,7 @@ class _CreatePostFormPageState extends State<CreatePostFormPage> {
           controller: _link,
           prefixIcon: const Icon(Icons.link_rounded, size: 18),
           hint: 'Link da transmissão online',
+          keyboardType: TextInputType.url,
         ),
         gap,
       ],
@@ -277,7 +290,7 @@ class _CreatePostFormPageState extends State<CreatePostFormPage> {
           inputFormatters: [FilteringTextInputFormatter.digitsOnly],
         ),
         gap,
-        AppTextField(label: 'Passo a passo (um passo por linha)', controller: _steps, maxLines: 5),
+        AppTextField(label: 'Passo a passo (um passo por linha)', controller: _steps, maxLines: 5, maxLength: 3000),
         gap,
       ],
       PostType.discussion || PostType.ad => const [],

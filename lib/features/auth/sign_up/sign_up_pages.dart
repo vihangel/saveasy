@@ -50,6 +50,14 @@ class _SignUpPageState extends State<SignUpPage> {
     );
   }
 
+  void _submit(SignUpCubit cubit) {
+    if (cubit.state.status.isLoading) return;
+    if (_form.currentState!.validate()) {
+      TextInput.finishAutofillContext();
+      cubit.submit(email: _email.text, password: _password.text);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return BlocConsumer<SignUpCubit, SignUpState>(
@@ -67,56 +75,68 @@ class _SignUpPageState extends State<SignUpPage> {
           onBack: () => AppBackButton.goBack(context, fallback: AppRoutes.login),
           child: Form(
             key: _form,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Text('Criar conta', style: context.text.headlineSmall),
-                const SizedBox(height: 16),
-                AppTextField(
-                  label: 'E-mail',
-                  controller: _email,
-                  keyboardType: TextInputType.emailAddress,
-                  validator: Validators.email,
-                  textInputAction: TextInputAction.next,
-                ),
-                const SizedBox(height: 16),
-                AppTextField(label: 'Senha', controller: _password, obscure: true, validator: Validators.password),
-                const SizedBox(height: 16),
-                AppTextField(
-                  label: 'Confirmar senha',
-                  obscure: true,
-                  validator: (v) => v == _password.text ? null : 'As senhas não conferem',
-                ),
-                const SizedBox(height: 8),
-                CheckboxListTile(
-                  value: state.acceptedTerms,
-                  onChanged: (v) => cubit.toggleTerms(v ?? false),
-                  controlAffinity: ListTileControlAffinity.leading,
-                  contentPadding: EdgeInsets.zero,
-                  dense: true,
-                  title: Wrap(
-                    children: [
-                      const Text('Li e concordo com os '),
-                      GestureDetector(
-                        onTap: _showTerms,
-                        child: const Text('termos de uso', style: TextStyle(color: AppColors.link)),
-                      ),
-                    ],
+            child: AutofillGroup(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Text('Criar conta', style: context.text.headlineSmall),
+                  const SizedBox(height: 16),
+                  AppTextField(
+                    label: 'E-mail',
+                    controller: _email,
+                    keyboardType: TextInputType.emailAddress,
+                    validator: Validators.email,
+                    textInputAction: TextInputAction.next,
+                    autofillHints: const [AutofillHints.email],
                   ),
-                ),
-                const SizedBox(height: 16),
-                PrimaryButton(
-                  label: 'Criar conta',
-                  loading: state.status.isLoading,
-                  onPressed: () {
-                    if (_form.currentState!.validate()) {
-                      cubit.submit(email: _email.text, password: _password.text);
-                    }
-                  },
-                ),
-                const SizedBox(height: 16),
-                TextButton(onPressed: () => context.go(AppRoutes.login), child: const Text('Já tenho conta · Entrar')),
-              ],
+                  const SizedBox(height: 16),
+                  AppTextField(
+                    label: 'Senha',
+                    controller: _password,
+                    obscure: true,
+                    hint: 'Mínimo 8 caracteres, com letras e números',
+                    validator: Validators.password,
+                    textInputAction: TextInputAction.next,
+                    autofillHints: const [AutofillHints.newPassword],
+                  ),
+                  const SizedBox(height: 16),
+                  AppTextField(
+                    label: 'Confirmar senha',
+                    obscure: true,
+                    validator: Validators.confirmPassword(() => _password.text),
+                    textInputAction: TextInputAction.done,
+                    autofillHints: const [AutofillHints.newPassword],
+                    onSubmitted: (_) => _submit(cubit),
+                  ),
+                  const SizedBox(height: 8),
+                  CheckboxListTile(
+                    value: state.acceptedTerms,
+                    onChanged: (v) => cubit.toggleTerms(v ?? false),
+                    controlAffinity: ListTileControlAffinity.leading,
+                    contentPadding: EdgeInsets.zero,
+                    dense: true,
+                    title: Wrap(
+                      children: [
+                        const Text('Li e concordo com os '),
+                        Semantics(
+                          link: true,
+                          child: InkWell(
+                            onTap: _showTerms,
+                            child: const Text('termos de uso', style: TextStyle(color: AppColors.link)),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  PrimaryButton(label: 'Criar conta', loading: state.status.isLoading, onPressed: () => _submit(cubit)),
+                  const SizedBox(height: 16),
+                  TextButton(
+                    onPressed: () => context.go(AppRoutes.login),
+                    child: const Text('Já tenho conta · Entrar'),
+                  ),
+                ],
+              ),
             ),
           ),
         );

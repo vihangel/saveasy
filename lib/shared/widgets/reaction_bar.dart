@@ -39,15 +39,27 @@ class ReactionBar extends StatelessWidget {
                 icon: liked ? Icons.favorite_rounded : Icons.favorite_border_rounded,
                 color: liked ? AppColors.danger : AppColors.textMuted,
                 label: Formatters.compact(likes),
+                semanticLabel: '${liked ? 'Descurtir' : 'Curtir'}, ${Formatters.plural(likes, 'curtida', 'curtidas')}',
                 onTap: onLike,
               ),
-              _Item(icon: Icons.chat_bubble_outline_rounded, label: Formatters.compact(comments), onTap: onComment),
-              _Item(icon: Icons.share_outlined, label: Formatters.compact(shares), onTap: onShare),
+              _Item(
+                icon: Icons.chat_bubble_outline_rounded,
+                label: Formatters.compact(comments),
+                semanticLabel: 'Comentar, ${Formatters.plural(comments, 'comentário', 'comentários')}',
+                onTap: onComment,
+              ),
+              _Item(
+                icon: Icons.share_outlined,
+                label: Formatters.compact(shares),
+                semanticLabel: 'Compartilhar, ${Formatters.plural(shares, 'compartilhamento', 'compartilhamentos')}',
+                onTap: onShare,
+              ),
             ],
           ),
         ),
         if (saved != null)
           IconButton(
+            tooltip: saved! ? 'Remover dos salvos' : 'Salvar',
             onPressed: onSave,
             icon: Icon(saved! ? Icons.bookmark_rounded : Icons.bookmark_border_rounded),
             color: saved! ? AppColors.primary : AppColors.textMuted,
@@ -58,28 +70,41 @@ class ReactionBar extends StatelessWidget {
 }
 
 class _Item extends StatelessWidget {
-  const _Item({required this.icon, required this.label, this.onTap, this.color = AppColors.textMuted});
+  const _Item({
+    required this.icon,
+    required this.label,
+    required this.semanticLabel,
+    this.onTap,
+    this.color = AppColors.textMuted,
+  });
 
   final IconData icon;
   final String label;
+  final String semanticLabel;
   final VoidCallback? onTap;
   final Color color;
 
   @override
   Widget build(BuildContext context) {
-    return InkWell(
+    return Semantics(
+      button: true,
+      label: semanticLabel,
       onTap: onTap,
-      borderRadius: BorderRadius.circular(20),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
-        // min: dentro do Wrap, cada item ocupa só o próprio tamanho.
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(icon, size: 20, color: color),
-            const SizedBox(width: 4),
-            Text(label, style: const TextStyle(fontSize: 13, color: AppColors.textMuted)),
-          ],
+      excludeSemantics: true,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(20),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+          // min: dentro do Wrap, cada item ocupa só o próprio tamanho.
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(icon, size: 20, color: color),
+              const SizedBox(width: 4),
+              Text(label, style: const TextStyle(fontSize: 13, color: AppColors.textMuted)),
+            ],
+          ),
         ),
       ),
     );

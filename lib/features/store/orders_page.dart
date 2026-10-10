@@ -204,6 +204,8 @@ class _ReviewDialogState extends State<_ReviewDialog> {
             children: [
               for (var i = 1; i <= 5; i++)
                 IconButton(
+                  tooltip: Formatters.plural(i, 'estrela', 'estrelas'),
+                  isSelected: i <= _rating,
                   onPressed: () => setState(() => _rating = i),
                   icon: Icon(i <= _rating ? Icons.star_rounded : Icons.star_border_rounded, color: AppColors.gold),
                 ),

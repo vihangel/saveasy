@@ -30,6 +30,7 @@ class IllustratedScaffold extends StatelessWidget {
     return Scaffold(
       backgroundColor: Colors.white,
       body: SingleChildScrollView(
+        keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
@@ -46,6 +47,7 @@ class IllustratedScaffold extends StatelessWidget {
                           ? Align(
                               alignment: Alignment.centerLeft,
                               child: IconButton(
+                                tooltip: 'Voltar',
                                 icon: const Icon(Icons.arrow_back_rounded, color: Colors.white),
                                 onPressed: onBack ?? () => AppBackButton.goBack(context, fallback: AppRoutes.login),
                               ),

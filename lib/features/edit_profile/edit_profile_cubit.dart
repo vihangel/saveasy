@@ -5,6 +5,7 @@ import '../../shared/data/models/models.dart';
 import '../../shared/data/repositories/repositories.dart';
 import '../../shared/notifiers/session_cubit.dart';
 import '../../shared/utils/view_status.dart';
+import '../../shared/utils/validators.dart';
 
 part 'edit_profile_cubit.freezed.dart';
 part 'edit_profile_state.dart';
@@ -60,9 +61,11 @@ class EditProfileCubit extends Cubit<EditProfileState> {
     required String bio,
     required String pronouns,
   }) async {
-    if (name.trim().isEmpty || username.trim().isEmpty) {
-      return emit(state.copyWith(error: 'Nome e usuário são obrigatórios.'));
-    }
+    // Limpa o erro anterior para a mesma mensagem aparecer de novo.
+    if (state.error != null) emit(state.copyWith(error: null));
+    if (name.trim().isEmpty) return emit(state.copyWith(error: 'Informe o nome.'));
+    final usernameError = Validators.username(username);
+    if (usernameError != null) return emit(state.copyWith(error: 'Nome de usuário: $usernameError.'));
     emit(state.copyWith(saving: true, error: null));
     try {
       await _users.update(

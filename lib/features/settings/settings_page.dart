@@ -214,12 +214,21 @@ class _ChangePasswordDialogState extends State<_ChangePasswordDialog> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            AppTextField(label: 'Nova senha', controller: _password, obscure: true, validator: Validators.password),
+            AppTextField(
+              label: 'Nova senha',
+              controller: _password,
+              obscure: true,
+              hint: 'Letras e números, 8+ caracteres',
+              validator: Validators.password,
+              textInputAction: TextInputAction.next,
+              autofillHints: const [AutofillHints.newPassword],
+            ),
             const SizedBox(height: 12),
             AppTextField(
               label: 'Repita a nova senha',
               obscure: true,
-              validator: (v) => v == _password.text ? null : 'As senhas não conferem',
+              validator: Validators.confirmPassword(() => _password.text),
+              autofillHints: const [AutofillHints.newPassword],
             ),
           ],
         ),
