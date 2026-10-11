@@ -7,6 +7,20 @@ Legenda: ✅ no Supabase · 🟡 ainda no mock local · ⏳ pendente
 
 ---
 
+## Fechamento da entrega web (11/10/2026)
+
+- Retomada sobre `b81beec`, preservando as alterações posteriores de tema e login.
+- **49 testes passaram** na versão atual, incluindo os cinco tamanhos de viewport,
+  fontes 1,0×/1,3×, seletores adaptativos e preservação de rascunho ao redimensionar.
+- `flutter analyze`: sem problemas.
+- A entrega web está incluída em `e35d601`; não foi necessário recriar o commit.
+- Publicação preparada pelo script `tool/deploy_pages.sh`, usando o backend padrão
+  Supabase e a base `/saveasy/`. O build mock usado na validação local não é publicado.
+- Este fechamento conclui a primeira entrega de adaptação web. A matriz em
+  `ADAPTACAO_WEB.md` continua registrando as melhorias restantes do planejamento.
+
+---
+
 ## Adaptação web · primeira entrega (10/10/2026)
 
 **Entrega parcial do planejamento web.** O acompanhamento completo está em
