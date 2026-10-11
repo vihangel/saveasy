@@ -104,6 +104,16 @@ abstract final class AppTheme {
         dividerColor: AppColors.border,
       ),
       snackBarTheme: const SnackBarThemeData(behavior: SnackBarBehavior.floating),
+      cardTheme: CardThemeData(
+        color: AppColors.background,
+        surfaceTintColor: Colors.transparent,
+        elevation: 0,
+        margin: EdgeInsets.zero,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+          side: const BorderSide(color: AppColors.border),
+        ),
+      ),
     );
   }
 }

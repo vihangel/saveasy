@@ -32,64 +32,11 @@ class IllustratedScaffold extends StatelessWidget {
       return Scaffold(
         backgroundColor: const Color(0xFFFFF3EA),
         body: SafeArea(
-          child: Row(
-            children: [
-              if (context.isExpanded)
-                Expanded(
-                  child: SingleChildScrollView(
-                    padding: const EdgeInsets.all(48),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Image.asset('assets/images/logo.png', width: 80),
-                        const SizedBox(height: 24),
-                        Text(
-                          'Ações que mudam o mundo',
-                          textAlign: TextAlign.center,
-                          style: Theme.of(context).textTheme.headlineLarge,
-                        ),
-                        const SizedBox(height: 24),
-                        if (image != null)
-                          ClipRRect(
-                            borderRadius: BorderRadius.circular(32),
-                            child: Image.asset(image!, height: 280, fit: BoxFit.contain),
-                          ),
-                        ?header,
-                      ],
-                    ),
-                  ),
-                ),
-              Expanded(
-                child: Center(
-                  child: SingleChildScrollView(
-                    padding: const EdgeInsets.all(24),
-                    child: SizedBox(
-                      width: 420,
-                      child: Card(
-                        child: Padding(
-                          padding: const EdgeInsets.all(24),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.stretch,
-                            children: [
-                              if (showBack)
-                                Align(
-                                  alignment: Alignment.centerLeft,
-                                  child: IconButton(
-                                    tooltip: 'Voltar',
-                                    icon: const Icon(Icons.arrow_back),
-                                    onPressed: onBack ?? () => AppBackButton.goBack(context, fallback: AppRoutes.login),
-                                  ),
-                                ),
-                              child,
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ],
+          child: Center(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 40),
+              child: context.isExpanded ? _buildSplit(context) : _buildCentered(context),
+            ),
           ),
         ),
       );
@@ -128,6 +75,84 @@ class IllustratedScaffold extends StatelessWidget {
               ),
             ),
             Padding(padding: const EdgeInsets.fromLTRB(24, 8, 24, 32), child: child),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// Telas largas (>= 1024): ilustração à esquerda e cartão à direita,
+  /// num bloco central com largura máxima para não esticar na tela toda.
+  Widget _buildSplit(BuildContext context) {
+    return ConstrainedBox(
+      constraints: const BoxConstraints(maxWidth: 1040),
+      child: IntrinsicHeight(
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Expanded(flex: 5, child: _buildBrandPanel(context)),
+            const SizedBox(width: 48),
+            Expanded(
+              flex: 4,
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 440),
+                child: _buildCard(context),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// Telas médias (600–1023): coluna única centralizada e legível,
+  /// em vez de um cartão estreito perdido num split pela metade.
+  Widget _buildCentered(BuildContext context) {
+    return ConstrainedBox(
+      constraints: const BoxConstraints(maxWidth: 460),
+      child: _buildCard(context),
+    );
+  }
+
+  Widget _buildBrandPanel(BuildContext context) {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Image.asset('assets/images/logo.png', width: 80),
+        const SizedBox(height: 24),
+        Text(
+          'Ações que mudam o mundo',
+          textAlign: TextAlign.center,
+          style: Theme.of(context).textTheme.headlineLarge,
+        ),
+        const SizedBox(height: 24),
+        if (image != null)
+          ClipRRect(
+            borderRadius: BorderRadius.circular(32),
+            child: Image.asset(image!, height: 260, fit: BoxFit.contain),
+          ),
+        ?header,
+      ],
+    );
+  }
+
+  Widget _buildCard(BuildContext context) {
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            if (showBack)
+              Align(
+                alignment: Alignment.centerLeft,
+                child: IconButton(
+                  tooltip: 'Voltar',
+                  icon: const Icon(Icons.arrow_back),
+                  onPressed: onBack ?? () => AppBackButton.goBack(context, fallback: AppRoutes.login),
+                ),
+              ),
+            child,
           ],
         ),
       ),
