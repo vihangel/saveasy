@@ -7,6 +7,35 @@ Legenda: ✅ no Supabase · 🟡 ainda no mock local · ⏳ pendente
 
 ---
 
+## Reestruturação visual da web (18/11/2026)
+
+- App logado no desktop centralizado num contêiner de até 1360 px (antes se
+  espalhava pela tela inteira em monitores largos), com menu lateral novo:
+  botão "Criar publicação", grupos, item atual destacado e cartão do usuário.
+- Cabeçalhos à esquerda no desktop; boas-vindas virou página de entrada;
+  login/cadastro com painel laranja da marca; feed, criar publicação e
+  mensagens ajustados. Detalhes e tabela antes/depois em
+  [ADAPTACAO_WEB.md](ADAPTACAO_WEB.md#reestruturação-visual--18112026).
+- Celular sem mudanças. 56 testes passando; sem erros no console.
+
+---
+
+## Revisão visual da autenticação web (11/10/2026)
+
+- Novo `WebAuthLayout`, ativado somente por `kIsWeb`: composição com largura
+  máxima de 1000 px no desktop e formulário de aproximadamente 428 px; em
+  tablet/celular web, uma coluna centralizada.
+- Marca de 36 px, ícones de 20–22 px, campos/botões consistentes e títulos
+  específicos para login, cadastro, código e nova senha.
+- Removidos os cabeçalhos ilustrados de celular desta apresentação web;
+  painel de marca discreto, fundo neutro e formulário branco com borda suave.
+- Tema dos campos/botões limitado ao formulário web. O layout nativo e as
+  regras de autenticação permanecem iguais.
+- Validação: 49 testes de regressão e quatro testes do layout web em
+  360/768/1024/1440 px com texto 1,3× passaram.
+
+---
+
 ## Fechamento da entrega web (11/10/2026)
 
 - Retomada sobre `b81beec`, preservando as alterações posteriores de tema e login.

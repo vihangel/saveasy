@@ -132,10 +132,12 @@ class _CreatePostFormPageState extends State<CreatePostFormPage> {
           body: SingleChildScrollView(
             keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
             padding: const EdgeInsets.fromLTRB(24, 8, 24, 32),
-            child: AdaptiveCards(
-              minWidth: 340,
+            // Capa em cima e campos embaixo (lado a lado a capa ficava solta).
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 _CoverPicker(type: type, imageUrl: state.imageUrl, onChanged: cubit.setImage),
+                const SizedBox(height: 24),
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
@@ -332,36 +334,57 @@ class _CoverPicker extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final hasImage = imageUrl != null;
+    final compact = context.isCompact;
+    final height = compact ? 160.0 : 220.0;
     return Center(
       child: InkWell(
         onTap: () => _pick(context),
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(compact ? 12 : 16),
         child: Container(
-          width: hasImage ? double.infinity : 190,
-          height: 160,
+          width: hasImage || !compact ? double.infinity : 190,
+          height: height,
           decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(12),
-            boxShadow: const [BoxShadow(color: Color(0x14000000), blurRadius: 10, offset: Offset(0, 2))],
+            color: compact ? Colors.white : AppColors.surface,
+            borderRadius: BorderRadius.circular(compact ? 12 : 16),
+            border: compact ? null : Border.all(color: AppColors.border),
+            boxShadow: compact
+                ? const [BoxShadow(color: Color(0x14000000), blurRadius: 10, offset: Offset(0, 2))]
+                : null,
           ),
           child: Stack(
             fit: StackFit.expand,
             children: [
-              if (hasImage) PostCover(type: type, imageUrl: imageUrl, height: 160, radius: 12),
-              Positioned(
-                right: 8,
-                bottom: 8,
-                child: hasImage
-                    ? IconButton.filledTonal(
-                        onPressed: () => _pick(context),
-                        icon: const Icon(Icons.edit_outlined),
-                        tooltip: 'Trocar imagem',
-                      )
-                    : const Padding(
-                        padding: EdgeInsets.all(4),
-                        child: Icon(Icons.add_photo_alternate_outlined, size: 30, color: AppColors.text),
-                      ),
-              ),
+              if (hasImage) PostCover(type: type, imageUrl: imageUrl, height: height, radius: compact ? 12 : 16),
+              // Desktop: área de envio com texto, como nos sites.
+              if (!hasImage && !compact)
+                const Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(Icons.add_photo_alternate_outlined, size: 36, color: AppColors.primary),
+                    SizedBox(height: 10),
+                    Text(
+                      'Adicionar imagem de capa',
+                      style: TextStyle(fontWeight: FontWeight.w600, color: AppColors.textDark),
+                    ),
+                    SizedBox(height: 4),
+                    Text('Clique para escolher um arquivo', style: TextStyle(fontSize: 12, color: AppColors.textMuted)),
+                  ],
+                ),
+              if (hasImage || compact)
+                Positioned(
+                  right: 8,
+                  bottom: 8,
+                  child: hasImage
+                      ? IconButton.filledTonal(
+                          onPressed: () => _pick(context),
+                          icon: const Icon(Icons.edit_outlined),
+                          tooltip: 'Trocar imagem',
+                        )
+                      : const Padding(
+                          padding: EdgeInsets.all(4),
+                          child: Icon(Icons.add_photo_alternate_outlined, size: 30, color: AppColors.text),
+                        ),
+                ),
             ],
           ),
         ),

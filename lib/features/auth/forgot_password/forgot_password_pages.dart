@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -66,13 +67,15 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
     return _StepListener(
       child: IllustratedScaffold(
         image: 'assets/images/header_forgot.png',
+        webTitle: 'Esqueceu sua senha?',
+        webDescription: 'Informe seu e-mail. Vamos enviar um código para você recuperar o acesso.',
         child: Form(
           key: _form,
           autovalidateMode: AutovalidateMode.onUserInteractionIfError,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              const SizedBox(height: 24),
+              if (!kIsWeb) const SizedBox(height: 24),
               AppTextField(
                 label: 'E-mail',
                 controller: _email,
@@ -81,7 +84,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                 autofillHints: const [AutofillHints.email],
                 textInputAction: TextInputAction.done,
               ),
-              const SizedBox(height: 40),
+              SizedBox(height: kIsWeb ? 24 : 40),
               PrimaryButton(
                 label: 'Enviar código',
                 loading: loading,
@@ -122,6 +125,8 @@ class _VerifyCodePageState extends State<VerifyCodePage> {
     return _StepListener(
       child: IllustratedScaffold(
         image: 'assets/images/header_code.png',
+        webTitle: 'Confira seu e-mail',
+        webDescription: 'Digite o código recebido para continuar com segurança.',
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
@@ -177,6 +182,8 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
     return _StepListener(
       child: IllustratedScaffold(
         image: 'assets/images/header_reset.png',
+        webTitle: 'Crie uma nova senha',
+        webDescription: 'Escolha uma senha segura para proteger a sua conta.',
         child: Form(
           key: _form,
           autovalidateMode: AutovalidateMode.onUserInteractionIfError,
@@ -201,7 +208,7 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
                 textInputAction: TextInputAction.done,
                 autofillHints: const [AutofillHints.newPassword],
               ),
-              const SizedBox(height: 40),
+              SizedBox(height: kIsWeb ? 24 : 40),
               PrimaryButton(
                 label: 'Salvar senha',
                 loading: loading,

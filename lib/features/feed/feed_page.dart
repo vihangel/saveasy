@@ -31,20 +31,23 @@ class FeedPage extends StatelessWidget {
                 onPressed: () => HomeShell.scaffoldKey.currentState?.openDrawer(),
               )
             : null,
-        title: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Image.asset('assets/images/logo.png', width: 28),
-            const SizedBox(width: 6),
-            const Flexible(
-              child: Text(
-                'SavEasy',
-                overflow: TextOverflow.ellipsis,
-                style: TextStyle(color: AppColors.primary),
-              ),
-            ),
-          ],
-        ),
+        // No desktop a marca já está no menu lateral.
+        title: context.isCompact
+            ? Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Image.asset('assets/images/logo.png', width: 28),
+                  const SizedBox(width: 6),
+                  const Flexible(
+                    child: Text(
+                      'SavEasy',
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(color: AppColors.primary),
+                    ),
+                  ),
+                ],
+              )
+            : const Text('Início'),
         actions: [
           if (user != null)
             Padding(
@@ -336,6 +339,25 @@ class _HorizontalPosts extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Tablet/desktop: grade que ocupa a largura da coluna (sem faixa rolando
+    // de lado, que no mouse é difícil de usar).
+    if (!context.isCompact) {
+      return Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 20),
+        child: LayoutBuilder(
+          builder: (context, box) {
+            final columns = box.maxWidth >= 560 ? 3 : 2;
+            final width = (box.maxWidth - 16 * (columns - 1)) / columns;
+            return Wrap(
+              spacing: 16,
+              runSpacing: 20,
+              // Uma linha completa: sem cartão sobrando sozinho embaixo.
+              children: [for (final post in posts.take(columns)) PostTile(post: post, width: width)],
+            );
+          },
+        ),
+      );
+    }
     return SizedBox(
       height: 170 + 100 * context.textScale,
       child: ListView.separated(

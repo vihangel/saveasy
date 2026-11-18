@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../app/breakpoints.dart';
+import '../../shared/widgets/widgets.dart';
 import '../chat/chat_page.dart';
 import 'messages_page.dart';
 
@@ -27,9 +28,16 @@ class _MessagesWorkspaceState extends State<MessagesWorkspace> {
     if (!context.isExpanded) return id == null ? list : conversation!;
     return Row(
       children: [
-        SizedBox(width: 320, child: list),
+        SizedBox(width: 380, child: list),
         const VerticalDivider(width: 1),
-        Expanded(child: id == null ? const Center(child: Text('Selecione uma conversa para começar.')) : conversation!),
+        Expanded(
+          child:
+              conversation ??
+              const EmptyState(
+                message: 'Escolha uma conversa ao lado para ler e responder.',
+                icon: Icons.forum_outlined,
+              ),
+        ),
       ],
     );
   }

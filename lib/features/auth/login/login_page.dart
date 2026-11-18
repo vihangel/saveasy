@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -50,6 +51,8 @@ class _LoginPageState extends State<LoginPage> {
       },
       builder: (context, state) {
         return IllustratedScaffold(
+          webTitle: 'Que bom ter você aqui',
+          webDescription: 'Entre na sua conta para continuar fazendo a diferença.',
           image: 'assets/images/header_login.png',
           showBack: false,
           child: Form(
@@ -85,11 +88,15 @@ class _LoginPageState extends State<LoginPage> {
                         foregroundColor: AppColors.link,
                         textStyle: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500),
                       ),
-                      child: const Text('esqueceu a senha?'),
+                      child: Text(kIsWeb ? 'Esqueceu sua senha?' : 'esqueceu a senha?'),
                     ),
                   ),
                   const SizedBox(height: 8),
-                  PrimaryButton(label: 'Login', loading: state.status.isLoading, onPressed: _submit),
+                  PrimaryButton(
+                    label: kIsWeb ? 'Entrar' : 'Login',
+                    loading: state.status.isLoading,
+                    onPressed: _submit,
+                  ),
                   // Login social desligado até configurar Google/Facebook no Supabase.
                   if (Env.socialLogin) ...[
                     const SizedBox(height: 20),
