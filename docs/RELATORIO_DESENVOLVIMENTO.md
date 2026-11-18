@@ -7,6 +7,19 @@ Legenda: ✅ no Supabase · 🟡 ainda no mock local · ⏳ pendente
 
 ---
 
+## Reestruturação visual da web (18/11/2026)
+
+- App logado no desktop centralizado num contêiner de até 1360 px (antes se
+  espalhava pela tela inteira em monitores largos), com menu lateral novo:
+  botão "Criar publicação", grupos, item atual destacado e cartão do usuário.
+- Cabeçalhos à esquerda no desktop; boas-vindas virou página de entrada;
+  login/cadastro com painel laranja da marca; feed, criar publicação e
+  mensagens ajustados. Detalhes e tabela antes/depois em
+  [ADAPTACAO_WEB.md](ADAPTACAO_WEB.md#reestruturação-visual--18112026).
+- Celular sem mudanças. 56 testes passando; sem erros no console.
+
+---
+
 ## Revisão visual da autenticação web (11/10/2026)
 
 - Novo `WebAuthLayout`, ativado somente por `kIsWeb`: composição com largura

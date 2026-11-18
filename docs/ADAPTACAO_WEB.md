@@ -268,3 +268,25 @@ Os detalhes administrativos abrem em diálogo, não em painel lateral nesta etap
 O aviso de atualização consulta `version.json` a cada cinco minutos; o deploy
 manual agora identifica cada build por timestamp. A pessoa escolhe quando
 recarregar, preservando a oportunidade de salvar seu rascunho.
+
+## Reestruturação visual · 18/11/2026
+
+Revisão feita no navegador em 2560, 1440, 1280, 768 e 390 px (backend mock).
+
+| Área | Antes | Agora |
+| --- | --- | --- |
+| Estrutura logada (desktop) | Menu colado na borda esquerda e coluna lateral na borda direita; em monitores largos o conteúdo ficava "solto" no meio | Menu + conteúdo + coluna lateral dentro de um contêiner centralizado de até 1360 px, com bordas e fundo neutro nas laterais |
+| Menu lateral | Lista simples | Botão laranja "Criar publicação", grupos (Sua conta / Gestão / Mais), destaque e *hover* no item atual, selos de não lidas e cartão do usuário (nível e moedas) no rodapé |
+| Cabeçalhos das telas | Título centralizado, como no celular | Título à esquerda, maior, com linha separando do conteúdo |
+| Boas-vindas | Três cartões com alturas diferentes e botão esticado | Página de entrada: barra com "Entrar"/"Criar conta", destaque com ilustração, "Como funciona" em 3 passos e rodapé (Transparência, Privacidade) |
+| Login, cadastro, senha, onboarding | Cartão cinza sem a cor da marca, letras pequenas | Painel laranja da marca com ilustração + formulário com campos e botões maiores (52 px) |
+| Feed | Logo repetido no topo; "Recomendados" em faixa horizontal que vazava da coluna | Título "Início"; recomendados em grade de uma linha (3 colunas) |
+| Criar publicação | Ícones soltos e busca colada no rodapé | Busca no topo e cartões com ícone, nome e descrição de cada tipo; formulário com capa em cima (área "Adicionar imagem de capa") e campos embaixo |
+| Mensagens | Lista com 320 px e abas cortadas | Lista com 380 px e estado vazio com ícone |
+
+Celular (< 600 px) não mudou.
+
+### Verificação
+- 56 testes passando, incluindo o percurso de todas as rotas em 320, 360, 768, 1280 e 1440 px com fonte 1,0×/1,3× sem estouro de layout, e um teste novo dos botões da página de entrada.
+- Sem erros no console navegando por login, feed, publicação, doação, perfil, painel da equipe e stories.
+- Rolagem pelo mouse conferida por teste (a automação do navegador não envia a roda do mouse ao Flutter).
