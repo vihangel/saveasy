@@ -69,7 +69,12 @@ class _AppTextFieldState extends State<AppTextField> {
       children: [
         if (widget.label.isNotEmpty) ...[
           ExcludeSemantics(
-            child: Text(widget.label, style: const TextStyle(fontSize: 13, color: AppColors.textMuted)),
+            child: Text(
+              widget.label,
+              style:
+                  Theme.of(context).inputDecorationTheme.labelStyle ??
+                  const TextStyle(fontSize: 13, color: AppColors.textMuted),
+            ),
           ),
           const SizedBox(height: 6),
         ],

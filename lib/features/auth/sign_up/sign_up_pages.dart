@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -79,6 +80,8 @@ class _SignUpPageState extends State<SignUpPage> {
       builder: (context, state) {
         final cubit = context.read<SignUpCubit>();
         return IllustratedScaffold(
+          webTitle: 'Crie sua conta',
+          webDescription: 'Seu próximo gesto de cuidado começa aqui.',
           image: 'assets/images/header_login.png',
           onBack: () => AppBackButton.goBack(context, fallback: AppRoutes.login),
           child: Form(
@@ -88,8 +91,7 @@ class _SignUpPageState extends State<SignUpPage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  Text('Criar conta', style: context.text.headlineSmall),
-                  const SizedBox(height: 16),
+                  if (!kIsWeb) ...[Text('Criar conta', style: context.text.headlineSmall), const SizedBox(height: 16)],
                   AppTextField(
                     label: 'E-mail',
                     controller: _email,
@@ -183,10 +185,12 @@ class _VerifyEmailPageState extends State<VerifyEmailPage> {
         final cubit = context.read<SignUpCubit>();
         return IllustratedScaffold(
           image: 'assets/images/header_code.png',
+          webTitle: 'Confirme seu e-mail',
+          webDescription: 'Falta pouco para fazer parte da comunidade.',
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Text('Confirme seu e-mail', textAlign: TextAlign.center, style: context.text.titleLarge),
+              if (!kIsWeb) Text('Confirme seu e-mail', textAlign: TextAlign.center, style: context.text.titleLarge),
               const SizedBox(height: 8),
               Text(
                 'Enviamos um código de 6 números para\n${state.email}',

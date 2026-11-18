@@ -7,6 +7,22 @@ Legenda: ✅ no Supabase · 🟡 ainda no mock local · ⏳ pendente
 
 ---
 
+## Revisão visual da autenticação web (11/10/2026)
+
+- Novo `WebAuthLayout`, ativado somente por `kIsWeb`: composição com largura
+  máxima de 1000 px no desktop e formulário de aproximadamente 428 px; em
+  tablet/celular web, uma coluna centralizada.
+- Marca de 36 px, ícones de 20–22 px, campos/botões consistentes e títulos
+  específicos para login, cadastro, código e nova senha.
+- Removidos os cabeçalhos ilustrados de celular desta apresentação web;
+  painel de marca discreto, fundo neutro e formulário branco com borda suave.
+- Tema dos campos/botões limitado ao formulário web. O layout nativo e as
+  regras de autenticação permanecem iguais.
+- Validação: 49 testes de regressão e quatro testes do layout web em
+  360/768/1024/1440 px com texto 1,3× passaram.
+
+---
+
 ## Fechamento da entrega web (11/10/2026)
 
 - Retomada sobre `b81beec`, preservando as alterações posteriores de tema e login.

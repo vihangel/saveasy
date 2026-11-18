@@ -1,3 +1,7 @@
+import 'package:flutter/foundation.dart';
+
+import 'web_auth_layout.dart';
+
 import 'package:flutter/material.dart';
 
 import '../../app/routes.dart';
@@ -15,6 +19,8 @@ class IllustratedScaffold extends StatelessWidget {
     this.header,
     this.showBack = true,
     this.onBack,
+    this.webTitle = 'Vamos começar',
+    this.webDescription = 'Complete seus dados para continuar no Save Easy.',
   });
 
   /// Asset recortado do Figma (já contém o fundo laranja e a curva do cartão).
@@ -25,9 +31,19 @@ class IllustratedScaffold extends StatelessWidget {
   final bool showBack;
   final VoidCallback? onBack;
   final Widget child;
+  final String webTitle, webDescription;
 
   @override
   Widget build(BuildContext context) {
+    if (kIsWeb) {
+      return WebAuthLayout(
+        title: webTitle,
+        description: webDescription,
+        showBack: showBack,
+        onBack: onBack,
+        child: child,
+      );
+    }
     if (!context.isCompact) {
       return Scaffold(
         backgroundColor: const Color(0xFFFFF3EA),
@@ -94,10 +110,7 @@ class IllustratedScaffold extends StatelessWidget {
             const SizedBox(width: 48),
             Expanded(
               flex: 4,
-              child: ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 440),
-                child: _buildCard(context),
-              ),
+              child: ConstrainedBox(constraints: const BoxConstraints(maxWidth: 440), child: _buildCard(context)),
             ),
           ],
         ),
@@ -108,10 +121,7 @@ class IllustratedScaffold extends StatelessWidget {
   /// Telas médias (600–1023): coluna única centralizada e legível,
   /// em vez de um cartão estreito perdido num split pela metade.
   Widget _buildCentered(BuildContext context) {
-    return ConstrainedBox(
-      constraints: const BoxConstraints(maxWidth: 460),
-      child: _buildCard(context),
-    );
+    return ConstrainedBox(constraints: const BoxConstraints(maxWidth: 460), child: _buildCard(context));
   }
 
   Widget _buildBrandPanel(BuildContext context) {
@@ -120,11 +130,7 @@ class IllustratedScaffold extends StatelessWidget {
       children: [
         Image.asset('assets/images/logo.png', width: 80),
         const SizedBox(height: 24),
-        Text(
-          'Ações que mudam o mundo',
-          textAlign: TextAlign.center,
-          style: Theme.of(context).textTheme.headlineLarge,
-        ),
+        Text('Ações que mudam o mundo', textAlign: TextAlign.center, style: Theme.of(context).textTheme.headlineLarge),
         const SizedBox(height: 24),
         if (image != null)
           ClipRRect(
