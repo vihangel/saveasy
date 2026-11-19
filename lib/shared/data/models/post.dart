@@ -114,4 +114,16 @@ abstract class Post with _$Post {
     final end = endsAt ?? startsAt;
     return end != null && end.isBefore(DateTime.now());
   }
+
+  /// Ainda dá para participar/doar (campanha aberta ou evento que não acabou).
+  bool get isOpen => type == PostType.donation ? !donationsClosed : !isFinished;
+
+  /// Campanha de doação com a data de encerramento já passada. A data é só o
+  /// dia, então a campanha aceita doações até o fim desse dia (hora local).
+  bool get donationsClosed {
+    final end = endsAt;
+    if (type != PostType.donation || end == null) return false;
+    final day = end.toLocal();
+    return DateTime(day.year, day.month, day.day + 1).isBefore(DateTime.now());
+  }
 }

@@ -9,7 +9,7 @@ abstract class OnboardingState with _$OnboardingState {
     @Default(AccountType.personal) AccountType accountType,
     @Default('') String name,
     @Default('') String username,
-    @Default('Ele/dele') String pronouns,
+    @Default('') String pronouns,
     DateTime? birthDate,
     String? avatarUrl,
     @Default(false) bool emailNews,

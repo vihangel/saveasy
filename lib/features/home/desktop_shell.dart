@@ -52,7 +52,7 @@ class DesktopShell extends StatelessWidget {
               child: Row(
                 children: [
                   SizedBox(
-                    width: expanded ? 256 : 84,
+                    width: expanded ? 256 : 108,
                     child: _SideMenu(user: user, expanded: expanded),
                   ),
                   const VerticalDivider(width: 1, color: AppColors.border),
@@ -212,11 +212,13 @@ class _SideMenu extends StatelessWidget {
                 ),
               heading('Mais'),
               item(Icons.public_outlined, Icons.public_rounded, 'Transparência', AppRoutes.transparency),
-              item(Icons.settings_outlined, Icons.settings_rounded, 'Configurações', AppRoutes.settings),
             ],
           ),
         ),
+        // Fixo no rodapé: continua visível mesmo quando a lista precisa rolar.
         const Divider(height: 1, color: AppColors.border),
+        const SizedBox(height: 8),
+        item(Icons.settings_outlined, Icons.settings_rounded, 'Configurações', AppRoutes.settings),
         _UserCard(user: user, expanded: expanded),
       ],
     );
@@ -273,8 +275,8 @@ class _MenuItemState extends State<_MenuItem> {
           onTap: widget.onTap,
           child: AnimatedContainer(
             duration: const Duration(milliseconds: 120),
-            height: 46,
-            padding: EdgeInsets.symmetric(horizontal: widget.expanded ? 14 : 0),
+            height: widget.expanded ? 46 : null,
+            padding: EdgeInsets.symmetric(horizontal: widget.expanded ? 14 : 2, vertical: widget.expanded ? 0 : 8),
             decoration: BoxDecoration(color: background, borderRadius: BorderRadius.circular(12)),
             child: widget.expanded
                 ? Row(
@@ -295,15 +297,34 @@ class _MenuItemState extends State<_MenuItem> {
                       ),
                     ],
                   )
-                : Center(child: icon),
+                // Trilho do tablet: nome embaixo do ícone (antes só aparecia ao passar o mouse).
+                : Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      icon,
+                      const SizedBox(height: 4),
+                      Text(
+                        widget.label,
+                        maxLines: 2,
+                        textAlign: TextAlign.center,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          fontSize: 11,
+                          height: 1.2,
+                          color: color,
+                          fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
+                        ),
+                      ),
+                    ],
+                  ),
           ),
         ),
       ),
     );
 
     return Padding(
-      padding: EdgeInsets.symmetric(horizontal: widget.expanded ? 12 : 14, vertical: 2),
-      child: widget.expanded ? tile : Tooltip(message: widget.label, child: tile),
+      padding: EdgeInsets.symmetric(horizontal: widget.expanded ? 12 : 4, vertical: 2),
+      child: tile,
     );
   }
 }

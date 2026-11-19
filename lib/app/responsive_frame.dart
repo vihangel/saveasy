@@ -105,7 +105,7 @@ class _SidePanel extends StatelessWidget {
             children: [
               Image.asset('assets/images/logo.png', width: 56),
               const SizedBox(width: 12),
-              Text('SavEasy', style: text.headlineMedium?.copyWith(color: AppColors.primary, fontSize: 32)),
+              Text('Save Easy', style: text.headlineMedium?.copyWith(color: AppColors.primary, fontSize: 32)),
             ],
           ),
           const SizedBox(height: 24),

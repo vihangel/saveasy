@@ -246,17 +246,18 @@ class _AdFormPageState extends State<AdFormPage> {
                     ],
                   ),
           ),
+          // Aviso ANTES do pagamento (antes ficava em letra miúda abaixo do botão).
+          const VerificationBanner(
+            margin: EdgeInsets.only(top: 20),
+            message:
+                'Contas não verificadas passam por análise (até 24 h) antes de o anúncio ir ao ar. '
+                'Com a conta verificada, ele entra no ar logo após o pagamento.',
+          ),
           const SizedBox(height: 20),
           PrimaryButton(
             label: quote == null ? 'Continuar' : 'Pagar ${Formatters.currency(quote.price)}',
             loading: _saving,
             onPressed: _submit,
-          ),
-          const SizedBox(height: 8),
-          const Text(
-            'Contas não verificadas passam por análise antes de o anúncio ir ao ar.',
-            textAlign: TextAlign.center,
-            style: TextStyle(fontSize: 12, color: AppColors.textMuted),
           ),
         ],
       ),

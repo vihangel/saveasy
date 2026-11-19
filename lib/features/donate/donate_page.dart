@@ -56,7 +56,13 @@ class DonatePage extends StatelessWidget {
           appBar: AppBar(leading: const AppBackButton(), title: const Text('Doar')),
           body: AsyncBody(
             status: state.status,
-            builder: (context) => _AmountForm(state: state),
+            // Link direto para uma campanha encerrada: não mostra o formulário.
+            builder: (context) => state.post?.donationsClosed ?? false
+                ? const EmptyState(
+                    message: 'Esta campanha foi encerrada e não recebe mais doações. Nenhum valor foi cobrado.',
+                    icon: Icons.lock_clock_rounded,
+                  )
+                : _AmountForm(state: state),
           ),
         );
       },

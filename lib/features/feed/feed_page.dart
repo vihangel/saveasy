@@ -40,7 +40,7 @@ class FeedPage extends StatelessWidget {
                   const SizedBox(width: 6),
                   const Flexible(
                     child: Text(
-                      'SavEasy',
+                      'Save Easy',
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(color: AppColors.primary),
                     ),
@@ -66,6 +66,8 @@ class FeedPage extends StatelessWidget {
             onRefresh: cubit.load,
             child: CustomScrollView(
               slivers: [
+                // Empresa/comunidade/influenciador ainda sem verificação.
+                const SliverToBoxAdapter(child: VerificationBanner(margin: EdgeInsets.fromLTRB(20, 12, 20, 4))),
                 SliverToBoxAdapter(child: _StoriesRow(stories: state.stories)),
                 SliverToBoxAdapter(
                   child: _FeedTabs(selected: state.tab, onSelected: cubit.selectTab),
@@ -143,17 +145,20 @@ class FeedPage extends StatelessWidget {
       ];
     }
     final cubit = context.read<FeedCubit>();
+    // Destaques só com o que ainda está aberto (sem evento passado nem
+    // campanha encerrada); a lista completa continua em "Publicações".
+    final open = state.posts.where((p) => p.isOpen).toList();
     final (highlightTitle, highlight, secondTitle, second) = switch (state.tab) {
-      FeedTab.popular => ('Recomendados', state.posts.take(4).toList(), null, <Post>[]),
+      FeedTab.popular => ('Recomendados', open.take(4).toList(), null, <Post>[]),
       FeedTab.nearby => (
         'Na sua região',
-        state.posts.where((p) => p.location != null).toList(),
+        open.where((p) => p.location != null).toList(),
         'Tutoriais feitos por comunidades',
         state.posts.where((p) => p.type == PostType.tutorial).toList(),
       ),
       FeedTab.following => (
         'Visualizado por amigos',
-        state.posts.take(3).toList(),
+        open.take(3).toList(),
         'Novas discussões',
         state.posts.where((p) => p.type == PostType.discussion).toList(),
       ),

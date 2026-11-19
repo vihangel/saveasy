@@ -18,9 +18,9 @@ abstract final class Formatters {
     return '${k.toStringAsFixed(k >= 10 || k == k.roundToDouble() ? 0 : 1).replaceAll('.', ',')}k';
   }
 
-  static String date(DateTime date) => _date.format(date);
+  static String date(DateTime date) => _date.format(date.toLocal());
 
-  static String dateTime(DateTime date) => _dateTime.format(date).toUpperCase();
+  static String dateTime(DateTime date) => _dateTime.format(date.toLocal()).toUpperCase();
 
   static String relative(DateTime date) {
     final diff = DateTime.now().difference(date);
@@ -40,16 +40,19 @@ abstract final class Formatters {
   }
 
   static String daysLeft(DateTime date) {
-    if (date.isBefore(DateTime.now())) return 'Encerrada';
+    // Encerra no fim do dia informado (o mesmo critério de Post.donationsClosed).
+    final day = date.toLocal();
+    if (DateTime(day.year, day.month, day.day + 1).isBefore(DateTime.now())) return 'Encerrada';
     final days = _calendarDaysUntil(date);
     if (days == 0) return 'Último dia';
     return days == 1 ? '1 dia rest.' : '$days dias rest.';
   }
 
   /// Data curta para campos de formulário: 24/09 · 09:00
-  static String shortDateTime(DateTime date) => _shortDateTime.format(date);
+  static String shortDateTime(DateTime date) => _shortDateTime.format(date.toLocal());
 
   static int _calendarDaysUntil(DateTime date) {
+    date = date.toLocal();
     final now = DateTime.now();
     return DateTime(date.year, date.month, date.day).difference(DateTime(now.year, now.month, now.day)).inDays;
   }

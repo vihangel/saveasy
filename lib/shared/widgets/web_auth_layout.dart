@@ -106,7 +106,7 @@ class WebAuthLayout extends StatelessWidget {
         focusedBorder: border.copyWith(borderSide: const BorderSide(color: AppColors.primary, width: 1.5)),
         errorBorder: border.copyWith(borderSide: const BorderSide(color: AppColors.danger)),
         focusedErrorBorder: border.copyWith(borderSide: const BorderSide(color: AppColors.danger, width: 1.5)),
-        hintStyle: const TextStyle(fontSize: 14, color: Color(0xFF8A90A2)),
+        hintStyle: const TextStyle(fontSize: 14, color: AppColors.textMuted),
       ),
       iconButtonTheme: IconButtonThemeData(style: IconButton.styleFrom(iconSize: 20)),
       filledButtonTheme: FilledButtonThemeData(

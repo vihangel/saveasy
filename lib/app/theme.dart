@@ -10,7 +10,7 @@ abstract final class AppColors {
   static const background = Colors.white;
   static const textDark = Color(0xFF121526);
   static const text = Color(0xFF414451);
-  static const textMuted = Color(0xFF8F92A1);
+  static const textMuted = Color(0xFF676B7B); // 5,3:1 sobre branco (WCAG AA)
   static const link = Color(0xFF519DE0);
   static const border = Color(0xFFE6E8EC);
   static const success = Color(0xFF2EB67D);

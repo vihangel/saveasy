@@ -197,6 +197,10 @@ class CreatePostCubit extends Cubit<CreatePostState> {
         }
         if (input.location.trim().isEmpty && input.link.trim().isEmpty) return 'Informe o local ou site.';
       case PostType.activity:
+        if (state.startsAt == null) return 'Informe a data e o horário da atividade.';
+        if (state.endsAt != null && !state.endsAt!.isAfter(state.startsAt!)) {
+          return 'O término precisa ser depois do início.';
+        }
         if (input.location.trim().isEmpty) return 'Informe o local da atividade.';
       case PostType.ad:
         if (state.adPlan == null) return 'Escolha um plano para a propaganda.';

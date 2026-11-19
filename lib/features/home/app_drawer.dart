@@ -34,7 +34,7 @@ class AppDrawer extends StatelessWidget {
                 children: [
                   Image.asset('assets/images/logo.png', width: 36),
                   const SizedBox(width: 8),
-                  Text('SavEasy', style: Theme.of(context).textTheme.titleLarge?.copyWith(color: AppColors.primary)),
+                  Text('Save Easy', style: Theme.of(context).textTheme.titleLarge?.copyWith(color: AppColors.primary)),
                 ],
               ),
             ),

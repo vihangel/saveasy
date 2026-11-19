@@ -21,6 +21,7 @@ export 'people_picker_sheet.dart';
 export 'checkout_sheet.dart';
 export 'ad_bar.dart';
 export 'report_sheet.dart';
+export 'verification_banner.dart';
 
 export 'app_page.dart';
 export 'adaptive_sheet.dart';

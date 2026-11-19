@@ -165,7 +165,8 @@ class _OnboardingProfilePageState extends State<OnboardingProfilePage> {
   late final _name = TextEditingController(text: context.read<OnboardingCubit>().state.name);
   final _username = TextEditingController();
 
-  static const _pronouns = ['Ele/dele', 'Ela/dela', 'Elu/delu'];
+  /// "Prefiro não informar" é salvo como vazio (sem pronome no perfil).
+  static const _pronouns = ['Ele/dele', 'Ela/dela', 'Elu/delu', 'Prefiro não informar'];
 
   @override
   void initState() {
@@ -182,11 +183,20 @@ class _OnboardingProfilePageState extends State<OnboardingProfilePage> {
 
   Future<void> _pickDate() async {
     final now = DateTime.now();
+    // Abre para digitar (dd/mm/aaaa): no calendário, quem nasceu em 1958
+    // precisava voltar décadas mês a mês.
     final date = await showDatePicker(
       context: context,
       firstDate: DateTime(1920),
       lastDate: now,
-      initialDate: DateTime(now.year - 18),
+      initialDate: context.read<OnboardingCubit>().state.birthDate,
+      initialEntryMode: DatePickerEntryMode.input,
+      initialDatePickerMode: DatePickerMode.year,
+      helpText: 'Data de nascimento',
+      fieldHintText: 'dd/mm/aaaa',
+      fieldLabelText: 'Data de nascimento',
+      errorFormatText: 'Use o formato dd/mm/aaaa',
+      errorInvalidText: 'Data fora do intervalo permitido',
     );
     if (date != null && mounted) context.read<OnboardingCubit>().selectBirthDate(date);
   }
@@ -211,7 +221,12 @@ class _OnboardingProfilePageState extends State<OnboardingProfilePage> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               AppTextField(
-                label: isPerson ? 'Nome completo' : 'Nome da ${state.accountType.label.toLowerCase()}',
+                label: switch (state.accountType) {
+                  AccountType.business => 'Nome da empresa',
+                  AccountType.community => 'Nome da comunidade',
+                  AccountType.influencer => 'Nome ou nome artístico',
+                  AccountType.personal => 'Nome completo',
+                },
                 controller: _name,
                 validator: Validators.required,
                 maxLength: 60,
@@ -241,12 +256,16 @@ class _OnboardingProfilePageState extends State<OnboardingProfilePage> {
                     for (final p in _pronouns)
                       ChoiceChip(
                         label: Text(p),
-                        selected: state.pronouns == p,
+                        selected: state.pronouns == p || (p.startsWith('Prefiro') && state.pronouns.isEmpty),
                         showCheckmark: false,
                         selectedColor: Colors.white,
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                        side: BorderSide(color: state.pronouns == p ? AppColors.primary : Colors.transparent),
-                        onSelected: (_) => cubit.selectPronouns(p),
+                        side: BorderSide(
+                          color: state.pronouns == p || (p.startsWith('Prefiro') && state.pronouns.isEmpty)
+                              ? AppColors.primary
+                              : Colors.transparent,
+                        ),
+                        onSelected: (_) => cubit.selectPronouns(p.startsWith('Prefiro') ? '' : p),
                       ),
                   ],
                 ),

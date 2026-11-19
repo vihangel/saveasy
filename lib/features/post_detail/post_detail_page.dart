@@ -213,16 +213,28 @@ class _Content extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 16),
-          PrimaryButton(
-            label: 'Doar',
-            icon: Icons.volunteer_activism_rounded,
-            onPressed: () async {
-              await context.push(AppRoutes.donate(post.id));
-              cubit.refreshPost();
-            },
-          ),
-          const SizedBox(height: 8),
-          _SendCoinsButton(post: post),
+          // Encerrada: não aceita mais doações (como o evento finalizado).
+          if (post.donationsClosed) ...[
+            const PrimaryButton(label: 'Campanha encerrada', icon: Icons.lock_clock_rounded, onPressed: null),
+            const SizedBox(height: 8),
+            const Text(
+              'Esta campanha chegou ao fim e não recebe mais doações. '
+              'Nenhum valor é cobrado. Veja outras campanhas abertas no Início.',
+              textAlign: TextAlign.center,
+              style: TextStyle(fontSize: 13, height: 1.5, color: AppColors.textMuted),
+            ),
+          ] else ...[
+            PrimaryButton(
+              label: 'Doar',
+              icon: Icons.volunteer_activism_rounded,
+              onPressed: () async {
+                await context.push(AppRoutes.donate(post.id));
+                cubit.refreshPost();
+              },
+            ),
+            const SizedBox(height: 8),
+            _SendCoinsButton(post: post),
+          ],
         ];
       case PostType.event:
         return [
@@ -269,7 +281,12 @@ class _Content extends StatelessWidget {
             children: [
               if (post.location != null) _InfoRow(icon: Icons.place_rounded, text: post.location!),
               if (post.startsAt != null) _InfoRow(icon: Icons.event_rounded, text: Formatters.dateTime(post.startsAt!)),
-              _InfoRow(icon: Icons.groups_rounded, text: '${post.attending} participantes'),
+              _InfoRow(
+                icon: Icons.groups_rounded,
+                text: post.capacity == null
+                    ? '${post.attending} participantes'
+                    : '${post.attending}/${post.capacity} vagas preenchidas',
+              ),
             ],
           ),
           const SizedBox(height: 16),

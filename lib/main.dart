@@ -1,3 +1,5 @@
+import 'package:flutter/foundation.dart';
+import 'package:flutter/semantics.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_web_plugins/url_strategy.dart';
 import 'package:go_router/go_router.dart';
@@ -16,6 +18,9 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   // Na web, URLs sem '#': /post/123 em vez de /#/post/123.
   usePathUrlStrategy();
+  // Flutter web só monta a árvore de acessibilidade depois de um botão oculto;
+  // ligada desde o início, leitores de tela encontram o conteúdo direto.
+  if (kIsWeb) SemanticsBinding.instance.ensureSemantics();
   // push/pop também atualizam a URL, então o voltar do navegador e o
   // recarregar mantêm a tela atual.
   GoRouter.optionURLReflectsImperativeAPIs = true;

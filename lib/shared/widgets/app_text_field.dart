@@ -73,7 +73,7 @@ class _AppTextFieldState extends State<AppTextField> {
               widget.label,
               style:
                   Theme.of(context).inputDecorationTheme.labelStyle ??
-                  const TextStyle(fontSize: 13, color: AppColors.textMuted),
+                  const TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: AppColors.text),
             ),
           ),
           const SizedBox(height: 6),

@@ -31,7 +31,7 @@ class _SplashPageState extends State<SplashPage> {
           children: [
             Image.asset('assets/images/logo.png', width: 180),
             const SizedBox(height: 16),
-            Text('SavEasy', style: Theme.of(context).textTheme.headlineMedium?.copyWith(color: AppColors.primary)),
+            Text('Save Easy', style: Theme.of(context).textTheme.headlineMedium?.copyWith(color: AppColors.primary)),
             const SizedBox(height: 80),
             const CircularProgressIndicator(color: AppColors.primary),
           ],

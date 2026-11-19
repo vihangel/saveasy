@@ -34,7 +34,8 @@ class _SignUpPageState extends State<SignUpPage> {
     super.dispose();
   }
 
-  void _showTerms() {
+  /// Abre o texto dos termos; "Li e concordo" no fim marca a caixa.
+  void _showTerms(SignUpCubit cubit) {
     showAdaptiveSheet<void>(
       context: context,
       showDragHandle: true,
@@ -51,6 +52,14 @@ class _SignUpPageState extends State<SignUpPage> {
                 Text('Termos de uso', style: Theme.of(context).textTheme.titleLarge),
                 const SizedBox(height: 12),
                 const Text(LegalTexts.terms),
+                const SizedBox(height: 20),
+                FilledButton(
+                  onPressed: () {
+                    cubit.toggleTerms(true);
+                    Navigator.pop(context);
+                  },
+                  child: const Text('Li e concordo'),
+                ),
               ],
             ),
           ),
@@ -120,24 +129,42 @@ class _SignUpPageState extends State<SignUpPage> {
                     onSubmitted: (_) => _submit(cubit),
                   ),
                   const SizedBox(height: 8),
-                  CheckboxListTile(
-                    value: state.acceptedTerms,
-                    onChanged: (v) => cubit.toggleTerms(v ?? false),
-                    controlAffinity: ListTileControlAffinity.leading,
-                    contentPadding: EdgeInsets.zero,
-                    dense: true,
-                    title: Wrap(
-                      children: [
-                        const Text('Li e concordo com os '),
-                        Semantics(
-                          link: true,
-                          child: InkWell(
-                            onTap: _showTerms,
-                            child: const Text('termos de uso', style: TextStyle(color: AppColors.link)),
-                          ),
+                  // Caixa e link separados: antes o toque no link marcava a caixa
+                  // em vez de abrir os termos.
+                  Row(
+                    children: [
+                      Checkbox(
+                        value: state.acceptedTerms,
+                        onChanged: (v) => cubit.toggleTerms(v ?? false),
+                        semanticLabel: 'Li e concordo com os termos de uso',
+                      ),
+                      Expanded(
+                        child: Wrap(
+                          crossAxisAlignment: WrapCrossAlignment.center,
+                          children: [
+                            GestureDetector(
+                              onTap: () => cubit.toggleTerms(!state.acceptedTerms),
+                              child: const ExcludeSemantics(child: Text('Li e concordo com os ')),
+                            ),
+                            TextButton(
+                              style: TextButton.styleFrom(
+                                padding: const EdgeInsets.symmetric(horizontal: 2),
+                                minimumSize: const Size(0, 36),
+                                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                foregroundColor: AppColors.link,
+                                textStyle: const TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w600,
+                                  decoration: TextDecoration.underline,
+                                ),
+                              ),
+                              onPressed: () => _showTerms(cubit),
+                              child: const Text('termos de uso'),
+                            ),
+                          ],
                         ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
                   const SizedBox(height: 16),
                   PrimaryButton(label: 'Criar conta', loading: state.status.isLoading, onPressed: () => _submit(cubit)),

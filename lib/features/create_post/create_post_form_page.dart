@@ -285,6 +285,14 @@ class _CreatePostFormPageState extends State<CreatePostFormPage> {
         gap,
       ],
       PostType.activity => [
+        Row(
+          children: [
+            Expanded(child: dateField('Data e hora de início', state.startsAt, cubit.setStart)),
+            const SizedBox(width: 12),
+            Expanded(child: dateField('Término (opcional)', state.endsAt, cubit.setEnd)),
+          ],
+        ),
+        gap,
         AppTextField(label: 'Local', controller: _location),
         gap,
         AppTextField(

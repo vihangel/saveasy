@@ -20,25 +20,26 @@ class CreatePostTypePage extends StatefulWidget {
 class _CreatePostTypePageState extends State<CreatePostTypePage> {
   String _query = '';
 
+  // Evento e Atividade lado a lado, que são os mais confundidos.
   static const _order = [
     PostType.donation,
     PostType.event,
+    PostType.activity,
     PostType.socialAction,
     PostType.tutorial,
-    PostType.ad,
-    PostType.activity,
     PostType.discussion,
+    PostType.ad,
   ];
 
   /// Uma linha explicando cada tipo (usada nos cartões do desktop).
   static const _descriptions = {
-    PostType.donation: 'Arrecade dinheiro por Pix ou moedas para uma causa.',
-    PostType.event: 'Divulgue um evento presencial ou online com data e local.',
-    PostType.socialAction: 'Mostre uma ação social que você fez ou vai fazer.',
-    PostType.tutorial: 'Ensine o passo a passo de algo que ajuda outras pessoas.',
-    PostType.ad: 'Anuncie para a região; parte do valor vai para o fundo de doações.',
-    PostType.activity: 'Convide voluntários para uma atividade com vagas.',
-    PostType.discussion: 'Abra uma conversa com a comunidade.',
+    PostType.donation: 'Quero arrecadar dinheiro (Pix ou moedas) para uma causa.',
+    PostType.event: 'Quero reunir pessoas numa data e local (ou online), como uma live ou palestra.',
+    PostType.activity: 'Quero chamar voluntários com data, horário e número de vagas, como um mutirão.',
+    PostType.socialAction: 'Quero mostrar uma boa ação que fiz ou estou fazendo.',
+    PostType.tutorial: 'Quero ensinar o passo a passo de algo que ajuda outras pessoas.',
+    PostType.ad: 'Quero anunciar minha empresa na região; parte do valor vai para o fundo.',
+    PostType.discussion: 'Quero abrir uma conversa ou tirar uma dúvida com a comunidade.',
   };
 
   void _open(PostType type) {

@@ -77,6 +77,30 @@ class _TransparencyPageState extends State<TransparencyPage> {
                   _Box(label: 'Vindo de anúncios', value: Formatters.currency(t.adShare)),
                 ],
               ),
+              const SizedBox(height: 16),
+              // Explica a diferença entre os totais (antes pareciam não bater).
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(color: AppColors.surface, borderRadius: BorderRadius.circular(16)),
+                child: const Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Como ler estes números',
+                      style: TextStyle(fontWeight: FontWeight.w700, color: AppColors.textDark),
+                    ),
+                    SizedBox(height: 8),
+                    Text(
+                      '• Doado às campanhas: soma de todas as doações feitas às campanhas — por Pix (repassado a quem organiza) '
+                      'e com moedas, pagas pelo fundo.\n'
+                      '• Saiu do fundo: só a parte das doações com moedas, que o fundo converte em dinheiro. '
+                      'Por isso é menor que o total doado.\n'
+                      '• Entrou no fundo: aportes da plataforma e 30% do valor de cada anúncio.',
+                      style: TextStyle(fontSize: 13, height: 1.6, color: AppColors.text),
+                    ),
+                  ],
+                ),
+              ),
               const SizedBox(height: 20),
               Text('Movimentações do fundo', style: Theme.of(context).textTheme.titleMedium),
               for (final m in t.movements)

@@ -159,6 +159,9 @@ class SupabasePostRepository implements PostRepository {
       for (final key in keys)
         if (json.containsKey(key)) key: json[key],
       if (post.adPlan != null) 'adPlan': _adPlans[post.adPlan] ?? post.adPlan,
+      // Com fuso (UTC): sem isso o horário local era gravado como se fosse UTC.
+      if (json.containsKey('startsAt')) 'startsAt': post.startsAt?.toUtc().toIso8601String(),
+      if (json.containsKey('endsAt')) 'endsAt': post.endsAt?.toUtc().toIso8601String(),
     };
   }
 

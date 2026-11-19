@@ -35,7 +35,9 @@ class _EditProfilePageState extends State<EditProfilePage> {
   late final _name = TextEditingController(text: _initial.name);
   late final _username = TextEditingController(text: _initial.username);
   late final _bio = TextEditingController(text: _initial.bio);
-  late String _pronouns = _initial.pronouns.isEmpty ? 'Ele/dele' : _initial.pronouns;
+
+  /// Vazio = "Prefiro não informar".
+  late String _pronouns = _initial.pronouns;
 
   @override
   void dispose() {
@@ -108,6 +110,11 @@ class _EditProfilePageState extends State<EditProfilePage> {
                       selected: _pronouns == p,
                       onSelected: (_) => setState(() => _pronouns = p),
                     ),
+                  ChoiceChip(
+                    label: const Text('Prefiro não informar'),
+                    selected: _pronouns.isEmpty,
+                    onSelected: (_) => setState(() => _pronouns = ''),
+                  ),
                 ],
               ),
               const SizedBox(height: 16),

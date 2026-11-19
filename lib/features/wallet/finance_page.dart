@@ -32,7 +32,7 @@ class _FinancePageState extends State<FinancePage> {
           final amountError = amount.text.isEmpty || value > 0
               ? (value > summary.available ? 'Acima do disponível' : null)
               : 'Valor inválido';
-          final valid = value > 0 && amountError == null && pix.text.trim().length >= 3;
+          final valid = value > 0 && amountError == null && pix.text.trim().length >= 5;
           return AlertDialog(
             title: const Text('Pedir repasse'),
             content: Column(
@@ -115,8 +115,21 @@ class _FinancePageState extends State<FinancePage> {
                       onPressed: s.available >= 10 ? () => _payout(s) : null,
                       child: const Text('Pedir repasse via Pix'),
                     ),
+                    // Explica o botão desativado (antes não dizia o motivo).
+                    if (s.available < 10)
+                      const Padding(
+                        padding: EdgeInsets.only(top: 8),
+                        child: Text(
+                          'O repasse fica disponível a partir de R\$ 10,00 de saldo.',
+                          style: TextStyle(color: Colors.white, fontSize: 12),
+                        ),
+                      ),
                   ],
                 ),
+              ),
+              const VerificationBanner(
+                margin: EdgeInsets.only(top: 16),
+                message: 'Os repasses via Pix são liberados para contas verificadas.',
               ),
               const SizedBox(height: 16),
               _Line(

@@ -7,6 +7,38 @@ Legenda: ✅ no Supabase · 🟡 ainda no mock local · ⏳ pendente
 
 ---
 
+## Correções da avaliação de IHC (GenderMag + AgeMag) (18/11/2026)
+
+Base: relatório `SaveEasy_Avaliacao_IHC.pdf` (17 problemas priorizados).
+
+| # | Problema (severidade) | O que foi feito |
+| --- | --- | --- |
+| 1 | Campanha encerrada aceitava doação (4) | Botão vira "Campanha encerrada" (desativado) com explicação; a tela de doar também bloqueia por link direto. A campanha aceita doações até o fim do dia de encerramento, e o selo "Encerrada" usa a mesma regra |
+| 2 | Atividade sem data/horário (4) | Campos "Data e hora de início" (obrigatório) e "Término (opcional)"; o detalhe mostra a data e as vagas preenchidas |
+| 3 | Menu sem nomes / leitor de tela (3) | Tablet: nome embaixo de cada ícone; desktop já mostrava. Acessibilidade da web ligada desde o início (`ensureSemantics`) |
+| 4 | Itens do menu sumiam (3) | Grupos (Sua conta / Gestão / Mais) e "Configurações" fixo no rodapé do menu |
+| 5 | Recomendados com eventos passados; horários 04:57 (3) | Destaques só com o que está aberto. **Fuso corrigido**: as datas vindas do banco eram mostradas em UTC e as escolhidas no formulário eram gravadas sem fuso; agora mostra no horário local e envia em UTC |
+| 6 | Nascimento abria em 2008 (3) | Abre para digitar dd/mm/aaaa (com opção de calendário por ano) |
+| 7 | Link dos termos não abria (3) | Caixa e link separados; o texto abre num painel com "Li e concordo" |
+| 8 | Verificação escondida (3) | Aviso "Verifique sua conta" no Início, no Painel financeiro e no anúncio para empresa/comunidade/influenciador não verificados |
+| 9 | Tipos de publicação parecidos (2) | Descrições pelo objetivo ("Quero reunir pessoas numa data…", "Quero chamar voluntários com vagas…") e Atividade ao lado de Evento |
+| 10 | Números da Transparência (2) | Quadro "Como ler estes números" explicando total doado × saída do fundo × entradas |
+| 11 | Pronome pré-selecionado (2) | Nada marcado por padrão e opção "Prefiro não informar" (cadastro e editar perfil) |
+| 12 | Aviso de análise do anúncio miúdo (2) | Aviso destacado **antes** do botão Pagar, com prazo e link para verificar |
+| 13 | Textos cinza-claro (2) | Cor de texto auxiliar `#676B7B` (5,3:1, WCAG AA); rótulos dos campos maiores e mais escuros |
+| 14 | "Nome da empresarial" (1) | "Nome da empresa" / "Nome da comunidade" / "Nome ou nome artístico" |
+| 15 | "SavEasy" × "Save Easy" (1) | Padronizado "Save Easy" |
+| — | Repasse desativado sem motivo | Explica o mínimo de R$ 10 e que o repasse exige conta verificada |
+
+### Ficou pendente (precisa de você ou de mudança no banco)
+- **#16 Contato do encarregado de dados (LGPD)** nas páginas de privacidade e exclusão: falta o e-mail de contato.
+- **#17 Conteúdo "[teste]" no feed**: são dados no banco de produção; precisa apagar pelo painel do Supabase (o acesso SQL por aqui foi negado).
+- O bloqueio de doação em campanha encerrada está no app; para garantir também no servidor, falta uma regra na função de doação do banco (não alterei regras do banco).
+
+Testes: 63 passando (novos: campanha encerrada/destaques/fuso e link dos termos).
+
+---
+
 ## Reestruturação visual da web (18/11/2026)
 
 - App logado no desktop centralizado num contêiner de até 1360 px (antes se
