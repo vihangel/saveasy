@@ -1,5 +1,3 @@
-import '../../shared/services/share_post.dart';
-
 import 'dart:async';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -64,10 +62,13 @@ class FeedCubit extends Cubit<FeedState> {
     _replace(updated);
   }
 
+  /// Conta o compartilhamento (o link é copiado pela tela, ver sharePostLink).
   Future<void> share(String postId) async {
-    await copyPostLink(postId);
-    final updated = await _posts.share(postId);
-    _replace(updated);
+    try {
+      _replace(await _posts.share(postId));
+    } catch (_) {
+      // A contagem não pode impedir quem já recebeu o link.
+    }
   }
 
   void _replace(Post post) => emit(state.copyWith(posts: [for (final p in state.posts) p.id == post.id ? post : p]));

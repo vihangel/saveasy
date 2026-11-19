@@ -16,18 +16,35 @@ class TagInput extends StatefulWidget {
 
 class _TagInputState extends State<TagInput> {
   final _controller = TextEditingController();
+  final _focus = FocusNode();
+
+  @override
+  void initState() {
+    super.initState();
+    // Saiu do campo com texto digitado: vira tag (antes o texto se perdia
+    // se a pessoa não apertasse Enter).
+    _focus.addListener(() {
+      if (!_focus.hasFocus) _add(_controller.text);
+    });
+  }
 
   @override
   void dispose() {
+    _focus.dispose();
     _controller.dispose();
     super.dispose();
   }
 
   void _add(String value) {
-    final tag = value.trim();
-    if (tag.isEmpty || widget.tags.contains(tag)) return;
-    widget.onChanged([...widget.tags, tag]);
+    if (!mounted || value.trim().isEmpty) return;
+    final tags = [
+      ...widget.tags,
+      for (final part in value.split(','))
+        if (part.trim().isNotEmpty && !widget.tags.contains(part.trim())) part.trim().replaceFirst('#', ''),
+    ];
     _controller.clear();
+    if (tags.length != widget.tags.length) widget.onChanged(tags.take(10).toList());
+    setState(() {});
   }
 
   @override
@@ -35,7 +52,10 @@ class _TagInputState extends State<TagInput> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(widget.label, style: const TextStyle(fontSize: 13, color: AppColors.textMuted)),
+        Text(
+          widget.label,
+          style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: AppColors.text),
+        ),
         const SizedBox(height: 6),
         Container(
           width: double.infinity,
@@ -52,15 +72,32 @@ class _TagInputState extends State<TagInput> {
                   onDeleted: () => widget.onChanged(widget.tags.where((t) => t != tag).toList()),
                 ),
               SizedBox(
-                width: 140,
-                child: TextField(
-                  controller: _controller,
-                  decoration: const InputDecoration(
-                    hintText: 'Adicionar tag',
-                    filled: false,
-                    contentPadding: EdgeInsets.symmetric(vertical: 12, horizontal: 4),
+                width: 240,
+                child: Semantics(
+                  label: widget.label,
+                  child: TextField(
+                    controller: _controller,
+                    focusNode: _focus,
+                    textInputAction: TextInputAction.done,
+                    decoration: InputDecoration(
+                      hintText: 'Digite e aperte Enter',
+                      filled: false,
+                      contentPadding: const EdgeInsets.symmetric(vertical: 12, horizontal: 4),
+                      suffixIcon: _controller.text.trim().isEmpty
+                          ? null
+                          : IconButton(
+                              tooltip: 'Adicionar tag',
+                              icon: const Icon(Icons.add_circle_outline_rounded),
+                              onPressed: () => _add(_controller.text),
+                            ),
+                    ),
+                    // Vírgula também separa: "animais, adoção".
+                    onChanged: (v) => v.contains(',') ? _add(v) : setState(() {}),
+                    onSubmitted: (v) {
+                      _add(v);
+                      _focus.requestFocus();
+                    },
                   ),
-                  onSubmitted: _add,
                 ),
               ),
             ],

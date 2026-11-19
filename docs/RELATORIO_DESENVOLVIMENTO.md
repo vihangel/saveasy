@@ -7,6 +7,43 @@ Legenda: ✅ no Supabase · 🟡 ainda no mock local · ⏳ pendente
 
 ---
 
+## Avaliação de IHC · 2ª versão (testes funcionais) (19/11/2026)
+
+Base: `SaveEasy_Avaliacao_IHC (1).pdf` (31 problemas). A avaliação foi feita em
+18/11, antes das correções da seção abaixo; os itens já resolvidos lá estão
+marcados como "já corrigido".
+
+| # | Problema | Situação |
+| --- | --- | --- |
+| 1, 2, 7, 8, 10, 11, 12, 19, 20, 22, 23, 28, 29 | (mesmos da 1ª versão) | Já corrigido em 18/11 |
+| 3 | Filtro por categoria não funciona | No computador os chips ficam todos visíveis (na faixa rolável o clique com mouse podia virar arrasto); chip marcado com ✓ e mensagem quando a categoria está vazia |
+| 4 | Compartilhar falha no navegador | Se o navegador bloquear a cópia, abre uma janela com o link para copiar; a contagem não derruba mais a ação. ⚠️ O objetivo "Compartilhe 1 boa ação" na verdade conta **stories** (texto no banco: "Publique um story hoje") — renomear no banco |
+| 5 | Autor doa/participa/faz check-in na própria publicação | No app: autor vê "Você organiza esta campanha/publicação" no lugar de Doar/Participar; tela de doar bloqueia o autor; check-in do organizador só a partir do dia da publicação |
+| 6 | Comunidade não verificada recebe doação | ⏳ Pendente: precisa do status de verificação do autor no JSON da publicação (mudança no banco) para mostrar o selo "não verificada" |
+| 9 | Fuso horário | Já corrigido (exibição local e gravação em UTC); calendário abre em hoje |
+| 13 | Vagas da Atividade | "X de Y vagas preenchidas" em Atividade e Evento |
+| 14 | Validação só no rodapé | ⏳ Pendente (mudança maior no formulário) |
+| 15 | Campo Tag não aceita texto | O texto vira tag com Enter, vírgula, botão "+" ou ao sair do campo |
+| 16 | Contador de comentários diverge | Detalhe usa o mesmo total dos cartões |
+| 17 | Ícones/texto somem sobre foto clara | Degradê escuro no topo da capa; story mais escurecido e texto com sombra |
+| 18 | Relógio analógico | Horário abre para digitar (hh:mm) |
+| 21 | Pronomes para Comunidade/Empresa | Escondidos em Editar perfil para empresa e comunidade |
+| 24 | Enter não envia comentário | Não reproduzido: o campo já envia com Enter (igual ao chat) |
+| 25 | "1 participantes" | Singular/plural tratado |
+| 26 | Próprio story abre "Novo story" | Tocar no avatar abre o story publicado; o "+" cria outro |
+| 27 | Resgatar selo sem saldo | Botão desativado com "Faltam N moedas" |
+| 30 | Contato do encarregado (LGPD) | ⏳ Falta o e-mail |
+| 31 | Conteúdo de teste no feed | ⏳ Apagar pelo painel do Supabase (inclui o conteúdo "[TESTE IHC]" criado na avaliação) |
+| — | Loja sem "fora de venda" | Selo "Fora de venda" na Minha loja |
+
+**Regras no servidor (não alteradas):** bloquear doação em campanha encerrada,
+recompensas do autor na própria publicação e check-in antes da data também no
+banco. Hoje o app impede; o banco ainda aceitaria uma chamada direta.
+
+Testes: 68 passando (novos: campo Tag e compartilhamento com bloqueio da área de transferência).
+
+---
+
 ## Correções da avaliação de IHC (GenderMag + AgeMag) (18/11/2026)
 
 Base: relatório `SaveEasy_Avaliacao_IHC.pdf` (17 problemas priorizados).

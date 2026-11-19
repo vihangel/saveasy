@@ -101,7 +101,9 @@ class _ChatPageState extends State<ChatPage> {
                             ),
                             Text(
                               thread.kind == ChatKind.community
-                                  ? '${Formatters.compact(thread.members)} participantes'
+                                  ? (thread.members == 1
+                                        ? '1 participante'
+                                        : '${Formatters.compact(thread.members)} participantes')
                                   : thread.online
                                   ? 'Online agora'
                                   : (thread.peerUsername == null ? 'Offline' : '@${thread.peerUsername}'),

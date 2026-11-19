@@ -12,6 +12,7 @@ import '../../shared/utils/app_icons.dart';
 import '../../shared/utils/context_x.dart';
 import '../../shared/widgets/widgets.dart';
 import 'edit_profile_cubit.dart';
+import '../../shared/data/models/models.dart';
 
 /// "Editar Perfil": dados básicos + título e selos exibidos no perfil.
 class EditProfilePage extends StatefulWidget {
@@ -99,25 +100,29 @@ class _EditProfilePageState extends State<EditProfilePage> {
                 ],
               ),
               const SizedBox(height: 16),
-              const Text('Pronomes', style: TextStyle(fontSize: 13, color: AppColors.textMuted)),
-              const SizedBox(height: 6),
-              Wrap(
-                spacing: 8,
-                children: [
-                  for (final p in const ['Ele/dele', 'Ela/dela', 'Elu/delu'])
+              // Pronomes só para pessoas (pessoal e influenciador), como no cadastro.
+              if (state.user.accountType == AccountType.personal ||
+                  state.user.accountType == AccountType.influencer) ...[
+                const Text('Pronomes', style: TextStyle(fontSize: 13, color: AppColors.textMuted)),
+                const SizedBox(height: 6),
+                Wrap(
+                  spacing: 8,
+                  children: [
+                    for (final p in const ['Ele/dele', 'Ela/dela', 'Elu/delu'])
+                      ChoiceChip(
+                        label: Text(p),
+                        selected: _pronouns == p,
+                        onSelected: (_) => setState(() => _pronouns = p),
+                      ),
                     ChoiceChip(
-                      label: Text(p),
-                      selected: _pronouns == p,
-                      onSelected: (_) => setState(() => _pronouns = p),
+                      label: const Text('Prefiro não informar'),
+                      selected: _pronouns.isEmpty,
+                      onSelected: (_) => setState(() => _pronouns = ''),
                     ),
-                  ChoiceChip(
-                    label: const Text('Prefiro não informar'),
-                    selected: _pronouns.isEmpty,
-                    onSelected: (_) => setState(() => _pronouns = ''),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 16),
+                  ],
+                ),
+                const SizedBox(height: 16),
+              ],
               AppTextField(label: 'Bio', controller: _bio, maxLines: 3, maxLength: 160),
               if (state.ownedCovers.isNotEmpty) ...[
                 const SizedBox(height: 24),

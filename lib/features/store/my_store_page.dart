@@ -76,9 +76,23 @@ class _MyStorePageState extends State<MyStorePage> {
                 title: Text(p.name),
                 subtitle: Text(
                   '${Formatters.currency(p.price)} · ${p.stock == null ? 'sem controle de estoque' : '${p.stock} em estoque'}'
-                  ' · ${p.salesCount} vendido(s)${p.active ? '' : ' · inativo'}',
+                  ' · ${Formatters.plural(p.salesCount, 'vendido', 'vendidos')}',
                 ),
-                trailing: const Icon(Icons.chevron_right_rounded),
+                // Visível de longe: produto que não aparece na loja.
+                trailing: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    if (!p.active)
+                      const Chip(
+                        label: Text('Fora de venda'),
+                        visualDensity: VisualDensity.compact,
+                        labelStyle: TextStyle(fontSize: 12, color: AppColors.danger),
+                        side: BorderSide(color: AppColors.danger),
+                        backgroundColor: Colors.white,
+                      ),
+                    const Icon(Icons.chevron_right_rounded),
+                  ],
+                ),
                 onTap: () => _open(AppRoutes.editProduct(p.id)),
               );
             },

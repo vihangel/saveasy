@@ -8,6 +8,7 @@ import '../../app/theme.dart';
 import '../../shared/data/models/models.dart';
 import '../../shared/data/repositories/repositories.dart';
 import '../../shared/utils/context_x.dart';
+import '../../shared/utils/formatters.dart';
 import '../../shared/widgets/widgets.dart';
 import 'qr_scan_page.dart';
 
@@ -29,6 +30,13 @@ class _ParticipantsPageState extends State<ParticipantsPage> {
   final _code = TextEditingController();
 
   bool get _isAuthor => _post?.authorId == context.currentUser.id;
+
+  /// Check-in só a partir do dia da publicação (antes valia dias antes).
+  bool get _checkinOpen {
+    final start = _post?.startsAt?.toLocal();
+    if (start == null) return true;
+    return !DateTime.now().isBefore(DateTime(start.year, start.month, start.day));
+  }
 
   @override
   void initState() {
@@ -59,6 +67,12 @@ class _ParticipantsPageState extends State<ParticipantsPage> {
   }
 
   Future<void> _checkIn({String? profileId, String? code, bool attended = true}) async {
+    if (attended && !_checkinOpen) {
+      return context.showMessage(
+        'O check-in libera no dia ${Formatters.date(_post!.startsAt!)}, quando a atividade acontecer.',
+        error: true,
+      );
+    }
     try {
       final items = await context.read<EngagementRepository>().checkIn(
         widget.postId,

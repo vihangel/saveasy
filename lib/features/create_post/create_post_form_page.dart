@@ -77,10 +77,20 @@ class _CreatePostFormPageState extends State<CreatePostFormPage> {
       context: context,
       firstDate: now,
       lastDate: now.add(const Duration(days: 365 * 2)),
-      initialDate: now.add(const Duration(days: 1)),
+      // Hoje selecionado (antes vinha amanhã e confundia com o "hoje" marcado).
+      initialDate: now,
     );
     if (date == null || !withTime || !mounted) return date;
-    final time = await showTimePicker(context: context, initialTime: const TimeOfDay(hour: 9, minute: 0));
+    // Digitar hh:mm é mais fácil que o relógio analógico (60+ e mouse).
+    final time = await showTimePicker(
+      context: context,
+      initialTime: const TimeOfDay(hour: 9, minute: 0),
+      initialEntryMode: TimePickerEntryMode.input,
+      helpText: 'Horário',
+      hourLabelText: 'Hora',
+      minuteLabelText: 'Minuto',
+      errorInvalidText: 'Horário inválido',
+    );
     if (time == null) return date;
     return DateTime(date.year, date.month, date.day, time.hour, time.minute);
   }

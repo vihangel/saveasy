@@ -243,13 +243,24 @@ class RewardDetailPage extends StatelessWidget {
                         ],
                       ),
                       const SizedBox(height: 24),
-                      reward.owned
-                          ? const OutlinedButton(onPressed: null, child: Text('Você já possui este item'))
-                          : PrimaryButton(
-                              label: 'Resgatar',
-                              loading: state.redeemingId == reward.id,
-                              onPressed: () => context.read<RewardsCubit>().redeem(reward.id),
-                            ),
+                      if (reward.owned)
+                        const OutlinedButton(onPressed: null, child: Text('Você já possui este item'))
+                      // Sem saldo: botão desativado e quanto falta (antes o erro só vinha depois).
+                      else if (coins < reward.price) ...[
+                        const PrimaryButton(label: 'Moedas insuficientes', onPressed: null),
+                        const SizedBox(height: 8),
+                        Text(
+                          'Faltam ${Formatters.number(reward.price - coins)} moedas. '
+                          'Ganhe participando de ações, doando ou completando conquistas.',
+                          textAlign: TextAlign.center,
+                          style: const TextStyle(fontSize: 13, color: AppColors.textMuted),
+                        ),
+                      ] else
+                        PrimaryButton(
+                          label: 'Resgatar',
+                          loading: state.redeemingId == reward.id,
+                          onPressed: () => context.read<RewardsCubit>().redeem(reward.id),
+                        ),
                     ],
                   ),
           );

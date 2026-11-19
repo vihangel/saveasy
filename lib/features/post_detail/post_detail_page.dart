@@ -13,6 +13,7 @@ import '../../shared/utils/formatters.dart';
 import '../../shared/widgets/widgets.dart';
 import 'post_detail_cubit.dart';
 import 'post_extras_section.dart';
+import '../../shared/services/share_post.dart';
 
 /// Detalhe de qualquer publicação (Doação 1-5, Evento 1-4, Ação Social 1-5,
 /// Atividade 1-4, Tutorial 1-2, Discussão 2-3). As seções específicas
@@ -64,6 +65,11 @@ class _Content extends StatelessWidget {
   Widget build(BuildContext context) {
     final post = state.post!;
     final cubit = context.read<PostDetailCubit>();
+    Future<void> share() async {
+      await sharePostLink(context, post.id);
+      await cubit.share();
+    }
+
     final content = Column(
       children: [
         Expanded(
@@ -82,7 +88,7 @@ class _Content extends StatelessWidget {
                     icon: Icon(post.saved ? Icons.bookmark_rounded : Icons.bookmark_border_rounded),
                     onPressed: cubit.toggleSave,
                   ),
-                  IconButton(tooltip: 'Compartilhar', icon: const Icon(Icons.share_outlined), onPressed: cubit.share),
+                  IconButton(tooltip: 'Compartilhar', icon: const Icon(Icons.share_outlined), onPressed: share),
                   if (cubit.isAuthor)
                     _AuthorMenu(post: post)
                   else
@@ -93,7 +99,23 @@ class _Content extends StatelessWidget {
                     ),
                 ],
                 flexibleSpace: FlexibleSpaceBar(
-                  background: PostCover(type: post.type, imageUrl: post.imageUrl, height: 280, radius: 0, iconSize: 72),
+                  // Degradê escuro no topo: ícones brancos legíveis sobre fotos claras.
+                  background: Stack(
+                    fit: StackFit.expand,
+                    children: [
+                      PostCover(type: post.type, imageUrl: post.imageUrl, height: 280, radius: 0, iconSize: 72),
+                      if (post.imageUrl != null)
+                        const DecoratedBox(
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              begin: Alignment.topCenter,
+                              end: Alignment.center,
+                              colors: [Color(0x99000000), Color(0x00000000)],
+                            ),
+                          ),
+                        ),
+                    ],
+                  ),
                 ),
               ),
               SliverPadding(
@@ -126,10 +148,11 @@ class _Content extends StatelessWidget {
                     ReactionBar(
                       likes: post.likes,
                       liked: post.liked,
-                      comments: state.comments.length,
+                      // Mesma contagem dos cartões do feed e do perfil.
+                      comments: post.commentsCount,
                       shares: post.shares,
                       onLike: cubit.toggleLike,
-                      onShare: cubit.share,
+                      onShare: share,
                     ),
                     const Divider(height: 24),
                     if (!context.isExpanded) ..._comments(context),
@@ -214,7 +237,15 @@ class _Content extends StatelessWidget {
           ),
           const SizedBox(height: 16),
           // Encerrada: não aceita mais doações (como o evento finalizado).
-          if (post.donationsClosed) ...[
+          if (cubit.isAuthor) ...[
+            const OutlinedButton(onPressed: null, child: Text('Você organiza esta campanha')),
+            const SizedBox(height: 8),
+            const Text(
+              'As doações aparecem aqui e no Painel financeiro. Em "Atualizações", toque em Publicar para contar novidades a quem apoia.',
+              textAlign: TextAlign.center,
+              style: TextStyle(fontSize: 13, height: 1.5, color: AppColors.textMuted),
+            ),
+          ] else if (post.donationsClosed) ...[
             const PrimaryButton(label: 'Campanha encerrada', icon: Icons.lock_clock_rounded, onPressed: null),
             const SizedBox(height: 8),
             const Text(
@@ -247,16 +278,16 @@ class _Content extends StatelessWidget {
               if (post.startsAt != null) _InfoRow(icon: Icons.event_rounded, text: Formatters.dateTime(post.startsAt!)),
               _InfoRow(
                 icon: Icons.groups_rounded,
-                text:
-                    '${Formatters.compact(post.attending)}'
-                    '${post.capacity == null ? '' : '/${Formatters.compact(post.capacity!)}'} participantes',
+                text: post.capacity == null
+                    ? Formatters.plural(post.attending, 'participante', 'participantes')
+                    : '${Formatters.compact(post.attending)} de ${Formatters.compact(post.capacity!)} vagas preenchidas',
               ),
               if (post.capacity != null) ProgressBar(value: post.attending / post.capacity!, color: AppColors.primary),
             ],
           ),
           const SizedBox(height: 16),
           // "Tenho interesse / Evento salvo" (salvar = seguir o evento) e "Participar".
-          if (!post.isFinished && !post.confirmed) ...[
+          if (!post.isFinished && !post.confirmed && !cubit.isAuthor) ...[
             OutlinedButton.icon(
               onPressed: cubit.toggleSave,
               icon: Icon(post.saved ? Icons.check_circle_outline_rounded : Icons.star_border_rounded),
@@ -284,8 +315,8 @@ class _Content extends StatelessWidget {
               _InfoRow(
                 icon: Icons.groups_rounded,
                 text: post.capacity == null
-                    ? '${post.attending} participantes'
-                    : '${post.attending}/${post.capacity} vagas preenchidas',
+                    ? Formatters.plural(post.attending, 'participante', 'participantes')
+                    : '${post.attending} de ${post.capacity} vagas preenchidas',
               ),
             ],
           ),
@@ -439,6 +470,11 @@ class _ParticipateButton extends StatelessWidget {
   Widget build(BuildContext context) {
     if (post.isFinished) {
       return const FilledButton(onPressed: null, child: Text('Finalizado'));
+    }
+    // Quem organiza não participa da própria publicação (nem ganha moedas
+    // com isso). Se já tinha confirmado antes, ainda pode sair.
+    if (post.authorId == context.currentUser.id && !post.confirmed) {
+      return const OutlinedButton(onPressed: null, child: Text('Você organiza esta publicação'));
     }
     if (post.confirmed) {
       return OutlinedButton.icon(

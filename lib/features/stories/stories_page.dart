@@ -106,7 +106,8 @@ class _StoriesPageState extends State<StoriesPage> with SingleTickerProviderStat
                     : DecorationImage(
                         image: context.read<ImageStorage>().provider(story.imageUrl)!,
                         fit: BoxFit.cover,
-                        colorFilter: const ColorFilter.mode(Color(0x55000000), BlendMode.darken),
+                        // Escurece mais para o texto branco aparecer em fotos claras.
+                        colorFilter: const ColorFilter.mode(Color(0x80000000), BlendMode.darken),
                       ),
               ),
               child: SafeArea(
@@ -184,7 +185,11 @@ class _StoriesPageState extends State<StoriesPage> with SingleTickerProviderStat
                       const Spacer(),
                       Text(
                         story.text,
-                        style: Theme.of(context).textTheme.headlineSmall?.copyWith(color: Colors.white, height: 1.3),
+                        style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                          color: Colors.white,
+                          height: 1.3,
+                          shadows: const [Shadow(color: Color(0x99000000), blurRadius: 12)],
+                        ),
                       ),
                       const Spacer(),
                       if (state.rewardMessage != null)

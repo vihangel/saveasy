@@ -13,6 +13,7 @@ import '../../shared/utils/view_status.dart';
 import '../../shared/widgets/widgets.dart';
 import '../home/home_shell.dart';
 import 'feed_cubit.dart';
+import '../../shared/services/share_post.dart';
 
 /// Feed 1 (Popular), Feed 2 (Na sua região) e Feed 3 (Seguindo).
 class FeedPage extends StatelessWidget {
@@ -85,30 +86,7 @@ class FeedPage extends StatelessWidget {
                   ),
                 ),
                 SliverToBoxAdapter(
-                  child: SizedBox(
-                    height: 52,
-                    child: ListView(
-                      scrollDirection: Axis.horizontal,
-                      padding: const EdgeInsets.fromLTRB(20, 10, 20, 0),
-                      children: [
-                        for (final category in PostCategory.values)
-                          Padding(
-                            padding: const EdgeInsets.only(right: 8),
-                            child: FilterChip(
-                              label: Text(category.label),
-                              selected: state.category == category,
-                              showCheckmark: false,
-                              selectedColor: AppColors.primary,
-                              labelStyle: TextStyle(
-                                color: state.category == category ? Colors.white : AppColors.text,
-                                fontSize: 12,
-                              ),
-                              onSelected: (_) => cubit.selectCategory(category),
-                            ),
-                          ),
-                      ],
-                    ),
-                  ),
+                  child: _CategoryChips(selected: state.category, onSelected: cubit.selectCategory),
                 ),
                 ..._content(context, state),
                 const SliverToBoxAdapter(child: SizedBox(height: 90)),
@@ -139,8 +117,13 @@ class FeedPage extends StatelessWidget {
     }
     if (state.posts.isEmpty) {
       return [
-        const SliverToBoxAdapter(
-          child: EmptyState(message: 'Nenhuma publicação encontrada.', icon: Icons.search_off_rounded),
+        SliverToBoxAdapter(
+          child: EmptyState(
+            message: state.category == null
+                ? 'Nenhuma publicação encontrada.'
+                : 'Nenhuma publicação em ${state.category!.label} por enquanto. Toque no filtro de novo para ver tudo.',
+            icon: Icons.search_off_rounded,
+          ),
         ),
       ];
     }
@@ -188,12 +171,8 @@ class FeedPage extends StatelessWidget {
             commentsCount: post.commentsCount,
             onLike: () => cubit.toggleLike(post.id),
             onShare: () async {
-              try {
-                await cubit.share(post.id);
-                if (context.mounted) context.showMessage('Link da publicação copiado!');
-              } catch (_) {
-                if (context.mounted) context.showMessage('Não foi possível compartilhar.', error: true);
-              }
+              await sharePostLink(context, post.id);
+              await cubit.share(post.id);
             },
           );
         },
@@ -266,25 +245,33 @@ class _StoriesRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final user = context.currentUser;
+    final mine = stories.indexWhere((s) => s.authorId == user.id);
     return SizedBox(
       height: 86 + 24 * context.textScale,
       child: ListView(
         scrollDirection: Axis.horizontal,
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         children: [
+          // Com story publicado, tocar abre o story; o "+" cria outro.
           _StoryBubble(
             label: 'Seu story',
-            onTap: () => context.push(AppRoutes.newStory),
+            onTap: () => context.push(mine >= 0 ? AppRoutes.stories(mine) : AppRoutes.newStory),
             child: Stack(
               children: [
-                UserAvatar(name: user.name, imageUrl: user.avatarUrl, size: 56),
-                const Positioned(
+                UserAvatar(name: user.name, imageUrl: user.avatarUrl, size: 56, ring: mine >= 0),
+                Positioned(
                   right: 0,
                   bottom: 0,
-                  child: CircleAvatar(
-                    radius: 10,
-                    backgroundColor: AppColors.orange,
-                    child: Icon(Icons.add, size: 14, color: Colors.white),
+                  child: Tooltip(
+                    message: 'Novo story',
+                    child: GestureDetector(
+                      onTap: () => context.push(AppRoutes.newStory),
+                      child: const CircleAvatar(
+                        radius: 10,
+                        backgroundColor: AppColors.orange,
+                        child: Icon(Icons.add, size: 14, color: Colors.white),
+                      ),
+                    ),
                   ),
                 ),
               ],
@@ -442,6 +429,47 @@ class _FeedAsideState extends State<_FeedAside> {
           ),
         ),
       ],
+    );
+  }
+}
+
+/// Filtro por categoria. No celular, faixa rolável; no computador, os chips
+/// ficam todos visíveis (na faixa, um clique com o mouse podia virar arrasto
+/// e o filtro não era aplicado).
+class _CategoryChips extends StatelessWidget {
+  const _CategoryChips({required this.selected, required this.onSelected});
+
+  final PostCategory? selected;
+  final ValueChanged<PostCategory?> onSelected;
+
+  @override
+  Widget build(BuildContext context) {
+    final chips = [
+      for (final category in PostCategory.values)
+        FilterChip(
+          label: Text(category.label),
+          selected: selected == category,
+          showCheckmark: !context.isCompact,
+          checkmarkColor: Colors.white,
+          selectedColor: AppColors.primary,
+          tooltip: selected == category ? 'Remover filtro ${category.label}' : 'Filtrar por ${category.label}',
+          labelStyle: TextStyle(color: selected == category ? Colors.white : AppColors.text, fontSize: 12),
+          onSelected: (_) => onSelected(category),
+        ),
+    ];
+    if (!context.isCompact) {
+      return Padding(
+        padding: const EdgeInsets.fromLTRB(20, 10, 20, 0),
+        child: Wrap(spacing: 8, runSpacing: 8, children: chips),
+      );
+    }
+    return SizedBox(
+      height: 52,
+      child: ListView(
+        scrollDirection: Axis.horizontal,
+        padding: const EdgeInsets.fromLTRB(20, 10, 20, 0),
+        children: [for (final chip in chips) Padding(padding: const EdgeInsets.only(right: 8), child: chip)],
+      ),
     );
   }
 }

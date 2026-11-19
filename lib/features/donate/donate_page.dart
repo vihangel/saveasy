@@ -57,12 +57,18 @@ class DonatePage extends StatelessWidget {
           body: AsyncBody(
             status: state.status,
             // Link direto para uma campanha encerrada: não mostra o formulário.
-            builder: (context) => state.post?.donationsClosed ?? false
-                ? const EmptyState(
-                    message: 'Esta campanha foi encerrada e não recebe mais doações. Nenhum valor foi cobrado.',
-                    icon: Icons.lock_clock_rounded,
-                  )
-                : _AmountForm(state: state),
+            builder: (context) => switch (state.post) {
+              final p? when p.donationsClosed => const EmptyState(
+                message: 'Esta campanha foi encerrada e não recebe mais doações. Nenhum valor foi cobrado.',
+                icon: Icons.lock_clock_rounded,
+              ),
+              // Autor não doa para a própria campanha (não pode ganhar moedas assim).
+              final p? when p.authorId == context.currentUser.id => const EmptyState(
+                message: 'Você organiza esta campanha, por isso não pode doar para ela.',
+                icon: Icons.volunteer_activism_outlined,
+              ),
+              _ => _AmountForm(state: state),
+            },
           ),
         );
       },
