@@ -233,6 +233,14 @@ class _Content extends StatelessWidget {
                 ),
               ],
               if (post.subtype.isNotEmpty) _InfoRow(icon: Icons.label_outline_rounded, text: post.subtype),
+              // Quem doa precisa saber se a organização já foi verificada.
+              if (post.authorVerified == false && post.authorType != AccountType.personal)
+                const _InfoRow(
+                  icon: Icons.gpp_maybe_outlined,
+                  text: 'Organização ainda não verificada pela equipe do Save Easy',
+                ),
+              if (post.authorVerified == true && post.authorType != AccountType.personal)
+                const _InfoRow(icon: Icons.verified_rounded, text: 'Organização verificada'),
             ],
           ),
           const SizedBox(height: 16),

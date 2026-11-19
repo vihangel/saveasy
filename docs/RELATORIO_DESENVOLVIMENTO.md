@@ -7,6 +7,30 @@ Legenda: ✅ no Supabase · 🟡 ainda no mock local · ⏳ pendente
 
 ---
 
+## Migration 12 · regras da avaliação no banco (19/11/2026) — ⏳ rodar no Supabase
+
+Arquivo: `supabase/migrations/20261119000012_ihc_regras.sql`. **Não apaga nem
+altera publicações.** Validada num Postgres local com todas as migrations
+anteriores (1–11) e testes de cada regra.
+
+| Regra | Como | Teste local |
+| --- | --- | --- |
+| Campanha encerrada não recebe doação | Gatilho em `payments` (Pix, antes de cobrar) e em `donations` (moedas) | Encerrada → recusa; "termina hoje" → aceita |
+| Autor não doa nem participa da própria publicação | Mesmos gatilhos + gatilho em `participations` | Recusa com mensagem |
+| Check-in só a partir do dia | Gatilho em `participations` ao marcar presença | Evento daqui a 5 dias → recusa; hoje → aceita |
+| Selo de verificação | `post_json` devolve `authorVerified` | false / true conforme o perfil |
+| Objetivo diário | "Compartilhe 1 boa ação" → "Publique 1 story" | Atualizado |
+
+Datas no fuso de Cuiabá; a campanha aceita doações até o fim do dia de
+encerramento (igual ao app). Pagamentos criados antes do encerramento continuam
+sendo entregues.
+
+**Como rodar:** Supabase → SQL Editor → New query → colar o conteúdo do arquivo →
+Run. Depois, abrir uma campanha de organização não verificada no app: aparece
+"Organização ainda não verificada pela equipe do Save Easy".
+
+---
+
 ## Avaliação de IHC · 2ª versão (testes funcionais) (19/11/2026)
 
 Base: `SaveEasy_Avaliacao_IHC (1).pdf` (31 problemas). A avaliação foi feita em

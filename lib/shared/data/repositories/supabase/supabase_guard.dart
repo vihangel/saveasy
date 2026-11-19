@@ -37,7 +37,7 @@ String _authMessage(AuthException e) {
   }
   if (m.contains('expired') || m.contains('invalid') && m.contains('token')) return 'Código inválido ou expirado.';
   if (m.contains('password should be') || m.contains('weak')) {
-    return 'Senha fraca. Use ao menos 6 caracteres, com letras e números.';
+    return 'Senha fraca. Use ao menos 8 caracteres, com letras e números.';
   }
   if (m.contains('rate limit') || e.statusCode == '429') {
     return 'Muitas tentativas. Aguarde um pouco e tente de novo.';

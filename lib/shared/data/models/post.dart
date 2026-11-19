@@ -64,6 +64,10 @@ abstract class Post with _$Post {
     /// Capa escolhida pelo autor (referência do ImageStorage).
     String? imageUrl,
     String? authorAvatarUrl,
+
+    /// Autor com conta verificada pela equipe. Nulo quando o banco ainda não
+    /// informa (antes da migration 12): nesse caso nenhum selo é mostrado.
+    bool? authorVerified,
     @Default(<PostCategory>[]) List<PostCategory> categories,
     @Default(<String>[]) List<String> tags,
     @Default('') String subtype,
